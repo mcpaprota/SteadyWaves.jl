@@ -3,6 +3,9 @@ uuid = "2d4f3d31-6681-40b2-b238-b8279529db51"
 authors = ["Maciej Paprota"]
 version = "1.0.0-DEV"
 
+[deps]
+NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
+
 [compat]
 julia = "1.6"
 

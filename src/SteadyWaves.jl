@@ -1,5 +1,6 @@
 module SteadyWaves
 
-# Write your package code here.
+using NonlinearSolve
+
 
 end
