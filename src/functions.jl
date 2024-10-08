@@ -112,13 +112,13 @@ end
 """
     disp_rel(d, ω, g)
 
-Calculate wavenumber `κ` based on depth `d`, angular wave frequency `ω`
+Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
 and gravitational acceleration `g` for given accuracy `ϵ`.
 """
 function disp_rel(d, ω, g=9.81, ϵ=10^-12)
-    κ = κ₀ = ω^2 / g # initial guess
-    while max(abs(κ * tanh(κ * d) - κ₀)) > ϵ
-        κ = κ₀ / tanh(κ * d)
+    k = k₀ = ω^2 / g # initial guess
+    while max(abs(k * tanh(k * d) - k₀)) > ϵ
+        k = k₀ / tanh(k * d)
     end
-    return κ
+    return k
 end
