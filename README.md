@@ -10,6 +10,6 @@ propagating in water of constant depth.
 
 ## Install
 
-```julia-repl
-pkg> add https://github.com/mcpaprota/SteadyWaves.jl
+```@repl
+using https://github.com/mcpaprota/SteadyWaves.jl
 ```
