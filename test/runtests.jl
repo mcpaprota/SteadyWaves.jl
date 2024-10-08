@@ -13,5 +13,5 @@ using Test
     @test u1[22] ≈ u2[22]
     # dispersion relation
     ω = √(g * k * tanh(k * d))
-    @test k ≈ SteadyWaves.disp_rel(d, ω)
+    @test k ≈ SteadyWaves.dispertion_relation(d, ω)
 end

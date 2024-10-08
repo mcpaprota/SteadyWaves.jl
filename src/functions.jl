@@ -40,7 +40,7 @@ function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 end
 
 """
-    init_conditions(d, H, L, N, M)
+    init_conditions(d, H, P, pc, N, M)
 
 Calculate initial conditions `u0` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using linear wave theory.
@@ -64,7 +64,7 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M)
-    pc == 1 ? k = 2π / P : k = disp_rel(d, 2π / P) # wave number (rad/s)
+    pc == 1 ? k = 2π / P : k = dispertion_relation(d, 2π / P) # wave number (rad/s)
     u0 = zeros(2N + 6)
     u0[1:N+1] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
     u0[N+2:2N+1] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
@@ -110,12 +110,12 @@ function f(du, u, p)
 end
 
 """
-    disp_rel(d, ω, g)
+    dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
 
 Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
 and gravitational acceleration `g` for given accuracy `ϵ`.
 """
-function disp_rel(d, ω, g=9.81, ϵ=10^-12)
+function dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
     while max(abs(k * tanh(k * d) - k₀)) > ϵ
         k = k₀ / tanh(k * d)
