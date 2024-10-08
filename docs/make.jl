@@ -9,7 +9,7 @@ makedocs(;
     sitename="SteadyWaves.jl",
     format=Documenter.HTML(;
         canonical="https://mcpaprota.github.io/SteadyWaves.jl",
-        edit_link="master",
+        edit_link="main",
         assets=String[],
     ),
     pages=[
@@ -19,5 +19,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/mcpaprota/SteadyWaves.jl",
-    devbranch="master",
+    devbranch="main",
 )
