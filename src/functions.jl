@@ -43,7 +43,7 @@ end
     init_conditions(d, H, L, N, M)
 
 Calculate initial conditions `u0` of a steady wave of height `H` and length `L`
-propagatin in water of depth `d` using linear wave theory.
+propagating in water of depth `d` using linear wave theory.
 
 ...
 # Arguments
