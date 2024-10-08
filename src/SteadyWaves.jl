@@ -2,6 +2,8 @@ module SteadyWaves
 
 using NonlinearSolve
 
-include()
+export fourier_approx
+
+include("functions.jl")
 
 end
