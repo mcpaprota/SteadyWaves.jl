@@ -20,5 +20,4 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/mcpaprota/SteadyWaves.jl",
-    devbranch="gh-pages",
 )
