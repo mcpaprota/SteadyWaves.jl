@@ -12,6 +12,6 @@ propagating in water of constant depth.
 
 ```julia
 julia> using Pkg
-julia> pkg.add(url="https://github.com/mcpaprota/SteadyWaves.jl")
+julia> Pkg.add(url="https://github.com/mcpaprota/SteadyWaves.jl")
 julia> using SteadyWaves.jl
 ```
