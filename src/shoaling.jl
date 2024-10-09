@@ -20,18 +20,19 @@ for wave of length `L` and height `H`.
 # Output (nondimensional)
 - `K`: vector of shoaling coefficient values
 """
-function shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
-    k = 2π / L # initial wave number (rad/m)
+function shoaling_approx(d, H, L; cc=1, N=10, g=9.81)
+    k = 2π / L # initial wave number (rad/m
     ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
 
     K = zero(float(d))
+    K[1] = 1
     u = fourier_approx(d[1], H, L; cc=cc, N=N)
-    F = wave_power(u, N) * √(g^3/(2π/L)^5) # F / ρ
+    F = wave_power(u, N) * √(g^3/k^5) # F / ρ
     T = wave_period(u, d[1], N)
     push!(u, k * H)
     for i in eachindex(d)
         if i>1
-            fourier_approx!(u, d[1], d[i] / d[1], F, T;  cc=cc, N=N)
+            fourier_approx!(u, d[1], d[i], F, T;  cc=cc, N=N)
             K[i] = u[2N+7] / k / H
         end
     end
@@ -54,7 +55,7 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
 """
-function fourier_approx!(u, d, d_p, F, T; cc=2, N=10, g=9.81)
+function fourier_approx!(u, d, d_p, F, T; cc=1, N=10, g=9.81)
     init_conditions!(d_p / d, u, N)
     params = [F / (√g^3 * √d^5), T * sqrt(g / d), cc]
     problem = NonlinearProblem(f_1, u[1:2N+7], params)
@@ -94,9 +95,9 @@ function f_1(du, u, p)
     du[2N+4] = u[1] - u[N+1] - u[2N+7]
     du[2N+5] = u[2N+2] * p[2] * √u[2N+3] - 2π
     if p[3] == 1
-        du[2N+5] = u[2N+3] - 2π / p[1]
+        du[2N+6] = u[2N+6] - u[2N+2] - u[2N+4] / u[2N+3]
     else
-        du[2N+5] = u[2N+2] * p[1] * √u[2N+3] - 2π
+        du[2N+6] = u[2N+6] - u[2N+2]
     end
     du[2N+7] = wave_power(u, N) - p[1] * √u[2N+3]^5
     return nothing
