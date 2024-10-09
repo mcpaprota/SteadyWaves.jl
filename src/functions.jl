@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # Basic functions for Fourier Approximation Method
 
 """

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # Functions for shoaling calculations based on Fourier Approximation Method
 
 """
@@ -77,4 +79,3 @@ F = wave_power(u, N) # calculate wave power F
 push!(u, 2π / L * H) # add kH to the outcome of the solution
 push!(u, F * √(g^3/(2π/L)^5)) # add F/ρ to the outcome of the solution
 push!(u, √(2π * L / g) / u[2N+2]) # add T to the outcome of the solution
-
