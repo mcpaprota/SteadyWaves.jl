@@ -3,30 +3,64 @@
 # Functions for shoaling calculations based on Fourier Approximation Method
 
 """
-    fams!(kd, F, τ, N, M, u, fs_amps)
+    shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
 
-Get subsequent shoaling wave solution from Fourier Approximation Method
-for mean water depths `d`, wave power `F`, wave period `τ`, number of eigenvalues `N`,
-    and number of height steps `M`. Flags: cc - current criterion 1 - stokes, 2 - euler;
-    fs_amps Fourier amplitudes or elevation
+Calculate shoaling coefficients `K` in range of depth values `d`
+for wave of length `L` and height `H`.
+
+...
+# Arguments
+- `d`: vector of decreasing water depths (m)
+- `L`: initial wavelength (m) - corresponding to d[1]
+- `H`: initial wave height (m) - corresponding to d[1]
+- `cc`: current criterion; `cc=1` - Stokes, `cc=2` - Euler (default)
+- `N`: number of solution eigenvalues, defaults to `N=10`
+- `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
+
+# Output (nondimensional)
+- `K`: vector of shoaling coefficient values
+"""
+function shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
+    k = 2π / L # initial wave number (rad/m)
+    ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
+
+    K = zero(float(d))
+    u = fourier_approx(d[1], H, L; cc=cc, N=N)
+    F = wave_power(u, N) * √(g^3/(2π/L)^5) # F / ρ
+    T = wave_period(u, d[1], N)
+    push!(u, k * H)
+    for i in eachindex(d)
+        if i>1
+            fourier_approx!(u, d[1], d[i] / d[1], F, T;  cc=cc, N=N)
+            K[i] = u[2N+7] / k / H
+        end
+    end
+    return K
+end
 
 """
-function fourier_approx!(u, d, d_p, F, T; cc=1, N=10, g=9.81)
+    fourier_approx!(u, d, d_p, F, T; cc=1, N=10, g=9.81)
+
+Update approximate solution `u` of a steady wave of power `F` and period `T`
+propagating in water of changing depth from `d` to `d_p` using Fourier Approximation Method.
+
+...
+# Arguments
+- `d`: initial water depth (m)
+- `d_p`: target water depth (m)
+- `F`: wave power (kg m/s)
+- `T`: wave period (s)
+- `cc`: current criterion; `cc=1` - Stokes (default), `cc=2` - Euler
+- `N`: number of solution eigenvalues, defaults to `N=10`
+- `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
+"""
+function fourier_approx!(u, d, d_p, F, T; cc=2, N=10, g=9.81)
     init_conditions!(d_p / d, u, N)
     params = [F / (√g^3 * √d^5), T * sqrt(g / d), cc]
     problem = NonlinearProblem(f_1, u[1:2N+7], params)
     solution = solve(problem, RobustMultiNewton())
-    u[1:2N+7] = sol.u
-    U_e = u[2N+2] - u[2N+6]
-    I_p = u[2N+4] + u[2N+3] * U_e
-    E_p = ((u[1] - u[2N+3])^2 + (u[N+1] - u[2N+3])^2 + 2 * sum((u[2:N] .- u[2N+3]) .^ 2)) / 4N
-    Q = u[2N+6] / √u[2N+3] - u[2N+4] / u[2N+3]^(1.5)
-    E_k = 0.5 * (u[2N+2] * I_p - U_e * Q * u[2N+3]^(1.5))
-    U_b2 = 2u[2N+5] - u[2N+2]^2
-    F = u[2N+2] * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + u[2N+2] * u[2N+3]) + u[2N+2] * U_e * (u[2N+6] * u[2N+3] - u[2N+4])
-    u[2N+8] = F * √(g^3/(u[2N+3]/d)^5) # add F√(k⁵/g³)/ρ to the outcome of the solution
-    u[2N+9] = 2π / √(u[2N+3] / d * g) / u[2N+2] # add T to the outcome of the solution
-    return u
+    u[1:2N+7] = solution.u
+    return nothing
 end
 
 function init_conditions!(ratio_d, u, N)
@@ -38,9 +72,15 @@ function init_conditions!(ratio_d, u, N)
     u[2N+5] = u[2N+5] / ratio_d # rk/g
     u[2N+6] = u[2N+6] / √ratio_d # Ū√(k/g)
     u[2N+7] = u[2N+7] / ratio_d # kH
-    return u
+    return nothing
 end
 
+"""
+    f_1(du, u, p)
+
+Define nonlinear system `f_1(u) = 0` with parameters `p`.
+
+"""
 function f_1(du, u, p)
     N = (length(u) - 7) ÷ 2
     for m in 0:N
@@ -53,17 +93,20 @@ function f_1(du, u, p)
     du[2N+3] = ((u[1] + u[N+1]) / 2 + sum(u[2:N])) / N - u[2N+3]
     du[2N+4] = u[1] - u[N+1] - u[2N+7]
     du[2N+5] = u[2N+2] * p[2] * √u[2N+3] - 2π
-    p[3] == 1 ? du[2N+6] = u[2N+6] - u[2N+2] - u[2N+4] / u[2N+3] : du[2N+6] = u[2N+6] - u[2N+2]
-    U_e = u[2N+2] - u[2N+6]
-    I_p = u[2N+4] + u[2N+3] * U_e
-    E_p = ((u[1] - u[2N+3])^2 + (u[N+1] - u[2N+3])^2 + 2 * sum((u[2:N] .- u[2N+3]) .^ 2)) / 4N
-    Q = u[2N+6] / √u[2N+3] - u[2N+4] / u[2N+3]^(1.5)
-    E_k = 0.5 * (u[2N+2] * I_p - U_e * Q * u[2N+3]^(1.5))
-    U_b2 = 2u[2N+5] - u[2N+2]^2
-    du[2N+7] = u[2N+2] * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + u[2N+2] * u[2N+3]) + u[2N+2] * U_e * (u[2N+6] * u[2N+3] - u[2N+4]) - p[1] * √u[2N+3]^5
+    if p[3] == 1
+        du[2N+5] = u[2N+3] - 2π / p[1]
+    else
+        du[2N+5] = u[2N+2] * p[1] * √u[2N+3] - 2π
+    end
+    du[2N+7] = wave_power(u, N) - p[1] * √u[2N+3]^5
     return nothing
 end
 
+"""
+    wave_power(u, N)
+
+Calculate wave power `F` from solution `u`.
+"""
 function wave_power(u, N)
     U_e = u[2N+2] - u[2N+6]
     I_p = u[2N+4] + u[2N+3] * U_e
@@ -75,7 +118,12 @@ function wave_power(u, N)
     return F
 end
 
-F = wave_power(u, N) # calculate wave power F
-push!(u, 2π / L * H) # add kH to the outcome of the solution
-push!(u, F * √(g^3/(2π/L)^5)) # add F/ρ to the outcome of the solution
-push!(u, √(2π * L / g) / u[2N+2]) # add T to the outcome of the solution
+"""
+    wave_period(u, N)
+
+Calculate wave period `T` from solution `u`.
+"""
+function wave_period(u, d, N; g=9.81)
+    T = 2π / √(u[2N+3] / d * g) / u[2N+2]
+    return T
+end

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-# Basic functions for Fourier Approximation Method
+# Basic functions for Fourier Approximation Method (FAM)
 
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
