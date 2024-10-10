@@ -2,7 +2,8 @@ using CairoMakie
 using SteadyWaves
 
 n_steps_d = 1000
-min_d₀ = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714]
+#min_d₀ = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714]
+min_d₀ = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
 range_H_L = [0.003, 0.005, 0.01, 0.02, 0.03, 0.05]
 results = zeros(n_steps_d, 2 * length(range_H_L))
 g = 9.81
@@ -19,11 +20,14 @@ for i in eachindex(Hs)
     # initial nonlinear solution
     range_d = reverse(range(min_d₀[i], 1, n_steps_d)) # water depths (m)
     ds = range_d * d₀ # water depths (m)
-    K = shoaling_approx(ds, Hs[i], L₀; N=40)
+    K = shoaling_approx(ds, Hs[i], L₀; N=N)
     results[:, 2i-1] = k₀ * ds
     results[:, 2i] = K
     println(i)
 end
+
+ds = reverse(range(0.01, 1, n_steps_d))
+k = dispersion_relation.(ds, ω₀)
 
 # initialize figure of size
 fig_width = 5 * 72 # inches x points

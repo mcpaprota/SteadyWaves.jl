@@ -11,7 +11,7 @@ module SteadyWaves
 
 using NonlinearSolve
 
-export fourier_approx, shoaling_approx
+export fourier_approx, shoaling_approx, dispersion_relation
 
 include("fam.jl")
 include("shoaling.jl")
