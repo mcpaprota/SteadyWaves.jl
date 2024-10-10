@@ -33,7 +33,7 @@ function shoaling_approx(d, H, L; cc=1, N=10, g=9.81)
     for i in eachindex(d)
         if i>1
             fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i];  cc=cc, N=N)
-            K[i] = u[2N+7] / k / H
+            K[i] = u[2N+7] / u[2N+3] * d[i] / H
             println(i)
         end
     end

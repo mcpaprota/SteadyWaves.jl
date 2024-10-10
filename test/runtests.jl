@@ -18,7 +18,7 @@ using Test
 
     # Test 03: dispersion relation
     ω = √(g * k * tanh(k * d))
-    @test k ≈ SteadyWaves.dispertion_relation(d, ω)
+    @test k ≈ dispersion_relation(d, ω)
 
     # Test 04: shoaling
     K = shoaling_approx([d, d], H, L)

@@ -1,9 +1,8 @@
-using CairoMakie
 using SteadyWaves
+using CairoMakie
 
-n_steps_d = 1000
-#min_d₀ = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714]
-min_d₀ = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+n_steps_d = 5000
+min_d₀ = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714]
 range_H_L = [0.003, 0.005, 0.01, 0.02, 0.03, 0.05]
 results = zeros(n_steps_d, 2 * length(range_H_L))
 g = 9.81
@@ -14,7 +13,7 @@ L₀ = 2 # wavelength (m)
 k₀ = 2π / L₀
 ω₀ = √(g * k₀ * tanh(k₀ * d₀))
 Hs = range_H_L * L₀ # wave height (m)
-N = 20 # eigenvalues of solution
+N = 40 # eigenvalues of solution
 
 for i in eachindex(Hs)
     # initial nonlinear solution
@@ -54,7 +53,7 @@ with_theme(theme_latexfonts()) do
         linestyle=:dot,
         label="linear theory")
     for n in 1:length(range_H_L)
-        lines!(results[1:5000, 2n-1], results[1:5000, 2n];
+        lines!(results[:, 2n-1], results[:, 2n];
             color=:dodgerblue4,
             linestyle=:dash, label="Rienecker and Fenton")
     end
@@ -65,5 +64,5 @@ with_theme(theme_latexfonts()) do
     )
     axislegend(ax, position=:rt, unique=true, patchsize=(42, 1))
     fig
-    save("figures/shoaling_diagram.png", fig, px_per_unit=10, pt_per_unit=1)
+    # save("figures/shoaling_diagram.png", fig, px_per_unit=10, pt_per_unit=1)
 end
