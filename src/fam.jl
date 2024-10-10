@@ -117,7 +117,7 @@ end
     dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
 
 Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
-and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
+and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory."
 """
 function dispersion_relation(d, ω, g=9.81, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
