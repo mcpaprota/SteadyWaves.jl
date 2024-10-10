@@ -19,7 +19,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `M`: number of height steps, defaults to `M=1`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
 
-# Output (nondimensional)
+# Output
 - `u[1:N+1]`: free surface elevation *kη*
 - `u[N+2:2N+1]`: stream function coefficients *B*
 - `u[2N+2]`: wave celerity *c√(k/g)*
@@ -58,7 +58,7 @@ propagating in water of depth `d` using linear wave theory.
 - `N`: number of solution eigenvalues
 - `M`: number of height steps
 
-# Output (nondimensional)
+# Output
 - `u[1:N+1]`: free surface elevation *kη*
 - `u[N+2:2N+1]`: stream function coefficients *B*
 - `u[2N+2]`: wave celerity *c√(k/g)*

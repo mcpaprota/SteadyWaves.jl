@@ -17,7 +17,7 @@ for wave of length `L` and height `H`.
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
 
-# Output (nondimensional)
+# Output
 - `K`: vector of shoaling coefficient values
 """
 function shoaling_approx(d, H, L; cc=1, N=10, g=9.81)
@@ -47,7 +47,7 @@ Update approximate solution `u` of a steady wave of power `F` and period `T`
 propagating in water of changing depth from `d` to `d_p` using Fourier Approximation Method.
 
 ...
-#
+# Arguments
 - `u`: solution matrix being mutated
 - `d`: initial water depth (m)
 - `d_p`: target water depth (m)

@@ -2,13 +2,17 @@
 CurrentModule = SteadyWaves
 ```
 
-# SteadyWaves
+# SteadyWaves.jl
 
-```@contents
-Pages = ["index.md", "api.md"]
-```
+A Fourier Approximation Method to steady, periodic, nonlinear waves
+propagating in water of constant depth (Rienecker and Fenton, 1981).
 
-Documentation for [SteadyWaves](https://github.com/mcpaprota/SteadyWaves.jl).
-SteadyWaves is an implementation of Rienecker and Fenton (1981)
-Fourier Approximation Method to steady, periodic, nonlinear waves
-propagating in water of constant depth.
+
+## Overview
+
+`SteadyWaves.jl` is a Julia package for calculation of properties of steady, periodic, 
+and nonlinear waves within the framework of potential flow. The solution is derived using
+a Fourier Approximation Method applied to a periodic boundary value problem of waves propagating 
+in water of constant depth up to a limiting height with additional capability to describe nonlinear
+shoaling waves (Rienecker and Fenton, 1981; Fenton, 1988, 1999). Unlike in previous implementations of the method,
+here, we use `NonlinearSolve.jl` package to `solve()` a set of nonlinear equations using `RobustMultiNewton` mode.
