@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Guide · SteadyWaves.jl</title><meta name="title" content="Guide · SteadyWaves.jl"/><meta property="og:title" content="Guide · SteadyWaves.jl"/><meta property="twitter:title" content="Guide · SteadyWaves.jl"/><meta name="description" content="Documentation for SteadyWaves.jl."/><meta property="og:description" content="Documentation for SteadyWaves.jl."/><meta property="twitter:description" content="Documentation for SteadyWaves.jl."/><meta property="og:url" content="https://mcpaprota.github.io/SteadyWaves.jl/guide/"/><meta property="twitter:url" content="https://mcpaprota.github.io/SteadyWaves.jl/guide/"/><link rel="canonical" href="https://mcpaprota.github.io/SteadyWaves.jl/guide/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/citations.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SteadyWaves.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Guide</a><ul class="internal"><li><a class="tocitem" href="#Installation"><span>Installation</span></a></li><li><a class="tocitem" href="#Quick-start"><span>Quick start</span></a></li><li><a class="tocitem" href="#Shoaling-waves"><span>Shoaling waves</span></a></li></ul></li><li><a class="tocitem" href="../api/">API reference</a></li><li><a class="tocitem" href="../references/">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Guide</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Guide</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mcpaprota/SteadyWaves.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mcpaprota/SteadyWaves.jl/blob/main/docs/src/guide.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Package-Guide"><a class="docs-heading-anchor" href="#Package-Guide">Package Guide</a><a id="Package-Guide-1"></a><a class="docs-heading-anchor-permalink" href="#Package-Guide" title="Permalink"></a></h1><p>SteadyWaves is a small package for calculating parameters of nonlinear, steady water waves. In this guide, we present how to install and use the package. </p><h2 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h2><pre><code class="language-julia hljs">pkg&gt; add SteadyWaves
+julia&gt; using SteadyWaves</code></pre><h2 id="Quick-start"><a class="docs-heading-anchor" href="#Quick-start">Quick start</a><a id="Quick-start-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-start" title="Permalink"></a></h2><p>In this example, we set define basic parameters of a regular wave with respect to wavelength <span>$L$</span> and wave height <span>$H$</span>, while we use <a href="https://github.com/MakieOrg/Makie.jl"><code>CairoMakie.jl</code></a> for graphical presentation of results</p><pre><code class="language-julia hljs">using SteadyWaves
+using CairoMakie # use the plotting package
+
+d = 1.0 # water depth (m)
+H = 0.2 # wave height (m)
+L = 2.0 # wavelength (m)
+k = 2π / L # wave number (rad/s)</code></pre><p>and calculate wave profile using <a href="../api/#SteadyWaves.fourier_approx-Tuple{Any, Any, Any}"><code>fourier_approx</code></a> function along <code>2N+1</code> points with a parameter flag <code>pc=1</code>. Wave period <code>T</code> is calculated using <a href="../api/#SteadyWaves.wave_period-Tuple{Any, Any, Any}"><code>wave_period</code></a> function.</p><pre><code class="language-julia hljs">N = 40 # set the number of points
+u = fourier_approx(d, H, L; pc=1, cc=1, N=N) # apply Fourier Approximation Method
+kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
+T = wave_period(u, d, N) # calculate wave period
+x = range(0, L, 2N + 1) # discretize L to match kη
+η = kη / k # use dimensional values
+
+# CairoMakie figure
+with_theme(theme_latexfonts()) do # use latex theme
+    fig = Figure(size = (300, 200), fontsize = 9)
+    ax = Axis(fig[1,1],
+            xlabel=L&quot;$x$ (m)&quot;,
+            ylabel=L&quot;$\eta$ (m)&quot;,
+            # display wave parameters in the title
+            title=L&quot;$d=%$(d)$ m, $L=%$(L)$ m, $T=%$(round(T, digits=2))$ s, $H=%$(H)$ m&quot;,
+            limits=(0, L, 0, η[N+1] * 1.1);) # set upper limit to 110% of η_max
+    lines!(ax, x, η)
+    fig # display figure
+end</code></pre><img src="e0a62fb2.png" alt="Example block output"/><p>In another simple example, we set basic parameters of a regular wave with respect to wave period <span>$T$</span> and height <span>$H$</span></p><pre><code class="language-julia hljs">using SteadyWaves
+using CairoMakie
+
+d = 1.0 # water depth (m)
+H = 0.2 # wave height (m)
+T = 2.0 # wave period (s)</code></pre><p>and calculate wave profile using <a href="../api/#SteadyWaves.fourier_approx-Tuple{Any, Any, Any}"><code>fourier_approx</code></a> function along <code>2N+1</code> points with a parameter flag <code>pc=2</code>. Wavelength is calculated using <a href="../api/#SteadyWaves.wavelength-Tuple{Any, Any, Any}"><code>wavelength</code></a> function.</p><pre><code class="language-julia hljs">N = 40 # set the number of points
+u = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
+L = wavelength(u, d, N) # calculate wavelength (rad/s)
+k = 2π / L # get wave number (rad/m)
+kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
+x = range(0, L, 2N + 1) # discretize L to match kη
+η = kη / k # use dimensional values
+
+# CairoMakie figure
+with_theme(theme_latexfonts()) do # use latex theme
+    fig = Figure(size = (300, 200), fontsize = 9)
+    ax = Axis(fig[1,1],
+            xlabel=L&quot;$x$ (m)&quot;,
+            ylabel=L&quot;$\eta$ (m)&quot;,
+            # display wave parameters in the title
+            title=L&quot;$d=%$(d)$ m, $L=%$(round(L, digits=2))$ m, $T=%$(T)$ s, $H=%$(H)$ m&quot;,
+            limits=(0, L, 0, η[N+1] * 1.1);) # set upper limit to 110% of η_max
+    lines!(ax, x, η)
+    fig # display figure
+end</code></pre><img src="17b64dc2.png" alt="Example block output"/><p>We may also check the <a href="../api/#SteadyWaves.wave_height-Tuple{Any, Any, Any}"><code>wave_height</code></a>.</p><pre><code class="language-julia hljs">println(&quot;The wave height is $(wave_height(u, d, N)) m.&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">The wave height is 0.2 m.</code></pre><h2 id="Shoaling-waves"><a class="docs-heading-anchor" href="#Shoaling-waves">Shoaling waves</a><a id="Shoaling-waves-1"></a><a class="docs-heading-anchor-permalink" href="#Shoaling-waves" title="Permalink"></a></h2><p>Here, we present a more complicated example, which reproduces a shoaling diagram. We follow <a href="../references/#Eldrup2020">Eldrup and Andersen [6]</a>, who presented shoaling coefficient <span>$K$</span> calculated by Fourier Approximation Method [<a href="../references/#Rienecker1981">1</a>] as a function of water depth <span>$d$</span> normalized by deep-water wave number <span>$k_0$</span> (cf. Figure 2 in [<a href="../references/#Eldrup2020">6</a>]).</p><p>First, we define test cases in terms of deep-water wave steepness <span>$H_0/L_0$</span> and minimum values of water depth <span>$d_{min}$</span> for each case.</p><pre><code class="language-julia hljs">using SteadyWaves
+using CairoMakie
+
+H₀_L₀ = [0.003, 0.005, 0.01, 0.02, 0.03, 0.05] # set wave steepness cases
+d_min = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714] # set minimal depth values</code></pre><p>We set a number of points <code>N</code> for <a href="../api/#SteadyWaves.shoaling_approx-Tuple{Any, Any, Any}"><code>shoaling_approx</code></a> (which uses in-place <a href="../api/#SteadyWaves.fourier_approx!-NTuple{5, Any}"><code>SteadyWaves.fourier_approx!</code></a>), number of depth steps <code>N_d</code> and create a matrix container <code>results</code> for storing the outcome of analysis.</p><pre><code class="language-julia hljs">N = 40 # set number of points
+N_d = 2000 # set number of steps for changing depth
+results = zeros(N_d, 2 * length(H₀_L₀))</code></pre><p>We define initial deep-water conditions, where we calculate angular wave frequency <code>ω₀</code> according to linear dispersion relation.</p><pre><code class="language-julia hljs"># initial conditions
+g = 9.81 # gravitational acceleration (m/s²)
+d₀ = 1 # water depth (m)
+L₀ = 2 # wavelength (m)
+k₀ = 2π / L₀ # wave number (rad/m)
+ω₀ = √(g * k₀ * tanh(k₀ * d₀)) # angular wave frequency (rad/s)
+H₀ = H₀_L₀ * L₀ # wave heights (m)</code></pre><p>We loop over wave cases each time defining a vector of depth values <code>d</code> from deep to shallow water according to a predefined minimal value <code>d_min</code> and applying <a href="../api/#SteadyWaves.shoaling_approx-Tuple{Any, Any, Any}"><code>shoaling_approx</code></a> function to calculate shoaling coefficient <code>K</code>. We store the results in <code>results</code>.</p><pre><code class="language-julia hljs">for i in eachindex(H₀)
+    d = reverse(range(d_min[i], 1, N_d))  * d₀ # water depths (m)
+    K = shoaling_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
+    # save results
+    results[:, 2i-1] = k₀ * d
+    results[:, 2i] = K
+end</code></pre><p>For reference, we calculate linear shoaling coefficient</p><p class="math-container">\[K = \sqrt{\frac{k\left(1+\frac{2k_0d_0}{\sinh2k_0d_0}\right)}{k_0\left(1+\frac{2kd}{\sinh2kd}\right)}}\]</p><p>which is independent of wave steepness <span>$H_0/L_0$</span>.</p><pre><code class="language-julia hljs">d = reverse(range(0.01, 1, N_d))  * d₀ # water depths (m)
+k = dispersion_relation.(d, ω₀) # linear wave numbers (rad/m)
+# calculate linear shoaling coefficient
+K = @. sqrt((k * (1 + 2k₀ * d₀ / sinh(2k₀ * d₀))) / (k₀ * (1 + 2k * d / sinh(2k * d))))</code></pre><p>Finally, we diagram the results.</p><pre><code class="language-julia hljs"># CairoMakie figure
+with_theme(theme_latexfonts()) do # use latex theme
+    fig = Figure(size = (400, 300), fontsize = 9)
+    ax = Axis(fig[1, 1],
+        xlabel=L&quot;$k_0d$&quot;,
+        xscale=log10,
+        xticks=[0.1, 1, 10],
+        ylabel=L&quot;$K$&quot;,
+        yscale=log10,
+        yticks=1:0.2:2.4,
+        limits=(0.04, π, 0.9, 2.4);
+        xminorticksvisible=true,
+        xminorticks=IntervalsBetween(10),
+        xminorgridvisible=true,
+        yminorticksvisible=true,
+        yminorticks=IntervalsBetween(4),
+        yminorgridvisible=true,
+    )
+    lines!(ax, k₀ * d, K;
+        color=:tomato,
+        linestyle=:dot,
+        label=&quot;linear theory&quot;)
+    for i in eachindex(H₀_L₀)
+        lines!(ax, results[:, 2i-1], results[:, 2i];
+            color=:dodgerblue4,
+            linestyle=:dash, label=&quot;Rienecker and Fenton&quot;)
+    end
+    text!(ax, k₀ * d_min, [2.3, 2.0, 1.6, 1.35, 1.25, 1.1],
+        text=[L&quot;H_0/L_0= %$(value)&quot; for value in H₀_L₀],
+        offset=(5, 0),
+        align=(:left, :center)
+    )
+    axislegend(ax, position=:rt, unique=true, patchsize=(42, 1))
+    fig
+end</code></pre><img src="a6b8d899.png" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Tuesday 15 October 2024 12:50">Tuesday 15 October 2024</span>. Using Julia version 1.11.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
