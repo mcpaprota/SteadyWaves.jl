@@ -8,7 +8,6 @@
 Calculate shoaling coefficients `K` in range of depth values `d`
 for wave of length `L` and height `H`.
 
-...
 # Arguments
 - `d`: vector of decreasing water depths (m)
 - `L`: initial wavelength (m) - corresponding to d[1]
@@ -46,7 +45,6 @@ end
 Update approximate solution `u` of a steady wave of power `F` and period `T`
 propagating in water of changing depth from `d` to `d_p` using Fourier Approximation Method.
 
-...
 # Arguments
 - `u`: solution matrix being mutated
 - `d`: initial water depth (m)

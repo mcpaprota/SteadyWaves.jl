@@ -8,7 +8,6 @@
 Approximate solution `u` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using Fourier Approximation Method.
 
-...
 # Arguments
 - `d`: water depth (m)
 - `H`: wave height (m)
@@ -49,7 +48,6 @@ end
 Calculate initial conditions `u0` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using linear wave theory.
 
-...
 # Arguments
 - `d`: water depth (m)
 - `H`: wave height (m)
