@@ -26,6 +26,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+4]`: volume flux due to waves *q√(k³/g)*
 - `u[2N+5]`: Bernoulli constant *rk/g*
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
+- `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
     u = init_conditions(d, H, P, pc, N, M)
@@ -39,6 +40,7 @@ function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
+    push!(u, u[2N+3] / d * H)
     return u
 end
 

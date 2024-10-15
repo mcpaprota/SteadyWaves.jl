@@ -6,21 +6,27 @@ using Test
     # wave parameters
     d, H, L, g = 1, 0.1, 1, 9.81 # depth, height, length, gravity acceleration
 
-    # Test 01: no mass transport in a flume
+    # Test: no mass transport in a flume
     k = 2π / L
     u1 = fourier_approx(d, H, L; cc=2)
     @test u1[22] ≈ u1[26] # c√(k/g) = Ū√(k/g)
 
-    # Test 02: c = L/T
+    # Test: c = L/T
     T = L / u1[22] * √(k / g) # T = c/L
     u2 = fourier_approx(1, 0.1, T; pc=2, cc=2)
     @test u1[22] ≈ u2[22]
 
-    # Test 03: dispersion relation
+    # Test: wave_length
+    @test L ≈ wavelength(u2, d, N)
+
+    # Test: wave_period
+    @test T ≈ wave_period(u2, d, N)
+
+    # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
     @test k ≈ dispersion_relation(d, ω)
 
-    # Test 04: shoaling
+    # Test: shoaling
     K = shoaling_approx([d, d], H, L)
     @test K[1] ≈ K[2]
 

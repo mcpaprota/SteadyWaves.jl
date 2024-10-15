@@ -23,6 +23,16 @@ function wavelength(u, d, N)
 end
 
 """
+    wave_height(u, d, N)
+
+Calculate dimensional wave height `H` from solution `u`.
+"""
+function wave_height(u, d, N)
+    H = u[2N+7] / u[2N+3] * d
+    return H
+end
+
+"""
     wave_power(u, N)
 
 Calculate dimensionless wave power `F` from solution `u` (non-public function).
