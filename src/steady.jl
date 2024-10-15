@@ -1,10 +1,13 @@
+# SPDX-License-Identifier: MIT
+
+# Basic functions for Fourier Approximation Method (FAM)
+
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 
 Approximate solution `u` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using Fourier Approximation Method.
 
-...
 # Arguments
 - `d`: water depth (m)
 - `H`: wave height (m)
@@ -15,7 +18,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `M`: number of height steps, defaults to `M=1`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
 
-# Output (nondimensional)
+# Output
 - `u[1:N+1]`: free surface elevation *kη*
 - `u[N+2:2N+1]`: stream function coefficients *B*
 - `u[2N+2]`: wave celerity *c√(k/g)*
@@ -23,6 +26,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+4]`: volume flux due to waves *q√(k³/g)*
 - `u[2N+5]`: Bernoulli constant *rk/g*
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
+- `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
     u = init_conditions(d, H, P, pc, N, M)
@@ -32,10 +36,11 @@ function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
         else
             params = [P * sqrt(g / d), H / d * m / M, pc, cc]
         end
-        problem = NonlinearProblem(f, u, params)
+        problem = NonlinearProblem(nonlinear_system_steady, u, params)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
+    push!(u, u[2N+3] / d * H)
     return u
 end
 
@@ -45,7 +50,6 @@ end
 Calculate initial conditions `u0` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using linear wave theory.
 
-...
 # Arguments
 - `d`: water depth (m)
 - `H`: wave height (m)
@@ -54,7 +58,7 @@ propagating in water of depth `d` using linear wave theory.
 - `N`: number of solution eigenvalues
 - `M`: number of height steps
 
-# Output (nondimensional)
+# Output
 - `u[1:N+1]`: free surface elevation *kη*
 - `u[N+2:2N+1]`: stream function coefficients *B*
 - `u[2N+2]`: wave celerity *c√(k/g)*
@@ -64,7 +68,7 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M)
-    pc == 1 ? k = 2π / P : k = dispertion_relation(d, 2π / P) # wave number (rad/s)
+    pc == 1 ? k = 2π / P : k = dispersion_relation(d, 2π / P) # wave number (rad/s)
     u0 = zeros(2N + 6)
     u0[1:N+1] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
     u0[N+2:2N+1] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
@@ -77,12 +81,12 @@ function init_conditions(d, H, P, pc, N, M)
 end
 
 """
-    f(du, u, p)
+    nonlinear_system_steady(du, u, p)
 
-Define nonlinear system `f(u) = 0` with parameters `p`.
+Define nonlinear system for steady waves `f(u) = 0` with parameters `p`.
 
 """
-function f(du, u, p)
+function nonlinear_system_steady(du, u, p)
     N = (length(u) - 6) ÷ 2
     for m in 0:N
         Σ₁ = sum([u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N)
@@ -113,9 +117,9 @@ end
     dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
 
 Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
-and gravitational acceleration `g` for given accuracy `ϵ`.
+and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory."
 """
-function dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
+function dispersion_relation(d, ω, g=9.81, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
     while max(abs(k * tanh(k * d) - k₀)) > ϵ
         k = k₀ / tanh(k * d)
