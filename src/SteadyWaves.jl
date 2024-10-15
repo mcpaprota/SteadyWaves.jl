@@ -13,7 +13,7 @@ using NonlinearSolve
 
 export fourier_approx, shoaling_approx, dispersion_relation
 
-include("fam.jl")
+include("steady.jl")
 include("shoaling.jl")
 
 end

@@ -59,7 +59,7 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T; cc=1, N=10)
     init_conditions!(d_p / d, u, N)
     params = [F, T, cc]
-    problem = NonlinearProblem(f_1, u[1:2N+7], params)
+    problem = NonlinearProblem(nonlinear_system_shoaling, u[1:2N+7], params)
     solution = solve(problem, RobustMultiNewton())
     u[1:2N+7] = solution.u
     return nothing
@@ -78,12 +78,12 @@ function init_conditions!(ratio_d, u, N)
 end
 
 """
-    f_1(du, u, p)
+    nonlinear_system_shoaling(du, u, p)
 
-Define nonlinear system `f_1(u) = 0` with parameters `p`.
+Define nonlinear system for shoaling waves `f(u) = 0` with parameters `p`.
 
 """
-function f_1(du, u, p)
+function nonlinear_system_shoaling(du, u, p)
     N = (length(u) - 7) ÷ 2
     for m in 0:N
         Σ₁ = sum([u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N) for j in 1:N])

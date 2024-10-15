@@ -36,7 +36,7 @@ function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
         else
             params = [P * sqrt(g / d), H / d * m / M, pc, cc]
         end
-        problem = NonlinearProblem(f_0, u, params)
+        problem = NonlinearProblem(nonlinear_system_steady, u, params)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
@@ -81,12 +81,12 @@ function init_conditions(d, H, P, pc, N, M)
 end
 
 """
-    f_0(du, u, p)
+    nonlinear_system_steady(du, u, p)
 
-Define nonlinear system `f_0(u) = 0` with parameters `p`.
+Define nonlinear system for steady waves `f(u) = 0` with parameters `p`.
 
 """
-function f_0(du, u, p)
+function nonlinear_system_steady(du, u, p)
     N = (length(u) - 6) ÷ 2
     for m in 0:N
         Σ₁ = sum([u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N)
