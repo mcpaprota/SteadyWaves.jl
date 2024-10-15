@@ -11,6 +11,6 @@ propagating in water of constant depth.
 ## Install
 
 ```julia
-pkg> add SteadyWaves
+pkg> add url="https://github.com/mcpaprota/SteadyWaves.jl"
 julia> using SteadyWaves
 ```
