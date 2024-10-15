@@ -27,11 +27,11 @@ The basic parameters characterizing regular wave train are listed below:
 -  $T$ wave period (s);
 noting that $c=L/T$.
 
-The wave problem is defined by parameters $d$, $H$, $L$ or $T$, and the mean current $\bar{u}$. There are two possible ways of defining the current criterion. One corresponds to the time-mean Eulerian current $c_E$
+The wave problem is defined by parameters $d$, $H$, $L$ or $T$, and the mean current $\bar{u}$. There are two possible ways of defining the current criterion. The first one corresponds to the time-mean Eulerian current $c_E$
 
 $$c - c_E + \bar{u} = 0,$$
 
-while the second to the mean mass-transport velocity $c_S$
+while the second one corresponds to the mean mass-transport velocity $c_S$
 
 $$c - c_S - \frac{Q}{d} = 0,$$
 
