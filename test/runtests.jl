@@ -17,10 +17,10 @@ using Test
     @test u1[22] ≈ u2[22]
 
     # Test: wave_length
-    @test L ≈ wavelength(u2, d, N)
+    @test L ≈ wavelength(u2, d, 10)
 
     # Test: wave_period
-    @test T ≈ wave_period(u2, d, N)
+    @test T ≈ wave_period(u2, d, 10)
 
     # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
