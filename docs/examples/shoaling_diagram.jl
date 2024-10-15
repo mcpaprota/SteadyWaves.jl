@@ -11,6 +11,7 @@ min_d₀ = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714]
 results = zeros(n_steps_d, 2 * length(H_over_L))
 
 # initial conditions
+g = 9.81 # gravitational acceleration (m/s²)
 d₀ = 1 # water depth (m)
 L₀ = 2 # wavelength (m)
 k₀ = 2π / L₀ # wave number (rad/m)

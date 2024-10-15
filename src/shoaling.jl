@@ -26,14 +26,13 @@ function shoaling_approx(d, H, L; cc=1, N=10, g=9.81)
     K = zero(float(d))
     K[1] = 1
     u = fourier_approx(d[1], H, L; cc=cc, N=N)
-    F = wave_power(u, N) / √k^5 # F / ρ√g³
+    F = SteadyWaves.wave_power(u, N) / √k^5 # F / ρ√g³
     T = wave_period(u, d[1], N) * √g # T * √g
     push!(u, k * H)
     for i in eachindex(d)
         if i>1
             fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i];  cc=cc, N=N)
             K[i] = u[2N+7] / u[2N+3] * d[i] / H
-            println(i)
         end
     end
     return K
@@ -100,30 +99,4 @@ function nonlinear_system_shoaling(du, u, p)
     end
     du[2N+7] = wave_power(u, N) - p[1] * √u[2N+3]^5
     return nothing
-end
-
-"""
-    wave_power(u, N)
-
-Calculate wave power `F` from solution `u`.
-"""
-function wave_power(u, N)
-    U_e = u[2N+2] - u[2N+6]
-    I_p = u[2N+4] + u[2N+3] * U_e
-    E_p = ((u[1] - u[2N+3])^2 + (u[N+1] - u[2N+3])^2 + 2 * sum((u[2:N] .- u[2N+3]) .^ 2)) / 4N
-    Q = u[2N+6] / √u[2N+3] - u[2N+4] / u[2N+3]^(1.5)
-    E_k = 0.5 * (u[2N+2] * I_p - U_e * Q * u[2N+3]^(1.5))
-    U_b2 = 2u[2N+5] - u[2N+2]^2
-    F = u[2N+2] * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + u[2N+2] * u[2N+3]) + u[2N+2] * U_e * (u[2N+6] * u[2N+3] - u[2N+4])
-    return F
-end
-
-"""
-    wave_period(u, N)
-
-Calculate wave period `T` from solution `u`.
-"""
-function wave_period(u, d, N; g=9.81)
-    T = 2π / √(u[2N+3] / d * g) / u[2N+2]
-    return T
 end
