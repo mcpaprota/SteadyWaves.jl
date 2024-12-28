@@ -24,7 +24,7 @@ using Test
 
     # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
-    @test k ≈ dispersion_relation(d, ω)
+    @test k ≈ wavenumber(d, ω)
 
     # Test: shoaling
     K = shoaling_approx([d, d], H, L)

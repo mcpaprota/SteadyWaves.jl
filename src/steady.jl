@@ -114,12 +114,12 @@ function nonlinear_system_steady(du, u, p)
 end
 
 """
-    dispertion_relation(d, ω, g=9.81, ϵ=10^-12)
+    wavenumber(d, ω, g=9.81, ϵ=10^-12)
 
 Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
-and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory."
+and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
 """
-function dispersion_relation(d, ω, g=9.81, ϵ=10^-12)
+function wavenumber(d, ω, g=9.81, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
     while max(abs(k * tanh(k * d) - k₀)) > ϵ
         k = k₀ / tanh(k * d)

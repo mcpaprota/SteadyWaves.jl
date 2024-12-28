@@ -11,7 +11,7 @@ module SteadyWaves
 
 using NonlinearSolve
 
-export fourier_approx, shoaling_approx, dispersion_relation
+export fourier_approx, shoaling_approx, wavenumber
 export wave_period, wavelength, wave_height
 
 include("output.jl")
