@@ -145,7 +145,7 @@ which is independent of wave steepness $H_0/L_0$.
 
 ```@example 3
 d = reverse(range(0.01, 1, N_d))  * d₀ # water depths (m)
-k = wavenumber.(d, ω₀) # linear wave numbers (rad/m)
+k = wave_number.(d, ω₀) # linear wave numbers (rad/m)
 # calculate linear shoaling coefficient
 K = @. sqrt((k * (1 + 2k₀ * d₀ / sinh(2k₀ * d₀))) / (k₀ * (1 + 2k * d / sinh(2k * d))))
 nothing # hide

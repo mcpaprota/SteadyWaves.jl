@@ -68,7 +68,7 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M)
-    pc == 1 ? k = 2π / P : k = dispersion_relation(d, 2π / P) # wave number (rad/s)
+    pc == 1 ? k = 2π / P : k = wave_number(d, 2π / P) # wave number (rad/s)
     u0 = zeros(2N + 6)
     u0[1:N+1] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
     u0[N+2:2N+1] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
@@ -114,12 +114,12 @@ function nonlinear_system_steady(du, u, p)
 end
 
 """
-    wavenumber(d, ω, g=9.81, ϵ=10^-12)
+    wave_number(d, ω, g=9.81, ϵ=10^-12)
 
-Calculate wavenumber `k` based on depth `d`, angular wave frequency `ω`
+Calculate wave_number `k` based on depth `d`, angular wave frequency `ω`
 and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
 """
-function wavenumber(d, ω, g=9.81, ϵ=10^-12)
+function wave_number(d, ω, g=9.81, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
     while max(abs(k * tanh(k * d) - k₀)) > ϵ
         k = k₀ / tanh(k * d)
