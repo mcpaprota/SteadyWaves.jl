@@ -2,6 +2,7 @@
 
 # Functions for shoaling calculations based on Fourier Approximation Method
 include("params.jl")
+include("nonlinear_system.jl")
 
 """
     shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
@@ -82,14 +83,14 @@ Define nonlinear system for shoaling waves `f(u) = 0` with parameters `p`.
 """
 function nonlinear_system_shoaling(du, u, p)
     N = (length(u) - 7) ÷ 2
+    
     for m in 0:N
-        Σ₁ = sum([u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N) for j in 1:N])
-        du[m+1] = Σ₁ - u[2N+6] * (u[m+1] - u[2N+3]) - u[2N+4]
-        Σ₂ = sum([j * u[N+1+j] * cosh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N) for j in 1:N])
-        Σ₃ = sum([j * u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * sin(j * m * π / N) for j in 1:N])
-        du[N+1+m+1] = (-u[2N+6] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+3] - u[2N+5]
+        du[m+1] = kinematic_surface_condition(u, N, m)
+        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
     end
-    du[2N+3] = ((u[1] + u[N+1]) / 2 + sum(u[2:N])) / N - u[2N+3]
+
+    du[2N+3] = mean_depth(u,N)
+    
     du[2N+4] = u[1] - u[N+1] - u[2N+7]
     du[2N+5] = u[2N+2] * p[2] * √u[2N+3] - 2π
     if p[3] == 1
