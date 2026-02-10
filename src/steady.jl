@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 # Basic functions for Fourier Approximation Method (FAM)
-
+include("params.jl")
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 
@@ -12,8 +12,8 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `d`: water depth (m)
 - `H`: wave height (m)
 - `P`: wave parameter - length `L` (m) or period `T` (s)
-- `pc`: parameter criterion; `pc=1` - length (default), `pc=2` - period
-- `cc`: current criterion; `cc=1` - Stokes (default), `cc=2` - Euler
+- `pc`: parameter criterion; `pc=1`, `pc=PC_LENGTH` - length (default), `pc=2`, `pc=PC_PERIOD` - period
+- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `M`: number of height steps, defaults to `M=1`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
@@ -28,14 +28,17 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
-    u = init_conditions(d, H, P, pc, N, M)
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=9.81)
+    u = init_conditions(d, H, P, Int(pc), N, M)
     for m in 1:M
-        if pc==1
-            params = [P / d, H / d * m / M, pc, cc]
-        else
-            params = [P * sqrt(g / d), H / d * m / M, pc, cc]
+        if Int(pc) == Int(PC_LENGTH)
+            params = [P / d, H / d * m / M, Int(pc), Int(cc)]
+        elseif Int(pc) == Int(PC_PERIOD)
+            params = [P * sqrt(g / d), H / d * m / M, Int(pc), Int(cc)]
+        else # prevents parsing unknown parameters
+            throw(error("Unknown parameter criterion \"$pc\""))
         end
+
         problem = NonlinearProblem(nonlinear_system_steady, u, params)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
@@ -54,7 +57,7 @@ propagating in water of depth `d` using linear wave theory.
 - `d`: water depth (m)
 - `H`: wave height (m)
 - `P`: wave parameter - length `L` (m) or period `T` (s)
-- `pc`: parameter criterion; `pc=1` - length, `pc=2` - period
+- `pc`: parameter criterion; `pc=1`, `pc=PC_LENGTH` - length (default), `pc=2`, `pc=PC_PERIOD` - period
 - `N`: number of solution eigenvalues
 - `M`: number of height steps
 
@@ -68,7 +71,7 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M)
-    pc == 1 ? k = 2π / P : k = wave_number(d, 2π / P) # wave number (rad/s)
+    Int(pc) == Int(PC_LENGTH) ? k = 2π / P : k = wave_number(d, 2π / P) # wave number (rad/s)
     u0 = zeros(2N + 6)
     u0[1:N+1] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
     u0[N+2:2N+1] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B

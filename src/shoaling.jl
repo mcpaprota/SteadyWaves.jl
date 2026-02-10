@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 # Functions for shoaling calculations based on Fourier Approximation Method
+include("params.jl")
 
 """
     shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
@@ -12,14 +13,14 @@ for wave of length `L` and height `H`.
 - `d`: vector of decreasing water depths (m)
 - `L`: initial wavelength (m) - corresponding to d[1]
 - `H`: initial wave height (m) - corresponding to d[1]
-- `cc`: current criterion; `cc=1` - Stokes, `cc=2` - Euler (default)
+- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
 
 # Output
 - `K`: vector of shoaling coefficient values
 """
-function shoaling_approx(d, H, L; cc=1, N=10, g=9.81)
+function shoaling_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
     k = 2π / L # initial wave number (rad/m
     ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
 
@@ -49,12 +50,12 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `d_p`: target water depth (m)
 - `F`: wave power (kg m/s)
 - `T`: wave period (s)
-- `cc`: current criterion; `cc=1` - Stokes (default), `cc=2` - Euler
+- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 """
-function fourier_approx!(u, d, d_p, F, T; cc=1, N=10)
+function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
-    params = [F, T, cc]
+    params = [F, T, Int(cc)]
     problem = NonlinearProblem(nonlinear_system_shoaling, u[1:2N+7], params)
     solution = solve(problem, RobustMultiNewton())
     u[1:2N+7] = solution.u
