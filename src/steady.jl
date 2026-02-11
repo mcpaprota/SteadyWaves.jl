@@ -31,16 +31,25 @@ propagating in water of depth `d` using Fourier Approximation Method.
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=9.81)
     u = init_conditions(d, H, P, Int(pc), N, M)
-    for m in 1:M
-        if Int(pc) == Int(PC_LENGTH)
-            params = [P / d, H / d * m / M, Int(pc), Int(cc)]
-        elseif Int(pc) == Int(PC_PERIOD)
-            params = [P * sqrt(g / d), H / d * m / M, Int(pc), Int(cc)]
-        else # prevents parsing unknown parameters
-            throw(error("Unknown parameter criterion \"$pc\""))
-        end
 
-        problem = NonlinearProblem(nonlinear_system_steady, u, params)
+    pc_constant = parameter_criterion_constant(pc, P, d, g)
+    pc_equation(u,N) = parameter_criterion(pc)(
+        u,N,
+        pc_constant
+    )
+
+    cc_equation = current_criterion(cc)
+
+    nonlinear_system(du,u,p) = nonlinear_system_steady(
+        du,u,p,
+        pc_equation,
+        cc_equation
+    )
+
+    for m in 1:M
+        params = [ H / d * m / M]
+
+        problem = NonlinearProblem(nonlinear_system, u, params)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
@@ -84,13 +93,17 @@ function init_conditions(d, H, P, pc, N, M)
     return u0
 end
 
+function wave_height_condition(u,N,p)
+    u[1] - u[N+1] - u[2N+3] * p
+end
+
 """
     nonlinear_system_steady(du, u, p)
 
 Define nonlinear system for steady waves `f(u) = 0` with parameters `p`.
 
 """
-function nonlinear_system_steady(du, u, p)
+function nonlinear_system_steady(du, u, p, pc_equation, cc_equation)
     N = (length(u) - 6) ÷ 2
     
     for m in 0:N
@@ -100,17 +113,11 @@ function nonlinear_system_steady(du, u, p)
 
     du[2N+3] = mean_depth(u,N)
     
-    du[2N+4] = u[1] - u[N+1] - u[2N+3] * p[2]
-    if p[3] == 1
-        du[2N+5] = u[2N+3] - 2π / p[1]
-    else
-        du[2N+5] = u[2N+2] * p[1] * √u[2N+3] - 2π
-    end
-    if p[4] == 1
-        du[2N+6] = u[2N+6] - u[2N+2] - u[2N+4] / u[2N+3]
-    else
-        du[2N+6] = u[2N+6] - u[2N+2]
-    end
+    du[2N+4] = wave_height_condition(u,N,p[1])
+
+    du[2N+5] = pc_equation(u,N)
+
+    du[2N+6] = cc_equation(u,N)
     return nothing
 end
 
