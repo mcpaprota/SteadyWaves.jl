@@ -2,6 +2,7 @@
 
 # Basic functions for Fourier Approximation Method (FAM)
 include("params.jl")
+include("nonlinear_system.jl")
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 
@@ -91,17 +92,14 @@ Define nonlinear system for steady waves `f(u) = 0` with parameters `p`.
 """
 function nonlinear_system_steady(du, u, p)
     N = (length(u) - 6) ÷ 2
+    
     for m in 0:N
-        Σ₁ = sum([u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N)
-                  for j in 1:N])
-        du[m+1] = Σ₁ - u[2N+6] * (u[m+1] - u[2N+3]) - u[2N+4]
-        Σ₂ = sum([j * u[N+1+j] * cosh(j * u[m+1]) / cosh(j * u[2N+3]) * cos(j * m * π / N)
-                  for j in 1:N])
-        Σ₃ = sum([j * u[N+1+j] * sinh(j * u[m+1]) / cosh(j * u[2N+3]) * sin(j * m * π / N)
-                  for j in 1:N])
-        du[N+1+m+1] = (-u[2N+6] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+3] - u[2N+5]
+        du[m+1] = kinematic_surface_condition(u, N, m)
+        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
     end
-    du[2N+3] = ((u[1] + u[N+1]) / 2 + sum(u[2:N])) / N - u[2N+3]
+
+    du[2N+3] = mean_depth(u,N)
+    
     du[2N+4] = u[1] - u[N+1] - u[2N+3] * p[2]
     if p[3] == 1
         du[2N+5] = u[2N+3] - 2π / p[1]
