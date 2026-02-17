@@ -56,8 +56,14 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 """
 function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
-    params = [F, T, Int(cc)]
-    problem = NonlinearProblem(nonlinear_system_shoaling, u[1:2N+7], params)
+    params = [F, T]
+
+    nonlinear_system(du,u,p) = nonlinear_system_shoaling(
+        du, u, p,
+        current_criterion(cc)
+    )
+
+    problem = NonlinearProblem(nonlinear_system, u[1:2N+7], params)
     solution = solve(problem, RobustMultiNewton())
     u[1:2N+7] = solution.u
     return nothing
@@ -75,13 +81,20 @@ function init_conditions!(ratio_d, u, N)
     return nothing
 end
 
+function wave_height_condition(u,N)
+    return u[1] - u[N+1] - u[2N+7]
+end
+function power_condition(u,N,p)
+    return wave_power(u, N) - p * √u[2N+3]^5
+end
+
 """
     nonlinear_system_shoaling(du, u, p)
 
 Define nonlinear system for shoaling waves `f(u) = 0` with parameters `p`.
 
 """
-function nonlinear_system_shoaling(du, u, p)
+function nonlinear_system_shoaling(du, u, p, cc_equation)
     N = (length(u) - 7) ÷ 2
     
     for m in 0:N
@@ -91,13 +104,12 @@ function nonlinear_system_shoaling(du, u, p)
 
     du[2N+3] = mean_depth(u,N)
     
-    du[2N+4] = u[1] - u[N+1] - u[2N+7]
-    du[2N+5] = u[2N+2] * p[2] * √u[2N+3] - 2π
-    if p[3] == 1
-        du[2N+6] = u[2N+6] - u[2N+2] - u[2N+4] / u[2N+3]
-    else
-        du[2N+6] = u[2N+6] - u[2N+2]
-    end
-    du[2N+7] = wave_power(u, N) - p[1] * √u[2N+3]^5
+    du[2N+4] = wave_height_condition(u,N)
+
+    du[2N+5] = period_condition(u,N,p[2])
+
+    du[2N+6] = cc_equation(u,N)
+
+    du[2N+7] = power_condition(u,N,p[1])
     return nothing
 end
