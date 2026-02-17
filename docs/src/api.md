@@ -10,4 +10,5 @@ Pages = ["api.md"]
 
 ```@autodocs
 Modules = [SteadyWaves]
+Private = false
 ```

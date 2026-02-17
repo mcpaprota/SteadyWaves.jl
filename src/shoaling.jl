@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: MIT
 
 # Functions for shoaling calculations based on Fourier Approximation Method
+
+using NonlinearSolve
+
 include("params.jl")
 include("nonlinear_system.jl")
+include("output.jl")
+include("Steady.jl")
+import .Steady:fourier_approx as steady_fourier_approx
 
 """
     shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
@@ -27,8 +33,8 @@ function shoaling_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
 
     K = zero(float(d))
     K[1] = 1
-    u = fourier_approx(d[1], H, L; cc=cc, N=N)
-    F = SteadyWaves.wave_power(u, N) / √k^5 # F / ρ√g³
+    u = steady_fourier_approx(d[1], H, L; cc=cc, N=N)
+    F = wave_power(u, N) / √k^5 # F / ρ√g³
     T = wave_period(u, d[1], N) * √g # T * √g
     for i in eachindex(d)
         if i>1
