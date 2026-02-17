@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: MIT
 
 # Basic functions for Fourier Approximation Method (FAM)
+using NonlinearSolve
 include("params.jl")
 include("nonlinear_system.jl")
+include("output.jl")
+
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 
@@ -119,18 +122,4 @@ function nonlinear_system_steady(du, u, p, pc_equation, cc_equation)
 
     du[2N+6] = cc_equation(u,N)
     return nothing
-end
-
-"""
-    wave_number(d, ω, g=9.81, ϵ=10^-12)
-
-Calculate wave_number `k` based on depth `d`, angular wave frequency `ω`
-and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
-"""
-function wave_number(d, ω, g=9.81, ϵ=10^-12)
-    k = k₀ = ω^2 / g # initial guess
-    while max(abs(k * tanh(k * d) - k₀)) > ϵ
-        k = k₀ / tanh(k * d)
-    end
-    return k
 end

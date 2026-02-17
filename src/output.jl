@@ -47,3 +47,17 @@ function wave_power(u, N)
     F = u[2N+2] * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + u[2N+2] * u[2N+3]) + u[2N+2] * U_e * (u[2N+6] * u[2N+3] - u[2N+4])
     return F
 end
+
+"""
+    wave_number(d, ω, g=9.81, ϵ=10^-12)
+
+Calculate wave_number `k` based on depth `d`, angular wave frequency `ω`
+and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
+"""
+function wave_number(d, ω, g=9.81, ϵ=10^-12)
+    k = k₀ = ω^2 / g # initial guess
+    while max(abs(k * tanh(k * d) - k₀)) > ϵ
+        k = k₀ / tanh(k * d)
+    end
+    return k
+end
