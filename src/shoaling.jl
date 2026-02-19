@@ -70,13 +70,13 @@ end
 
 function init_conditions!(ratio_d, u, N)
     u[1:N+1] =  1 .+ (u[1:N+1] .- 1) / ratio_d # kη
-    u[N+2:2N+1] = u[N+2:2N+1] / √ratio_d # B
-    u[2N+2] = u[2N+2] / √ratio_d # c√(k/g)
-    u[2N+3] = u[2N+3] / ratio_d # kη̄
-    u[2N+4] = u[2N+4] / √ratio_d^3 # q√(k³/g)
-    u[2N+5] = u[2N+5] / ratio_d # rk/g
-    u[2N+6] = u[2N+6] / √ratio_d # Ū√(k/g)
-    u[2N+7] = u[2N+7] / ratio_d # kH
+    u[N+2:2N+1] /= √ratio_d # B
+    u[2N+2] /= √ratio_d # c√(k/g)
+    u[2N+3] /= ratio_d # kη̄
+    u[2N+4] /= √ratio_d^3 # q√(k³/g)
+    u[2N+5] /= ratio_d # rk/g
+    u[2N+6] /= √ratio_d # Ū√(k/g)
+    u[2N+7] /= ratio_d # kH
     return nothing
 end
 
