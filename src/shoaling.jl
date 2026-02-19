@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 # Functions for shoaling calculations based on Fourier Approximation Method
-include("params.jl")
 include("nonlinear_system.jl")
 
 """
@@ -28,7 +27,7 @@ function shoaling_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
     K = zero(float(d))
     K[1] = 1
     u = fourier_approx(d[1], H, L; cc=cc, N=N)
-    F = SteadyWaves.wave_power(u, N) / √k^5 # F / ρ√g³
+    F = wave_power(u, N) / √k^5 # F / ρ√g³
     T = wave_period(u, d[1], N) * √g # T * √g
     for i in eachindex(d)
         if i>1
@@ -81,13 +80,6 @@ function init_conditions!(ratio_d, u, N)
     return nothing
 end
 
-function wave_height_condition(u,N)
-    return u[1] - u[N+1] - u[2N+7]
-end
-function power_condition(u,N,p)
-    return wave_power(u, N) - p * √u[2N+3]^5
-end
-
 """
     nonlinear_system_shoaling(du, u, p)
 
@@ -102,9 +94,9 @@ function nonlinear_system_shoaling(du, u, p, cc_equation)
         du[N+1+m+1] = dynamic_surface_condition(u, N, m)
     end
 
-    du[2N+3] = mean_depth(u,N)
+    du[2N+3] = mean_depth_condition(u,N)
     
-    du[2N+4] = wave_height_condition(u,N)
+    du[2N+4] = height_condition(u,N)
 
     du[2N+5] = period_condition(u,N,p[2])
 

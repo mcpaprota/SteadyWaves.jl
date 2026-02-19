@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 # Basic functions for Fourier Approximation Method (FAM)
-include("params.jl")
 include("nonlinear_system.jl")
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
@@ -93,10 +92,6 @@ function init_conditions(d, H, P, pc, N, M)
     return u0
 end
 
-function wave_height_condition(u,N,p)
-    u[1] - u[N+1] - u[2N+3] * p
-end
-
 """
     nonlinear_system_steady(du, u, p)
 
@@ -111,9 +106,9 @@ function nonlinear_system_steady(du, u, p, pc_equation, cc_equation)
         du[N+1+m+1] = dynamic_surface_condition(u, N, m)
     end
 
-    du[2N+3] = mean_depth(u,N)
+    du[2N+3] = mean_depth_condition(u,N)
     
-    du[2N+4] = wave_height_condition(u,N,p[1])
+    du[2N+4] = height_condition(u,N,p[1])
 
     du[2N+5] = pc_equation(u,N)
 
