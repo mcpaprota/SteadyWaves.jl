@@ -78,3 +78,23 @@ function parameter_criterion_constant(pc, P, d, g)
         throw(error("Unknown parameter criterion $pc"))
     end
 end
+
+function nonlinear_system_base(du, u, N, h_condition, pc_equation, cc_equation, pwr_condition)
+    for m in 0:N
+        du[m+1] = kinematic_surface_condition(u, N, m)
+        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
+    end
+
+    du[2N+3] = mean_depth_condition(u,N)
+    
+    du[2N+4] = h_condition(u,N)
+
+    du[2N+5] = pc_equation(u,N)
+
+    du[2N+6] = cc_equation(u,N)
+
+    if !isnothing(pwr_condition)
+        du[2N+7] = pwr_condition(u,N)
+    end
+    return nothing
+end

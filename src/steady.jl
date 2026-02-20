@@ -39,16 +39,18 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=9.81)
 
     cc_equation = current_criterion(cc)
 
-    nonlinear_system(du,u,p) = nonlinear_system_steady(
-        du,u,p,
-        pc_equation,
-        cc_equation
-    )
-
     for m in 1:M
-        params = [ H / d * m / M]
+        h_condition(u, N) = height_condition(u, N, H / d * m / M)
 
-        problem = NonlinearProblem(nonlinear_system, u, params)
+        nonlinear_system(du,u,p) = nonlinear_system_base(
+            du,u,N,
+            h_condition,
+            pc_equation,
+            cc_equation,
+            nothing
+        )
+
+        problem = NonlinearProblem(nonlinear_system, u)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
@@ -90,30 +92,6 @@ function init_conditions(d, H, P, pc, N, M)
     u0[2N+5] = tanh(k * d) / 2 # rk/g
     u0[2N+6] = √tanh(k * d) # Ū√(k/g)
     return u0
-end
-
-"""
-    nonlinear_system_steady(du, u, p)
-
-Define nonlinear system for steady waves `f(u) = 0` with parameters `p`.
-
-"""
-function nonlinear_system_steady(du, u, p, pc_equation, cc_equation)
-    N = (length(u) - 6) ÷ 2
-    
-    for m in 0:N
-        du[m+1] = kinematic_surface_condition(u, N, m)
-        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
-    end
-
-    du[2N+3] = mean_depth_condition(u,N)
-    
-    du[2N+4] = height_condition(u,N,p[1])
-
-    du[2N+5] = pc_equation(u,N)
-
-    du[2N+6] = cc_equation(u,N)
-    return nothing
 end
 
 """
