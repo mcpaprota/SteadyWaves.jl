@@ -81,14 +81,14 @@ propagating in water of depth `d` using linear wave theory.
 """
 function init_conditions(d, H, P, pc, N, M)
     Int(pc) == Int(PC_LENGTH) ? k = 2π / P : k = wave_number(d, 2π / P) # wave number (rad/s)
-    u0 = zeros(2N + 6)
-    u0[1:N+1] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
-    u0[N+2:2N+1] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
-    u0[2N+2] = √tanh(k * d) # c√(k/g)
-    u0[2N+3] = k * d # kη̄
-    u0[2N+4] = 0 # q√(k³/g)
-    u0[2N+5] = tanh(k * d) / 2 # rk/g
-    u0[2N+6] = √tanh(k * d) # Ū√(k/g)
+    u0 = zeros(2N + U_INDEX)
+    u0[elevation_indexes(N)] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
+    u0[stream_indexes(N)] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
+    u0[2N+C_INDEX] = √tanh(k * d) # c√(k/g)
+    u0[2N+D_INDEX] = k * d # kη̄
+    u0[2N+Q_INDEX] = 0 # q√(k³/g)
+    u0[2N+R_INDEX] = tanh(k * d) / 2 # rk/g
+    u0[2N+U_INDEX] = √tanh(k * d) # Ū√(k/g)
     return u0
 end
 

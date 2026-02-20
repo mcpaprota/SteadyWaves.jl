@@ -32,7 +32,7 @@ function shoaling_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
     for i in eachindex(d)
         if i>1
             fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i];  cc=cc, N=N)
-            K[i] = u[2N+7] / u[2N+3] * d[i] / H
+            K[i] = u[2N+H_INDEX] / u[2N+D_INDEX] * d[i] / H
         end
     end
     return K
@@ -69,14 +69,14 @@ function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
 end
 
 function init_conditions!(ratio_d, u, N)
-    u[1:N+1] =  1 .+ (u[1:N+1] .- 1) / ratio_d # kη
-    u[N+2:2N+1] /= √ratio_d # B
-    u[2N+2] /= √ratio_d # c√(k/g)
-    u[2N+3] /= ratio_d # kη̄
-    u[2N+4] /= √ratio_d^3 # q√(k³/g)
-    u[2N+5] /= ratio_d # rk/g
-    u[2N+6] /= √ratio_d # Ū√(k/g)
-    u[2N+7] /= ratio_d # kH
+    u[elevation_indexes(N)] =  1 .+ (u[elevation_indexes(N)] .- 1) / ratio_d # kη
+    u[stream_indexes(N)] /= √ratio_d # B
+    u[2N+C_INDEX] /= √ratio_d # c√(k/g)
+    u[2N+D_INDEX] /= ratio_d # kη̄
+    u[2N+Q_INDEX] /= √ratio_d^3 # q√(k³/g)
+    u[2N+R_INDEX] /= ratio_d # rk/g
+    u[2N+U_INDEX] /= √ratio_d # Ū√(k/g)
+    u[2N+H_INDEX] /= ratio_d # kH
     return nothing
 end
 
