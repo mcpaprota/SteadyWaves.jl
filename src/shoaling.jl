@@ -55,14 +55,19 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 """
 function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
-    params = [F, T]
 
-    nonlinear_system(du,u,p) = nonlinear_system_shoaling(
-        du, u, p,
-        current_criterion(cc)
+    pc_equation(u,N) = period_condition(u, N, T)
+    pwr_condition(u,N) = power_condition(u,N,F)
+
+    nonlinear_system(du,u,p) = nonlinear_system_base(
+        du, u, N,
+        height_condition,
+        pc_equation,
+        current_criterion(cc),
+        pwr_condition
     )
 
-    problem = NonlinearProblem(nonlinear_system, u[1:2N+7], params)
+    problem = NonlinearProblem(nonlinear_system, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
     u[1:2N+7] = solution.u
     return nothing
@@ -77,31 +82,5 @@ function init_conditions!(ratio_d, u, N)
     u[2N+5] /= ratio_d # rk/g
     u[2N+6] /= √ratio_d # Ū√(k/g)
     u[2N+7] /= ratio_d # kH
-    return nothing
-end
-
-"""
-    nonlinear_system_shoaling(du, u, p)
-
-Define nonlinear system for shoaling waves `f(u) = 0` with parameters `p`.
-
-"""
-function nonlinear_system_shoaling(du, u, p, cc_equation)
-    N = (length(u) - 7) ÷ 2
-    
-    for m in 0:N
-        du[m+1] = kinematic_surface_condition(u, N, m)
-        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
-    end
-
-    du[2N+3] = mean_depth_condition(u,N)
-    
-    du[2N+4] = height_condition(u,N)
-
-    du[2N+5] = period_condition(u,N,p[2])
-
-    du[2N+6] = cc_equation(u,N)
-
-    du[2N+7] = power_condition(u,N,p[1])
     return nothing
 end
