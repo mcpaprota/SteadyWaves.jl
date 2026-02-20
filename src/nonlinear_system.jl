@@ -1,24 +1,20 @@
 include("output.jl")
 include("params.jl") 
 
-function stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
-    return u[N+1+j] * hiperbolic(j * u[m+1]) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * m * π / N)
-end
-
 function mean_depth_condition(u,N)
     elevation = u[elevation_indexes(N)]
     return ((elevation[1] + elevation[end]) / 2 + sum(elevation[2:end-1])) / N - u[2N+D_INDEX]
 end
 
 function kinematic_surface_condition(u,N,m)
-    Σ₁ = sum([stream_eigenfunction(sinh, cos, u, N, m, j) for j in 1:N])
+    Σ₁ = sum([surface_stream_eigenfunction(sinh, cos, u, N, m, j) for j in 1:N])
     return Σ₁ - u[2N+U_INDEX] * (u[m+1] - u[2N+D_INDEX]) - u[2N+Q_INDEX]
 end
 
 function dynamic_surface_condition(u,N,m)
-        Σ₂ = sum([j*stream_eigenfunction(cosh,cos,u,N,m,j) for j in 1:N])
-        Σ₃ = sum([j*stream_eigenfunction(sinh,sin,u,N,m,j) for j in 1:N])
-        return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+D_INDEX] - u[2N+R_INDEX]
+    Σ₂ = sum([j*surface_stream_eigenfunction(cosh,cos,u,N,m,j) for j in 1:N])
+    Σ₃ = sum([j*surface_stream_eigenfunction(sinh,sin,u,N,m,j) for j in 1:N])
+    return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+D_INDEX] - u[2N+R_INDEX]
 end
 
 function height_condition(u,N,p)

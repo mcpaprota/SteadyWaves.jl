@@ -100,3 +100,25 @@ function wave_power(u, N)
     F = celerity * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + celerity * depth) + celerity * U_e * (velocity * depth - flux)
     return F
 end
+
+function reflect(array)
+    return [reverse(array); array[2:end]]
+end
+
+function free_surface(u,N)
+    return reflect(u[1:N+1])
+end
+
+function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,ky,j)
+    return u[N+1+j] * hiperbolic(j * ky) / cosh(j * u[2N+3]) * trigonometric(j * kx * π / N)
+end
+
+function surface_stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
+   return stream_eigenfunction(hiperbolic,trigonometric,u,N,m,u[m+1],j) 
+end
+
+
+function u(u,N,kx,ky)
+    k = 1 #TODO K wave_number
+    return u[N+1] + k*sum([j*stream_eigenfunction(cosh,cos,u,N,kx,ky,j) for j in 1:N])
+end
