@@ -106,7 +106,7 @@ We set a number of points `N` for [`shoaling_approx`](@ref) (which uses in-place
 
 ```@example 3
 N = 40 # set number of points
-N_d = 2000 # set number of steps for changing depth
+N_d = 600 # set number of steps for changing depth
 results = zeros(N_d, 2 * length(H₀_L₀))
 nothing # hide
 ```
@@ -128,7 +128,7 @@ We loop over wave cases each time defining a vector of depth values `d` from dee
 
 ```@example 3
 for i in eachindex(H₀)
-    d = reverse(range(d_min[i], 1, N_d))  * d₀ # water depths (m)
+    d = reverse(logrange(d_min[i], 1, N_d))  * d₀ # water depths (m)
     K = shoaling_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
     # save results
     results[:, 2i-1] = k₀ * d
@@ -144,7 +144,7 @@ $$K = \sqrt{\frac{k\left(1+\frac{2k_0d_0}{\sinh2k_0d_0}\right)}{k_0\left(1+\frac
 which is independent of wave steepness $H_0/L_0$.
 
 ```@example 3
-d = reverse(range(0.01, 1, N_d))  * d₀ # water depths (m)
+d = reverse(logrange(0.01, 1, N_d))  * d₀ # water depths (m)
 k = wave_number.(d, ω₀) # linear wave numbers (rad/m)
 # calculate linear shoaling coefficient
 K = @. sqrt((k * (1 + 2k₀ * d₀ / sinh(2k₀ * d₀))) / (k₀ * (1 + 2k * d / sinh(2k * d))))
