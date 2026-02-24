@@ -56,18 +56,19 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
 
-    pc_equation(u,N) = period_condition(u, N, T)
-    pwr_condition(u,N) = power_condition(u,N,F)
+    _period_condition(u,N) = period_condition(u, N, T)
+    _power_condition(u,N) = power_condition(u,N,F)
+    _current_condition = current_condition_factory(cc)
 
-    nonlinear_system(du,u,p) = nonlinear_system_base(
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!(
         du, u, N,
         height_condition,
-        pc_equation,
-        current_criterion(cc),
-        pwr_condition
+        _period_condition,
+        _current_condition,
+        _power_condition
     )
 
-    problem = NonlinearProblem(nonlinear_system, u[1:2N+7])
+    problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
     u[1:2N+7] = solution.u
     return nothing
