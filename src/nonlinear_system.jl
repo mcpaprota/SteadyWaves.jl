@@ -50,7 +50,7 @@ function period_condition(u,N,p)
     return u[2N+C_INDEX] * p * √u[2N+D_INDEX] - 2π   
 end
 
-function current_criterion(cc)
+function current_condition_factory(cc)
     if Int(cc) == Int(CC_STOKES)
         return stokes_condition
     elseif Int(cc) == Int(CC_EULER)
@@ -60,7 +60,7 @@ function current_criterion(cc)
     end
 end
 
-function parameter_criterion(pc)
+function parameter_condition_factory(pc)
     if Int(pc) == Int(PC_LENGTH)
         return length_condition
     elseif Int(pc) == Int(PC_PERIOD)
@@ -70,7 +70,7 @@ function parameter_criterion(pc)
     end
 end
 
-function parameter_criterion_constant(pc, P, d, g)
+function parameter_condition_constant(pc, P, d, g)
     if Int(pc) == Int(PC_LENGTH)
         return  P / d
     elseif Int(pc) == Int(PC_PERIOD)
@@ -80,7 +80,7 @@ function parameter_criterion_constant(pc, P, d, g)
     end
 end
 
-function nonlinear_system_base(du, u, N, _height_condition, pc_equation, cc_equation)
+function nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition)
     for m in 0:N
         du[m+1] = kinematic_surface_condition(u, N, m)
         du[N+1+m+1] = dynamic_surface_condition(u, N, m)
@@ -90,14 +90,14 @@ function nonlinear_system_base(du, u, N, _height_condition, pc_equation, cc_equa
     
     du[2N+4] = _height_condition(u,N)
 
-    du[2N+5] = pc_equation(u,N)
+    du[2N+5] = _parameter_condition(u,N)
 
-    du[2N+6] = cc_equation(u,N)
+    du[2N+6] = _current_condition(u,N)
     return nothing
 end
 
-function nonlinear_system_base(du, u, N, _height_condition, pc_equation, cc_equation, _power_condition)
-    nonlinear_system_base(du, u, N, _height_condition, pc_equation, cc_equation)
+function nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition, _power_condition)
+    nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition)
 
     du[2N+7] = _power_condition(u, N)
     return nothing

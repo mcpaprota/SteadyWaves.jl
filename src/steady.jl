@@ -31,26 +31,26 @@ propagating in water of depth `d` using Fourier Approximation Method.
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=9.81)
     u = init_conditions(d, H, P, Int(pc), N, M)
 
-    pc_constant = parameter_criterion_constant(pc, P, d, g)
-    pc_equation(u,N) = parameter_criterion(pc)(
+    parameter_constant = parameter_condition_constant(pc, P, d, g)
+    _parameter_condition(u,N) = parameter_condition_factory(pc)(
         u,N,
-        pc_constant
+        parameter_constant
     )
 
-    cc_equation = current_criterion(cc)
+    _current_condition = current_condition_factory(cc)
 
     for m in 1:M
         _height_condition(u, N) = height_condition(u, N, H / d * m / M)
 
-        nonlinear_system(du,u,p) = nonlinear_system_base(
+        _nonlinear_system!(du,u,p) = nonlinear_system_base!(
             du,u,N,
             _height_condition,
-            pc_equation,
-            cc_equation
+            _parameter_condition,
+            _current_condition
             
         )
 
-        problem = NonlinearProblem(nonlinear_system, u)
+        problem = NonlinearProblem(_nonlinear_system!, u)
         solution = solve(problem, RobustMultiNewton())
         u[:] = solution.u
     end
