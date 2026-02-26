@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: MIT
 
 # Functions for shoaling calculations based on Fourier Approximation Method
-include("nonlinear_system.jl")
+module Shoaling
 
+using ..Output
+using ..Output: wave_power, wave_period
+using ..Params
+using NonlinearSolve
+using ..Steady: fourier_approx
+using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition
 """
     shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
 
@@ -84,4 +90,6 @@ function init_conditions!(ratio_d, u, N)
     u[2N+U_INDEX] /= √ratio_d # Ū√(k/g)
     u[2N+H_INDEX] /= ratio_d # kH
     return nothing
+end
+
 end

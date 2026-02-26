@@ -1,7 +1,13 @@
 # SPDX-License-Identifier: MIT
 
 # Basic functions for Fourier Approximation Method (FAM)
-include("nonlinear_system.jl")
+module Steady
+
+using ..Output
+using ..Params
+using NonlinearSolve
+using ..NonlinearSystem: nonlinear_system_base!, parameter_condition_constant, parameter_condition_factory,
+    current_condition_factory, height_condition
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
 
@@ -106,4 +112,6 @@ function wave_number(d, ω, g=9.81, ϵ=10^-12)
         k = k₀ / tanh(k * d)
     end
     return k
+end
+
 end

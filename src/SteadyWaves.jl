@@ -9,13 +9,24 @@ propagating in water of constant depth.
 """
 module SteadyWaves
 
-using NonlinearSolve
-export fourier_approx, shoaling_approx, wave_number
+include("params.jl")
+using .Params
+
+include("output.jl")
+using .Output
+using .Output: wave_height, wavelength, wave_power, wave_period
+
+include("nonlinear_system.jl")
+
+include("steady.jl")
+using .Steady: fourier_approx, wave_number
+
+include("shoaling.jl")
+using .Shoaling: shoaling_approx, fourier_approx!
+
+export fourier_approx,fourier_approx!, shoaling_approx, wave_number
 export wave_period, wavelength, wave_height
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
-
-include("steady.jl")
-include("shoaling.jl")
 
 end
