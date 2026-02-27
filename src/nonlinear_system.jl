@@ -5,7 +5,12 @@ using ..Output: wave_power, wave_period
 using ..Params
 
 function stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
-    return u[N+1+j] * hiperbolic(j * u[m+1]) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * m * π / N)
+    @inbounds begin
+        u_j = u[N + 1 + j]
+        u_m = u[m + 1]
+        u_depth = u[2 * N + D_INDEX]
+    end
+    return u_j * hiperbolic(j * u_m) / cosh(j * u_depth) * trigonometric(j * m * π / N)
 end
 
 function mean_depth_condition(u,N)
