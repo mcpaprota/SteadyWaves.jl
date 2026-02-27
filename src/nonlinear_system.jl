@@ -1,5 +1,8 @@
-include("output.jl")
-include("params.jl") 
+module NonlinearSystem
+
+using ..Output
+using ..Output: wave_power, wave_period
+using ..Params
 
 function stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
     return u[N+1+j] * hiperbolic(j * u[m+1]) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * m * π / N)
@@ -101,4 +104,6 @@ function nonlinear_system_base!(du, u, N, _height_condition, _parameter_conditio
 
     du[2N+7] = _power_condition(u, N)
     return nothing
+end
+
 end

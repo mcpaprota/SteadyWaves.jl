@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 # Functions for calculating the output
+module Output
 
 """
 `u[elevation_indexes(N)]`: free surface elevations *kη*
@@ -99,4 +100,10 @@ function wave_power(u, N)
     U_b2 = 2 * bernoulli - celerity^2
     F = celerity * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + celerity * depth) + celerity * U_e * (velocity * depth - flux)
     return F
+end
+
+export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
+
+export elevation_indexes,stream_indexes
+
 end
