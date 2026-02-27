@@ -18,7 +18,7 @@ H₀ = H₀_L₀ * L₀ # wave heights (m)
 
 for i in eachindex(H₀)
     d = reverse(logrange(d_min[i], 1, N_d))  * d₀ # water depths (m)
-    K = shoaling_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
+    K = topo_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
     # save results
     results[:, 2i-1] = k₀ * d
     results[:, 2i] = K
