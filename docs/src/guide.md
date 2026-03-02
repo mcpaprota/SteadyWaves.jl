@@ -102,7 +102,7 @@ d_min = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714] # set minimal depth value
 nothing # hide
 ```
 
-We set a number of points `N` for [`shoaling_approx`](@ref) (which uses in-place [`SteadyWaves.fourier_approx!`](@ref)), number of depth steps `N_d` and create a matrix container `results` for storing the outcome of analysis.
+We set a number of points `N` for [`topo_approx`](@ref) (which uses in-place [`SteadyWaves.fourier_approx!`](@ref)), number of depth steps `N_d` and create a matrix container `results` for storing the outcome of analysis.
 
 ```@example 3
 N = 40 # set number of points
@@ -124,12 +124,12 @@ H₀ = H₀_L₀ * L₀ # wave heights (m)
 nothing # hide
 ```
 
-We loop over wave cases each time defining a vector of depth values `d` from deep to shallow water according to a predefined minimal value `d_min` and applying [`shoaling_approx`](@ref) function to calculate shoaling coefficient `K`. We store the results in `results`.
+We loop over wave cases each time defining a vector of depth values `d` from deep to shallow water according to a predefined minimal value `d_min` and applying [`topo_approx`](@ref) function to calculate shoaling coefficient `K`. We store the results in `results`.
 
 ```@example 3
 for i in eachindex(H₀)
     d = reverse(logrange(d_min[i], 1, N_d))  * d₀ # water depths (m)
-    K = shoaling_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
+    K = topo_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
     # save results
     results[:, 2i-1] = k₀ * d
     results[:, 2i] = K
