@@ -27,7 +27,7 @@ using Test
     @test k ≈ wave_number(d, ω)
 
     # Test: shoaling
-    K = shoaling_approx([d, d], H, L)
+    K = topo_approx([d, d], H, L)
     @test K[1] ≈ K[2]
 
 end

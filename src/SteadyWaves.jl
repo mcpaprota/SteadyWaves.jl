@@ -22,9 +22,9 @@ include("steady.jl")
 using .Steady: fourier_approx, wave_number
 
 include("shoaling.jl")
-using .Shoaling: shoaling_approx, fourier_approx!
+using .Shoaling: topo_approx, fourier_approx!
 
-export fourier_approx,fourier_approx!, shoaling_approx, wave_number
+export fourier_approx,fourier_approx!, topo_approx, wave_number
 export wave_period, wavelength, wave_height
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD

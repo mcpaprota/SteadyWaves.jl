@@ -10,7 +10,7 @@ using NonlinearSolve
 using ..Steady: fourier_approx
 using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition
 """
-    shoaling_approx(d, H, L; cc=2, N=10, g=9.81)
+    topo_approx(d, H, L; cc=2, N=10, g=9.81)
 
 Calculate shoaling coefficients `K` in range of depth values `d`
 for wave of length `L` and height `H`.
@@ -26,7 +26,7 @@ for wave of length `L` and height `H`.
 # Output
 - `K`: vector of shoaling coefficient values
 """
-function shoaling_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
+function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
     k = 2π / L # initial wave number (rad/m
     ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
 
