@@ -69,6 +69,15 @@ function wavelength(u, d, N)
 end
 
 """
+    wave_number(u, d, N)
+
+Calculate dimensional wave number `k` from solution `u`.
+"""
+function wave_number(u, d, N)
+    return u[2N+D_INDEX] / d
+end
+
+"""
     wave_height(u, d, N)
 
 Calculate dimensional wave height `H` from solution `u`.
@@ -100,6 +109,29 @@ function wave_power(u, N)
     U_b2 = 2 * bernoulli - celerity^2
     F = celerity * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + celerity * depth) + celerity * U_e * (velocity * depth - flux)
     return F
+end
+
+function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,kz,j)
+    # takes index of jth stream function coefficient
+    B_index = stream_indexes(N)[j] 
+
+    # retrieves jth stream function coefficient without creating an array
+    B = u[B_index]
+
+    return B * hiperbolic(j * kz) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * kx)
+end
+
+function surface_stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
+   return stream_eigenfunction(hiperbolic, trigonometric, u, N, m/N * π, u[m+1], j) 
+end
+
+function dimensionless_vertical_velocity(u,N,kx,kz)
+    return u[2N+D_INDEX] * sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
+end
+
+function vertical_velocity(u,N,x,z,k,g=9.81)
+    return sqrt(k/g)*dimensionless_vertical_velocity(u,N,k *x, k * z)
+
 end
 
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX

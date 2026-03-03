@@ -5,7 +5,7 @@ using Test
 
     # wave parameters
     d, H, L, g = 1, 0.1, 1, 9.81 # depth, height, length, gravity acceleration
-
+    N = 10
     # Test: no mass transport in a flume
     k = 2π / L
     u1 = fourier_approx(d, H, L; cc=2)
@@ -30,4 +30,30 @@ using Test
     K = topo_approx([d, d], H, L)
     @test K[1] ≈ K[2]
 
+    # Test: dimensionless_vertical_velocity
+    #velocity at 3 bottom points
+    @test 0 ≈ dimensionless_vertical_velocity(u2,N,     0,     0)
+    @test 0 ≈ dimensionless_vertical_velocity(u2,N,     π/2,   0)
+    @test 0 ≈ dimensionless_vertical_velocity(u2,N,     π,     0)
+
+    #velocity at wave highest point
+    @test 0 ≈ dimensionless_vertical_velocity(u2, N,    0,      u2[1])
+    
+    #velocity at wave lowest point
+    @test 1e-15 > abs(dimensionless_vertical_velocity(u2, N,     π,     u2[N+1]))
+
+    #velocity inside a wave
+    @test 1e-4 < abs(dimensionless_vertical_velocity(u2, N,   π/N,   u2[2]/2))
+
+    #Test: vertical_velocity
+    k = Output.wave_number(u2,d,N)
+    @test 0 ≈ vertical_velocity(u2,N,0,0,k)
+
+    X = π/N
+    Z = u2[2]/2
+    @test vertical_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(k/g) * dimensionless_vertical_velocity(u2, N, X, Z)
+
+    # Test: dispersion relation
+    ω = √(g * k * tanh(k * d))
+    @test k ≈ wave_number(d, ω)
 end
