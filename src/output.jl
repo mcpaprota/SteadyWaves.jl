@@ -126,11 +126,20 @@ function surface_stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
 end
 
 function dimensionless_vertical_velocity(u,N,kx,kz)
-    return u[2N+D_INDEX] * sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
+    return sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
 end
 
 function vertical_velocity(u,N,x,z,k,g=9.81)
     return sqrt(k/g)*dimensionless_vertical_velocity(u,N,k *x, k * z)
+
+end
+
+function dimensionless_horizontal_velocity(u,N,kx,kz)
+    return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, u, N, kx, kz, j) for j in 1:N])
+end
+
+function horizontal_velocity(u,N,x,z,k,g=9.81)
+    return sqrt(k/g)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
 
 end
 

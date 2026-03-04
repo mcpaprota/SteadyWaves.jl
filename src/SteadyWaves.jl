@@ -15,7 +15,8 @@ using .Params
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
-    dimensionless_vertical_velocity, vertical_velocity
+    dimensionless_vertical_velocity, vertical_velocity,
+    dimensionless_horizontal_velocity, horizontal_velocity
 
 include("nonlinear_system.jl")
 
@@ -28,6 +29,7 @@ using .Shoaling: topo_approx, fourier_approx!
 export fourier_approx,fourier_approx!, topo_approx, wave_number
 export wave_period, wavelength, wave_height
 export dimensionless_vertical_velocity, vertical_velocity
+export dimensionless_horizontal_velocity, horizontal_velocity
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 export Output
