@@ -3,6 +3,7 @@ module NonlinearSystem
 using ..Output
 using ..Output: wave_power, wave_period, surface_stream_eigenfunction
 using ..Params
+using Physics: G
 
 function mean_depth_condition(u,N)
     elevation = u[elevation_indexes(N)]

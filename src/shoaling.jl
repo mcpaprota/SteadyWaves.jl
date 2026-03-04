@@ -6,6 +6,7 @@ module Shoaling
 using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
+using Physics: G
 using NonlinearSolve
 using ..Steady: fourier_approx
 using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition
@@ -26,7 +27,7 @@ for wave of length `L` and height `H`.
 # Output
 - `K`: vector of shoaling coefficient values
 """
-function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=9.81)
+function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G)
     k = 2π / L # initial wave number (rad/m
     ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
 

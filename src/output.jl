@@ -2,6 +2,7 @@
 
 # Functions for calculating the output
 module Output
+using Physics: G
 
 """
 `u[elevation_indexes(N)]`: free surface elevations *kη*
@@ -53,7 +54,7 @@ const H_INDEX::Int = 7
 
 Calculate dimensional wave period `T` from solution `u`.
 """
-function wave_period(u, d, N; g=9.81)
+function wave_period(u, d, N; g=G)
     T = 2π / u[2N+C_INDEX] / √(u[2N+D_INDEX] / d * g)
     return T
 end

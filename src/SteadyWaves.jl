@@ -26,6 +26,9 @@ using .Steady: fourier_approx, wave_number
 include("shoaling.jl")
 using .Shoaling: topo_approx, fourier_approx!
 
+include("physics.jl")
+using .Physics: G
+
 export fourier_approx,fourier_approx!, topo_approx, wave_number
 export wave_period, wavelength, wave_height
 export dimensionless_vertical_velocity, vertical_velocity
@@ -33,5 +36,6 @@ export dimensionless_horizontal_velocity, horizontal_velocity
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 export Output
+export G
 
 end
