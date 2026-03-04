@@ -10,7 +10,7 @@ propagating in water of constant depth.
 module SteadyWaves
 
 include("physics.jl")
-using .Physics: G
+using .Physics: G, RHO
 
 include("params.jl")
 using .Params
@@ -21,7 +21,8 @@ include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
     dimensionless_vertical_velocity, vertical_velocity,
-    dimensionless_horizontal_velocity, horizontal_velocity
+    dimensionless_horizontal_velocity, horizontal_velocity,
+    dimensionless_pressure, pressure
 
 include("nonlinear_system.jl")
 
@@ -35,9 +36,10 @@ export fourier_approx,fourier_approx!, topo_approx, wave_number
 export wave_period, wavelength, wave_height, linear_wave_number
 export dimensionless_vertical_velocity, vertical_velocity
 export dimensionless_horizontal_velocity, horizontal_velocity
+export dimensionless_pressure, pressure
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 export Output
-export G
+export G, RHO
 
 end

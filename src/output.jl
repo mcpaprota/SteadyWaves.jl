@@ -101,6 +101,18 @@ function horizontal_velocity(u,N,x,z,k,g=G)
     return sqrt(g/k)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
 end
 
+function dimensionless_pressure(u,N,kx,kz)
+    v_x = dimensionless_horizontal_velocity(u,N,kx,kz)
+    v_z = dimensionless_vertical_velocity(u,N,kx,kz)
+
+    return u[2N+R_INDEX] - v_x^2 / 2 - v_z^2 / 2 - kz
+end
+
+function pressure(u,N,x,z,k,g=9.81,rho=RHO)
+    return rho * g / k * dimensionless_pressure(u, N, k * x, k * z)
+end
+
+
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
 
 export elevation_indexes,stream_indexes
