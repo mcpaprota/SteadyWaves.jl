@@ -51,10 +51,10 @@ using Test
 
     X = π/N
     Z = u2[2]/2
-    @test vertical_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(k/g) * dimensionless_vertical_velocity(u2, N, X, Z)
+    @test vertical_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(g/k) * dimensionless_vertical_velocity(u2, N, X, Z)
 
     #Test: horizontal_velocity
-    @test horizontal_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(k/g) * dimensionless_horizontal_velocity(u2, N, X, Z)
+    @test horizontal_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(g/k) * dimensionless_horizontal_velocity(u2, N, X, Z)
 
     # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
