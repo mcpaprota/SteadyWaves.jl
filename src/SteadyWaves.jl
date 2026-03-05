@@ -9,6 +9,9 @@ propagating in water of constant depth.
 """
 module SteadyWaves
 
+include("Physics.jl")
+using .Physics
+
 include("params.jl")
 using .Params
 
@@ -25,9 +28,6 @@ using .Steady: fourier_approx, wave_number
 
 include("shoaling.jl")
 using .Shoaling: topo_approx, fourier_approx!
-
-include("Physics.jl")
-using .Physics
 
 export fourier_approx,fourier_approx!, topo_approx, wave_number
 export wave_period, wavelength, wave_height
