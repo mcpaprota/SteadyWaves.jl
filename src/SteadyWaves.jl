@@ -9,8 +9,8 @@ propagating in water of constant depth.
 """
 module SteadyWaves
 
-include("Physics.jl")
-using .Physics
+include("physics.jl")
+using .Physics: G
 
 include("params.jl")
 using .Params
