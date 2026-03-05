@@ -4,7 +4,7 @@ using Test
 @testset "SteadyWaves.jl" begin
 
     # wave parameters
-    d, H, L, g = 1, 0.1, 1, 9.81 # depth, height, length, gravity acceleration
+    d, H, L, g = 1, 0.1, 1, G # depth, height, length, gravity acceleration
     N = 10
     # Test: no mass transport in a flume
     k = 2π / L
