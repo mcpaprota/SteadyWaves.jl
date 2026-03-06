@@ -5,11 +5,12 @@ module Steady
 
 using ..Output
 using ..Params
+using ..Physics
 using NonlinearSolve
 using ..NonlinearSystem: nonlinear_system_base!, parameter_condition_constant, parameter_condition_factory,
     current_condition_factory, height_condition
 """
-    fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=9.81)
+    fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
 
 Approximate solution `u` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using Fourier Approximation Method.
@@ -34,7 +35,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=9.81)
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     u = init_conditions(d, H, P, Int(pc), N, M)
 
     parameter_constant = parameter_condition_constant(pc, P, d, g)
@@ -101,12 +102,12 @@ function init_conditions(d, H, P, pc, N, M)
 end
 
 """
-    wave_number(d, ω, g=9.81, ϵ=10^-12)
+    wave_number(d, ω, g=G, ϵ=10^-12)
 
 Calculate wave_number `k` based on depth `d`, angular wave frequency `ω`
 and gravitational acceleration `g` for given accuracy `ϵ` according to linear wave theory.
 """
-function wave_number(d, ω, g=9.81, ϵ=10^-12)
+function wave_number(d, ω, g=G, ϵ=10^-12)
     k = k₀ = ω^2 / g # initial guess
     while max(abs(k * tanh(k * d) - k₀)) > ϵ
         k = k₀ / tanh(k * d)

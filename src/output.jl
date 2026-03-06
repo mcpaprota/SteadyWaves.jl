@@ -2,6 +2,7 @@
 
 # Functions for calculating the output
 module Output
+using ..Physics
 
 """
 `u[elevation_indexes(N)]`: free surface elevations *kη*
@@ -49,11 +50,11 @@ const H_INDEX::Int = 7
 
 
 """
-    wave_period(u, d, N; g=9.81)
+    wave_period(u, d, N; g=G)
 
 Calculate dimensional wave period `T` from solution `u`.
 """
-function wave_period(u, d, N; g=9.81)
+function wave_period(u, d, N; g=G)
     T = 2π / u[2N+C_INDEX] / √(u[2N+D_INDEX] / d * g)
     return T
 end
@@ -129,7 +130,7 @@ function dimensionless_vertical_velocity(u,N,kx,kz)
     return sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
 end
 
-function vertical_velocity(u,N,x,z,k,g=9.81)
+function vertical_velocity(u,N,x,z,k,g=G)
     return sqrt(k/g)*dimensionless_vertical_velocity(u,N,k *x, k * z)
 
 end
@@ -138,7 +139,7 @@ function dimensionless_horizontal_velocity(u,N,kx,kz)
     return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, u, N, kx, kz, j) for j in 1:N])
 end
 
-function horizontal_velocity(u,N,x,z,k,g=9.81)
+function horizontal_velocity(u,N,x,z,k,g=G)
     return sqrt(k/g)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
 
 end

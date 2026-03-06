@@ -9,6 +9,9 @@ propagating in water of constant depth.
 """
 module SteadyWaves
 
+include("physics.jl")
+using .Physics: G
+
 include("params.jl")
 using .Params
 
@@ -33,5 +36,6 @@ export dimensionless_horizontal_velocity, horizontal_velocity
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 export Output
+export G
 
 end
