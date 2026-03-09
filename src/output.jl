@@ -87,18 +87,18 @@ function dimensionless_vertical_velocity(u,N,kx,kz)
     return sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
 end
 
-function vertical_velocity(u,N,x,z,k,g=G)
-    return sqrt(k/g)*dimensionless_vertical_velocity(u,N,k *x, k * z)
 
+function vertical_velocity(u,N,x,z,k,g=G)
+    return sqrt(g/k)*dimensionless_vertical_velocity(u,N,k *x, k * z)
 end
 
 function dimensionless_horizontal_velocity(u,N,kx,kz)
     return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, u, N, kx, kz, j) for j in 1:N])
 end
 
-function horizontal_velocity(u,N,x,z,k,g=G)
-    return sqrt(k/g)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
 
+function horizontal_velocity(u,N,x,z,k,g=G)
+    return sqrt(g/k)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
 end
 
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
