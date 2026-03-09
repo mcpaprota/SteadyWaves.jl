@@ -9,7 +9,9 @@ using ..Params
 using ..Physics
 using NonlinearSolve
 using ..Steady: fourier_approx
-using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition
+using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition,
+        kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
+        ConditionStruct
 """
     topo_approx(d, H, L; cc=2, N=10, g=G)
 
@@ -67,13 +69,17 @@ function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     _power_condition(u,N) = power_condition(u,N,F)
     _current_condition = current_condition_factory(cc)
 
-    _nonlinear_system!(du,u,p) = nonlinear_system_base!(
-        du, u, N,
-        height_condition,
-        _period_condition,
-        _current_condition,
-        _power_condition
-    )
+    conditions = [
+        ConditionStruct(kinematic_surface_condition, 0:N),
+        ConditionStruct(dynamic_surface_condition, 0:N),
+        ConditionStruct(mean_depth_condition),
+        ConditionStruct(_period_condition),
+        ConditionStruct(_current_condition),
+        ConditionStruct(height_condition),
+        ConditionStruct(_power_condition)
+    ]
+
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, N, conditions)
 
     problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
