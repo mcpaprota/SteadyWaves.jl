@@ -15,6 +15,8 @@ using .Physics: G
 include("params.jl")
 using .Params
 
+include("index.jl")
+
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,

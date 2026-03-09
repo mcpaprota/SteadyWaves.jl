@@ -9,7 +9,9 @@ Pages = ["api.md"]
 ```
 
 ```@autodocs
-Modules = [SteadyWaves,
+Modules = [
+    SteadyWaves,
+    SteadyWaves.Index,
     SteadyWaves.NonlinearSystem,
     SteadyWaves.Output,
     SteadyWaves.Params,
