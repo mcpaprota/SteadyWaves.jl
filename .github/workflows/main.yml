@@ -1,0 +1,12 @@
+name: Check PR commits
+
+on:
+  pull_request:
+
+jobs:
+  check-commit-count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if PR has more than 1 commit
+        if: ${{ github.event.pull_request.commits != 1 }}
+        run: exit 1
