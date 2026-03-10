@@ -89,15 +89,40 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M)
-    Int(pc) == Int(PC_LENGTH) ? k = 2π / P : k = linear_wave_number(d, 2π / P) # wave number (rad/s)
+    return dimensionless_linear_solution(d,H / M, P, pc, N)
+end
+
+function init(d,P,pc,N)
+    k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P) # wave number (rad/s)
     u0 = zeros(2N + U_INDEX)
-    u0[elevation_indexes(N)] = @. k * d + 1 / 2 * k * H / M * cos((0:N) * π / N) # kη
-    u0[stream_indexes(N)] = [k * H / M / 2 / √tanh(k * d); zeros(N - 1)] # B
+
+    return k, u0
+end
+
+function dimensionless_linear_solution(d, H, P, pc, N)
+    k, u0 = init(d, P, pc, N)
+
+    u0[elevation_indexes(N)] = @. k * d + 0.5 * k * H * cos((0:N) * π / N) # kη
+    u0[stream_indexes(N)[begin]] = 0.5 * k * H / √tanh(k * d) # Bk/g
     u0[2N+C_INDEX] = √tanh(k * d) # c√(k/g)
     u0[2N+D_INDEX] = k * d # kη̄
     u0[2N+Q_INDEX] = 0 # q√(k³/g)
     u0[2N+R_INDEX] = tanh(k * d) / 2 # rk/g
     u0[2N+U_INDEX] = √tanh(k * d) # Ū√(k/g)
+    return u0
+end
+
+function dimensional_linear_solution(d, H, P, pc, N, g = G)
+    k, u0 = init(d, P, pc, N)
+
+    u0[elevation_indexes(N)] = @.d + 0.5 * H * cos((0:N) * π / N) # η
+    u0[stream_indexes(N)[begin]] = 0.5 * g * H / √tanh(k * d) # B 
+
+    u0[2N+C_INDEX] = √(g *tanh(k * d) / k) # c
+    u0[2N+D_INDEX] = d # η̄
+    u0[2N+Q_INDEX] = 0 # q
+    u0[2N+R_INDEX] = 0.5 * g * tanh(k * d) / k # r 
+    u0[2N+U_INDEX] = √(g * tanh(k * d) / k) # Ū
     return u0
 end
 
