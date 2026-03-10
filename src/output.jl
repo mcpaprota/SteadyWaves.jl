@@ -69,22 +69,29 @@ function wave_power(u, N)
     return F
 end
 
-function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,kz,j)
-    # takes index of jth stream function coefficient
-    B_index = stream_indexes(N)[j] 
+# function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,kz,j)
+#     # takes index of jth stream function coefficient
+#     B_index = stream_indexes(N)[j] 
 
-    # retrieves jth stream function coefficient without creating an array
-    B = u[B_index]
+#     # retrieves jth stream function coefficient without creating an array
+#     B = u[B_index]
 
-    return B * hiperbolic(j * kz) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * kx)
+#     return B * hiperbolic(j * kz) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * kx)
+# end
+
+function stream_eigenfunction(hiperbolic, trigonometric, stream_coeffs, depth, kx, kz, j)
+    B = stream_coeffs[j]
+    return B * hiperbolic(j * kz) / cosh(j * depth) * trigonometric(j * kx)
 end
 
-function surface_stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
-   return stream_eigenfunction(hiperbolic, trigonometric, u, N, m/N * π, u[m+1], j) 
+function surface_stream_eigenfunction(hiperbolic, trigonometric, stream_coeffs, depth, kx, kz, j)
+   return stream_eigenfunction(hiperbolic, trigonometric, stream_coeffs, depth, kx, kz, j) 
 end
 
 function dimensionless_vertical_velocity(u,N,kx,kz)
-    return sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
+    stream_coeffs = @view u[stream_indexes(N)]
+    depth = u[2N + D_INDEX] 
+    return sum([j * stream_eigenfunction(sinh, sin, stream_coeffs, depth, kx, kz, j) for j in 1:N])
 end
 
 
@@ -93,7 +100,9 @@ function vertical_velocity(u,N,x,z,k,g=G)
 end
 
 function dimensionless_horizontal_velocity(u,N,kx,kz)
-    return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, u, N, kx, kz, j) for j in 1:N])
+    stream_coeffs = @view u[stream_indexes(N)]
+    depth = u[2N + D_INDEX] 
+    return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, stream_coeffs, depth, kx, kz, j) for j in 1:N])
 end
 
 
