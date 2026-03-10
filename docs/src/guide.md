@@ -56,12 +56,12 @@ H = 0.2 # wave height (m)
 T = 2.0 # wave period (s)
 nothing # hide
 ```
-and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` points with a parameter flag `pc=2`. Wavelength is calculated using [`wavelength`](@ref) function.
+and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` points with a parameter flag `pc=2`. Wavelength is calculated using [`wave_length`](@ref) function.
 ```@example 2
 
 N = 40 # set the number of points
 u = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
-L = wavelength(u, d, N) # calculate wavelength (rad/s)
+L = wave_length(u, d, N) # calculate wavelength (rad/s)
 k = 2π / L # get wave number (rad/m)
 kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
 x = range(0, L, 2N + 1) # discretize L to match kη
