@@ -1,7 +1,7 @@
 module NonlinearSystem
 
 using ..Output
-using ..Output: wave_power, wave_period, surface_stream_eigenfunction
+using ..Output: wave_power, wave_period, surface_stream_eigenfunction, wave_length
 using ..Params
 
 function mean_depth_condition(u,N)

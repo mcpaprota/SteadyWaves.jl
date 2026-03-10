@@ -17,11 +17,9 @@ function wave_period(u, d, N; g=G)
 end
 
 """
-    wavelength(u, d, N)
-
-Calculate dimensional wavelength `L` from solution `u`.
+Calculate dimensional wave_length `L` from solution `u`.
 """
-function wavelength(u, d, N)
+function wave_length(u, d, N)
     L = 2π * d / u[2N+D_INDEX]
     return L
 end

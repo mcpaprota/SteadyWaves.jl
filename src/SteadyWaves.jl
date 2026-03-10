@@ -19,7 +19,7 @@ include("index.jl")
 
 include("output.jl")
 using .Output
-using .Output: wave_height, wavelength, wave_power, wave_period,
+using .Output: wave_height, wave_length, wave_power, wave_period,
     dimensionless_vertical_velocity, vertical_velocity,
     dimensionless_horizontal_velocity, horizontal_velocity
 
