@@ -32,7 +32,7 @@ include("shoaling.jl")
 using .Shoaling: topo_approx, fourier_approx!
 
 export fourier_approx,fourier_approx!, topo_approx, wave_number
-export wave_period, wavelength, wave_height, linear_wave_number
+export wave_period, wave_length, wave_height, linear_wave_number
 export dimensionless_vertical_velocity, vertical_velocity
 export dimensionless_horizontal_velocity, horizontal_velocity
 export CurrentCriterion, CC_EULER, CC_STOKES

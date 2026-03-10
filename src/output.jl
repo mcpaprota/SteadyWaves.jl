@@ -8,7 +8,6 @@ using ..Index
 
 """
     wave_period(u, d, N; g=G)
-
 Calculate dimensional wave period `T` from solution `u`.
 """
 function wave_period(u, d, N; g=G)
@@ -17,7 +16,9 @@ function wave_period(u, d, N; g=G)
 end
 
 """
-Calculate dimensional wave_length `L` from solution `u`.
+    wave_length(u, d, N)
+
+Calculate dimensional wavelength `L` from solution `u`.
 """
 function wave_length(u, d, N)
     L = 2π * d / u[2N+D_INDEX]
