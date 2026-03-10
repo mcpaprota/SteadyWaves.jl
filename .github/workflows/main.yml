@@ -1,0 +1,12 @@
+name: PR Validation
+
+on:
+  pull_request:
+
+jobs:
+  check-commit-count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure that PR has exacly 1 commit
+        if: ${{ github.event.pull_request.commits != 1 }}
+        run: exit 1
