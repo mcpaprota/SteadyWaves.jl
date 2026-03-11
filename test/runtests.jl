@@ -4,7 +4,7 @@ using Test
 @testset "SteadyWaves.jl" begin
 
     # wave parameters
-    d, H, L, g = 1, 0.1, 1, G # depth, height, length, gravity acceleration
+    d, H, L, g, rho = 1, 0.1, 1, G, RHO # depth, height, length, gravity acceleration
     N = 10
     # Test: no mass transport in a flume
     k = 2π / L
@@ -56,5 +56,7 @@ using Test
     #Test: horizontal_velocity
     @test horizontal_velocity(u2,N, X/k, Z/k,k) ≈ sqrt(g/k) * dimensionless_horizontal_velocity(u2, N, X, Z)
 
- 
+    #Test: pressure
+    @test pressure(u2,N, X/k, Z/k,k) ≈ rho * g / k  * dimensionless_pressure(u2, N, X, Z)
+
 end
