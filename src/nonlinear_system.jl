@@ -79,26 +79,34 @@ function parameter_condition_constant(pc, P, d, g)
     end
 end
 
-function nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition)
-    for m in 0:N
-        du[m+1] = kinematic_surface_condition(u, N, m)
-        du[N+1+m+1] = dynamic_surface_condition(u, N, m)
-    end
+struct ConditionStruct
+    condition
+    range
+    is_singular
 
-    du[2N+3] = mean_depth_condition(u,N)
-    
-    du[2N+4] = _height_condition(u,N)
+    ConditionStruct(condition) = new(condition,nothing,true)
 
-    du[2N+5] = _parameter_condition(u,N)
+    ConditionStruct(condition,range) = new(condition,range,false)
 
-    du[2N+6] = _current_condition(u,N)
-    return nothing
 end
 
-function nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition, _power_condition)
-    nonlinear_system_base!(du, u, N, _height_condition, _parameter_condition, _current_condition)
+function nonlinear_system_base!(du, u, N, conditions)
 
-    du[2N+7] = _power_condition(u, N)
+    index = 1
+
+    for con_struct in conditions
+        if con_struct.is_singular
+            du[index] = con_struct.condition(u,N)
+            index += 1
+        else
+            for m in con_struct.range
+                du[index] = con_struct.condition(u,N,m)
+                index += 1
+            end
+        end
+
+    end
+
     return nothing
 end
 
