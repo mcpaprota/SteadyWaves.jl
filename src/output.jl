@@ -105,7 +105,7 @@ function dimensionless_pressure(u,N,kx,kz)
     v_x = dimensionless_horizontal_velocity(u,N,kx,kz)
     v_z = dimensionless_vertical_velocity(u,N,kx,kz)
 
-    return u[2N+R_INDEX] - v_x^2 / 2 - v_z^2 / 2 - kz
+    return u[2N+R_INDEX] - v_x^2 / 2 - v_z^2 / 2 - kz + u[2N+D_INDEX]
 end
 
 function pressure(u,N,x,z,k,g=9.81,rho=RHO)
