@@ -4,7 +4,7 @@
 module Shoaling
 
 using ..Output
-using ..Output: wave_power, wave_period
+using ..Output: wave_power, wave_period, wave_length
 using ..Params
 using ..Physics
 using NonlinearSolve
