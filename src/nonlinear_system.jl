@@ -59,6 +59,18 @@ function current_condition_factory(cc)
     end
 end
 
+function current_condition_factory(config.cc)
+    if config.dimensional
+        error("NOT IMPLEMENTED")
+    elseif Int(config.cc) == Int(CC_STOKES)
+        return stokes_condition
+    elseif Int(config.cc) == Int(CC_EULER)
+        return euler_condition
+    else
+        throw(error("Unknown current criterion $cc"))
+    end
+end
+
 function parameter_condition_factory(pc)
     if Int(pc) == Int(PC_LENGTH)
         return length_condition
@@ -77,6 +89,35 @@ function parameter_condition_constant(pc, P, d, g)
     else
         throw(error("Unknown parameter criterion $pc"))
     end
+end
+
+function parameter_condition_constant(config,P,d,g)
+    if config.dimensional
+        return P
+    elseif Int(config.pc) == Int(PC_LENGTH)
+        return  P / d
+    elseif Int(config.pc) == Int(PC_PERIOD)
+        return P* sqrt(g / d) 
+    else
+        error("Unknown parameter criterion $(config.pc)")
+    end
+end
+
+
+function parameter_condition_factory(config,P,d,g)
+    if config.dimensional
+        error("NOT IMPLEMENTED")
+    elseif Int(config.pc) == Int(PC_LENGTH)
+        condition = length_condition
+    elseif Int(config.pc) == Int(PC_PERIOD)
+        condition = period_condition
+    else
+        error("Unknown parameter criterion $(config.pc)")
+    end
+    
+    constant = parameter_condition_constant(config, P, d, g)
+
+    return (u,N) -> condition(u,N,constant)
 end
 
 struct ConditionStruct

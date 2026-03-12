@@ -9,7 +9,16 @@ end
     PC_LENGTH = 1
     PC_PERIOD= 2
 end
+
+struct ConfigStruct
+    pc::ParameterCriterion
+    cc::CurrentCriterion
+    dimensional::bool
+end
+
 export CurrentCriterion, CC_EULER, CC_STOKES
 
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
+
+export ConfigStruct
 end
