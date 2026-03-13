@@ -1,53 +1,52 @@
 module NonlinearSystem
 
+using ..Index
 using ..Output
 using ..Output: wave_power, wave_period, surface_stream_eigenfunction, dimensionless_pressure
 using ..Params
 
-function mean_depth_condition(u,N)
-    elevation = u[elevation_indexes(N)]
-    return ((elevation[1] + elevation[end]) / 2 + sum(elevation[2:end-1])) / N - u[2N+D_INDEX]
+function mean_depth_condition(u,N,v)
+    return v.eta.average(u,N) - v.D(u,N)
 end
 
-function kinematic_surface_condition(u,N,m)
+function kinematic_surface_condition(u,N,m,v)
     Σ₁ = sum([surface_stream_eigenfunction(sinh, cos, u, N, m, j) for j in 1:N])
-    return Σ₁ - u[2N+U_INDEX] * (u[m+1] - u[2N+D_INDEX]) - u[2N+Q_INDEX]
+    return Σ₁ - v.U(u,N) * (v.eta.point(u,N,m) - v.D(u,N)) - v.Q(u,N)
 end
 
-function dynamic_surface_condition(u,N,m)
+function dynamic_surface_condition(u,N,m,v)
     kx = m/N * pi
-    kz = u[elevation_indexes(N)[m+begin]]
+    kz = v.eta.point(u,N,m)
 
     return dimensionless_pressure(u, N, kx, kz)
 end
 
-function height_condition(u,N,p)
-    return u[1] - u[N+1] - u[2N+3] * p
+function height_condition(u,N,H_d,v)
+    return v.eta.highest(u,N) - v.eta.lowest(u,N) - v.D(u,N) * H_d
 end
 
-function height_condition(u,N)
-    @assert length(u) >= 2N+7 "height_condition require u[2N+7] or parameter p { H / d * m / M } to exist"
-    return u[1] - u[N+1] - u[2N+7]
+function height_condition(u,N,v)
+    return v.eta.highest(u,N) - v.eta.lowest(u,N) - v.H(u,N)
 end
 
-function power_condition(u,N,p)
-    return wave_power(u, N) - p * √u[2N+3]^5
+function power_condition(u,N,v)
+    return wave_power(u, N) - v.F(u,N)
 end
 
-function euler_condition(u,N)
-    return u[2N+U_INDEX] - u[2N+C_INDEX]
+function euler_condition(u,N,v)
+    return v.U(u,N) - v.C(u,N)
 end
 
-function stokes_condition(u,N)
-    return euler_condition(u,N) - u[2N+Q_INDEX] / u[2N+D_INDEX]
+function stokes_condition(u,N,v)
+    return euler_condition(u,N,v) - v.U(u,N) / v.D(u,N)
 end
 
-function length_condition(u,N,p)
-    return u[2N+D_INDEX] - 2π / p
+function length_condition(u,N,v)
+    return v.L(u,N) - 2π
 end
 
-function period_condition(u,N,p)
-    return u[2N+C_INDEX] * p * √u[2N+D_INDEX] - 2π   
+function period_condition(u,N,v)
+    return v.C(u,N) * v.T(u,N)  - 2π
 end
 
 function current_condition_factory(cc)
@@ -91,17 +90,17 @@ struct ConditionStruct
 
 end
 
-function nonlinear_system_base!(du, u, N, conditions)
+function nonlinear_system_base!(du, u, N, conditions,v)
 
     index = 1
 
     for con_struct in conditions
         if con_struct.is_singular
-            du[index] = con_struct.condition(u,N)
+            du[index] = con_struct.condition(u,N,v)
             index += 1
         else
             for m in con_struct.range
-                du[index] = con_struct.condition(u,N,m)
+                du[index] = con_struct.condition(u,N,m,v)
                 index += 1
             end
         end

@@ -11,8 +11,8 @@ using ..Index
 
 Calculate dimensional wave period `T` from solution `u`.
 """
-function wave_period(u, d, N; g=G)
-    T = 2π / u[2N+C_INDEX] / √(u[2N+D_INDEX] / d * g)
+function wave_period(u, d, N; g=G,id=Index.INDEX_STRUCT)
+    T = 2π / u[id.C(N)] / √(u[id.D(N)]/ d * g)
     return T
 end
 
@@ -111,7 +111,6 @@ end
 function pressure(u,N,x,z,k,g=9.81,rho=RHO)
     return rho * g / k * dimensionless_pressure(u, N, k * x, k * z)
 end
-
 
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
 

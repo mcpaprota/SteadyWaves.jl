@@ -4,6 +4,7 @@
 module Steady
 
 using ..Output
+using ..Index
 using ..Params
 using ..Physics
 using NonlinearSolve
@@ -38,28 +39,31 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
+    eta = Index.Elevation.Direct.DIRECT_ELEVATION
+    id = Index.INDEX_STRUCT
+
     u = init_conditions(d, H, P, Int(pc), N, M)
 
-    parameter_constant = parameter_condition_constant(pc, P, d, g)
-    _parameter_condition(u,N) = parameter_condition_factory(pc)(
-        u,N,
-        parameter_constant
-    )
-    _current_condition = current_condition_factory(cc)
+    parameter_condition = parameter_condition_factory(pc)
+    current_condition = current_condition_factory(cc)
 
-    for m in 1:M
-        _height_condition(u, N) = height_condition(u, N, H / d * m / M)
-
-        conditions = [
+    conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
             ConditionStruct(dynamic_surface_condition,0:N),
             ConditionStruct(mean_depth_condition),
-            ConditionStruct(_parameter_condition),
-            ConditionStruct(_current_condition),
-            ConditionStruct(_height_condition)
+            ConditionStruct(parameter_condition),
+            ConditionStruct(current_condition),
+            ConditionStruct(height_condition)
         ]
 
-        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,N,conditions)
+    for m in 1:M
+        v = Index.InterpreterStruct(eta,id;
+                H = (u,N) -> v.D(u,N) * H / d * m /M,
+                L = Int(pc) == Int(PC_PERIOD) ? nothing : (u,N) -> v.D(u,N) * P / d,
+                T = Int(pc) == Int(PC_PERIOD) ?  (u,N) -> P * sqrt( g / d * v.D(u,N) ) : nothing,
+            )
+
+        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,N,conditions,v)
 
         problem = NonlinearProblem(_nonlinear_system!, u)
         solution = solve(problem, RobustMultiNewton())

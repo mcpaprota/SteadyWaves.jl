@@ -4,6 +4,7 @@
 module Shoaling
 
 using ..Output
+using ..Index
 using ..Output: wave_power, wave_period
 using ..Params
 using ..Physics
@@ -39,10 +40,15 @@ function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G)
     F = wave_power(u, N) / √k^5 # F / ρ√g³
     T = wave_period(u, d[1], N) * √g # T * √g
     for i in eachindex(d)
+        
         if i>1
             fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i];  cc=cc, N=N)
             K[i] = u[2N+H_INDEX] / u[2N+D_INDEX] * d[i] / H
+
+            print("\r...........................................................................................")
+            print("\r\t$(i)\t$(d[i])\t$(u[2N+D_INDEX])")
         end
+
     end
     return K
 end
@@ -65,21 +71,28 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
 
-    _period_condition(u,N) = period_condition(u, N, T)
-    _power_condition(u,N) = power_condition(u,N,F)
-    _current_condition = current_condition_factory(cc)
+    id = Index.INDEX_STRUCT
+    eta = Index.Elevation.Direct.DIRECT_ELEVATION
+
+    v = Index.InterpreterStruct(eta,id;
+        F = (u,N) -> F * √v.D(u,N)^5,
+        T = (u,N) -> T * sqrt( v.D(u,N) ),
+    )
+
+
+    current_condition = current_condition_factory(cc)
 
     conditions = [
         ConditionStruct(kinematic_surface_condition, 0:N),
         ConditionStruct(dynamic_surface_condition, 0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(_period_condition),
-        ConditionStruct(_current_condition),
+        ConditionStruct(period_condition),
+        ConditionStruct(current_condition),
         ConditionStruct(height_condition),
-        ConditionStruct(_power_condition)
+        ConditionStruct(power_condition)
     ]
 
-    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, N, conditions)
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!(du, u, N, conditions,v)
 
     problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
