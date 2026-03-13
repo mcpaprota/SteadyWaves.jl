@@ -40,6 +40,12 @@ propagating in water of depth `d` using Fourier Approximation Method.
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     u = init_conditions(d, H, P, Int(pc), N, M)
 
+    eta = Output.Elevation.DirectElevation
+
+    _kinematic_surface_condition(u,N,m) = kinematic_surface_condition(u,N,m,eta)
+    _dynamic_surface_condition(u,N,m) = dynamic_surface_condition(u,N,m,eta)
+    _mean_depth_condition(u,N) = mean_depth_condition(u,N,eta)
+
     parameter_constant = parameter_condition_constant(pc, P, d, g)
     _parameter_condition(u,N) = parameter_condition_factory(pc)(
         u,N,
@@ -48,12 +54,12 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     _current_condition = current_condition_factory(cc)
 
     for m in 1:M
-        _height_condition(u, N) = height_condition(u, N, H / d * m / M)
+        _height_condition(u, N) = height_condition(u, N, H / d * m / M,eta)
 
         conditions = [
-            ConditionStruct(kinematic_surface_condition,0:N),
-            ConditionStruct(dynamic_surface_condition,0:N),
-            ConditionStruct(mean_depth_condition),
+            ConditionStruct(_kinematic_surface_condition,0:N),
+            ConditionStruct(_dynamic_surface_condition,0:N),
+            ConditionStruct(_mean_depth_condition),
             ConditionStruct(_parameter_condition),
             ConditionStruct(_current_condition),
             ConditionStruct(_height_condition)

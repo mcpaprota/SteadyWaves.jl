@@ -65,17 +65,26 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, N)
 
+
+    eta = Output.Elevation.DirectElevation
+
+    _kinematic_surface_condition(u,N,m) = kinematic_surface_condition(u,N,m,eta)
+    _dynamic_surface_condition(u,N,m) = dynamic_surface_condition(u,N,m,eta)
+    _mean_depth_condition(u,N) = mean_depth_condition(u,N,eta)
+
+    _height_condition(u,N) = height_condition(u,N,eta)
+
     _period_condition(u,N) = period_condition(u, N, T)
     _power_condition(u,N) = power_condition(u,N,F)
     _current_condition = current_condition_factory(cc)
 
     conditions = [
-        ConditionStruct(kinematic_surface_condition, 0:N),
-        ConditionStruct(dynamic_surface_condition, 0:N),
-        ConditionStruct(mean_depth_condition),
+        ConditionStruct(_kinematic_surface_condition, 0:N),
+        ConditionStruct(_dynamic_surface_condition, 0:N),
+        ConditionStruct(_mean_depth_condition),
         ConditionStruct(_period_condition),
         ConditionStruct(_current_condition),
-        ConditionStruct(height_condition),
+        ConditionStruct(_height_condition),
         ConditionStruct(_power_condition)
     ]
 

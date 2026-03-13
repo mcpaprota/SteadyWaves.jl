@@ -112,6 +112,40 @@ function pressure(u,N,x,z,k,g=9.81,rho=RHO)
     return rho * g / k * dimensionless_pressure(u, N, k * x, k * z)
 end
 
+module Elevation
+    using ..Output
+
+    function direct_point(u,N,m)
+        return u[elevation_indexes(N)[m+begin]]
+    end
+
+    function direct_lowest(u,N)
+        return u[elevation_indexes(N)[end]]
+    end
+
+    function direct_highest(u,N)
+        return u[elevation_indexes(N)[begin]]
+    end
+
+    function direct_average(u,N)
+        correction = (direct_highest(u,N) + direct_lowest(u,N)) / 2
+        return (sum(u[elevation_indexes(N)]) - correction) / N
+    end
+
+    struct ElevationStruct
+        point
+        lowest
+        highest
+        average
+    end
+
+    const DirectElevation = ElevationStruct(
+        direct_point,
+        direct_lowest,
+        direct_highest,
+        direct_average,
+    )
+end
 
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
 
