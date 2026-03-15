@@ -1,7 +1,7 @@
 module NonlinearSystem
 
 using ..Output
-using ..Output: wave_power, wave_period, surface_stream_eigenfunction
+using ..Output: wave_power, wave_period, stream_eigenfunction
 using ..Params
 
 function mean_depth_condition(u,N)
@@ -10,14 +10,22 @@ function mean_depth_condition(u,N)
 end
 
 function kinematic_surface_condition(u,N,m)
-    Σ₁ = sum([surface_stream_eigenfunction(sinh, cos, u, N, m, j) for j in 1:N])
-    return Σ₁ - u[2N+U_INDEX] * (u[m+1] - u[2N+D_INDEX]) - u[2N+Q_INDEX]
+    stream_coeffs = @view u[stream_indexes(N)]
+    depth = u[2N+D_INDEX]
+    kx = m/N * π
+    kz = u[elevation_indexes(N)[m+begin]] # surface elevation
+    Σ₁ = sum([stream_eigenfunction(sinh, cos, stream_coeffs, depth, kx, kz, j) for j in 1:N])
+    return Σ₁ - u[2N+U_INDEX] * (kz - depth) - u[2N+Q_INDEX]
 end
 
 function dynamic_surface_condition(u,N,m)
-    Σ₂ = sum([j*surface_stream_eigenfunction(cosh,cos,u,N,m,j) for j in 1:N])
-    Σ₃ = sum([j*surface_stream_eigenfunction(sinh,sin,u,N,m,j) for j in 1:N])
-    return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+D_INDEX] - u[2N+R_INDEX]
+    stream_coeffs = @view u[stream_indexes(N)]
+    depth = u[2N + D_INDEX] 
+    kx = m/N * π
+    kz = u[elevation_indexes(N)[m+begin]]
+    Σ₂ = sum([j*stream_eigenfunction(cosh,cos,stream_coeffs,depth,kx,kz,j) for j in 1:N])
+    Σ₃ = sum([j*stream_eigenfunction(sinh,sin,stream_coeffs,depth,kx,kz,j) for j in 1:N])
+    return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + kz - depth - u[2N+R_INDEX]
 end
 
 function height_condition(u,N,p)
