@@ -38,7 +38,7 @@ export dimensionless_vertical_velocity, vertical_velocity
 export dimensionless_horizontal_velocity, horizontal_velocity
 export dimensionless_pressure, pressure
 export CurrentCriterion, CC_EULER, CC_STOKES
-export ParameterCriterion, PC_LENGTH, PC_PERIOD
+export ParameterCriterion, PC_LENGTH, PC_PERIOD, PC_STILL_WATER
 export Output
 export G, RHO
 

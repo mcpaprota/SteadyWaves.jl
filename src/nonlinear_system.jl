@@ -20,13 +20,27 @@ function dynamic_surface_condition(u,N,m)
     return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+D_INDEX] - u[2N+R_INDEX]
 end
 
-function height_condition(u,N,p)
-    return u[1] - u[N+1] - u[2N+3] * p
+function height_condition(u,N,H_d)
+    return u[1] - u[N+1] - u[2N+3] * H_d
+end
+
+function height_condition(u,N,H, L)
+    return u[1] - u[N+1] - 2pi * H / L
 end
 
 function height_condition(u,N)
     @assert length(u) >= 2N+7 "height_condition require u[2N+7] or parameter p { H / d * m / M } to exist"
     return u[1] - u[N+1] - u[2N+7]
+end
+
+function height_condition_factory(d, H=nothing, L=nothing)
+    if H === nothing
+        return height_condition
+    elseif L === nothing
+        return (u,N) -> height_condition(u, N, H / d)
+    else
+        return (u,N) -> height_condition(u, N, H, L)
+    end
 end
 
 function power_condition(u,N,p)
@@ -41,12 +55,16 @@ function stokes_condition(u,N)
     return euler_condition(u,N) - u[2N+Q_INDEX] / u[2N+D_INDEX]
 end
 
-function length_condition(u,N,p)
-    return u[2N+D_INDEX] - 2π / p
+function length_condition(u,N,kd)
+    return u[2N+D_INDEX] - kd
 end
 
 function period_condition(u,N,p)
     return u[2N+C_INDEX] * p * √u[2N+D_INDEX] - 2π   
+end
+
+function still_depth_condition(u,N,kd)
+    return u[2N+Q_INDEX] - u[2N+C_INDEX]*kd
 end
 
 function current_condition_factory(cc)
@@ -59,22 +77,19 @@ function current_condition_factory(cc)
     end
 end
 
-function parameter_condition_factory(pc)
+function parameter_condition_factory(pc, P, d, g)
     if Int(pc) == Int(PC_LENGTH)
-        return length_condition
-    elseif Int(pc) == Int(PC_PERIOD)
-        return period_condition
-    else
-        throw(error("Unknown parameter criterion $pc"))
-    end
-end
 
-function parameter_condition_constant(pc, P, d, g)
-    if Int(pc) == Int(PC_LENGTH)
-        return  P / d
+        return (u,N) -> length_condition(u, N, d * 2pi / P)
+
     elseif Int(pc) == Int(PC_PERIOD)
-        return P * sqrt(g / d) 
-    else
+
+        return (u,N) -> period_condition(u, N, P * sqrt(g / d))
+
+    elseif Int(pc) == Int(PC_STILL_WATER)
+
+        return (u,N) -> still_depth_condition(u, N, d * 2pi /P)
+    else 
         throw(error("Unknown parameter criterion $pc"))
     end
 end

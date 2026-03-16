@@ -7,9 +7,10 @@ using ..Output
 using ..Params
 using ..Physics
 using NonlinearSolve
-using ..NonlinearSystem: nonlinear_system_base!, parameter_condition_constant, parameter_condition_factory,
+using ..NonlinearSystem: nonlinear_system_base!, parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
+    height_condition_factory,
     ConditionStruct
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
@@ -40,15 +41,17 @@ propagating in water of depth `d` using Fourier Approximation Method.
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     u = init_conditions(d, H, P, Int(pc), N, M)
 
-    parameter_constant = parameter_condition_constant(pc, P, d, g)
-    _parameter_condition(u,N) = parameter_condition_factory(pc)(
-        u,N,
-        parameter_constant
-    )
+    if Int(pc) == Int(PC_PERIOD)
+        T,L = P, nothing
+    else
+        T,L = nothing, P
+    end
+
+    _parameter_condition = parameter_condition_factory(pc, P, d, g)
     _current_condition = current_condition_factory(cc)
 
     for m in 1:M
-        _height_condition(u, N) = height_condition(u, N, H / d * m / M)
+        _height_condition = height_condition_factory(d, H * m / M, L)
 
         conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
@@ -110,7 +113,7 @@ function dimensionless_linear_solution(d, H, P, pc, N)
     u0[stream_indexes(N)[begin]] = 0.5 * k * H / √tanh(k * d) # Bk/g
     u0[2N+C_INDEX] = √tanh(k * d) # c√(k/g)
     u0[2N+D_INDEX] = k * d # kη̄
-    u0[2N+Q_INDEX] = 0 # q√(k³/g)
+    u0[2N+Q_INDEX] = 0# q√(k³/g)
     u0[2N+R_INDEX] = tanh(k * d) / 2 # rk/g
     u0[2N+U_INDEX] = √tanh(k * d) # Ū√(k/g)
     return u0
