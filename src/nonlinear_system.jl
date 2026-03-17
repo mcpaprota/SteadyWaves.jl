@@ -1,7 +1,7 @@
 module NonlinearSystem
 
 using ..Output
-using ..Output: wave_power, wave_period, surface_stream_eigenfunction
+using ..Output: wave_power, wave_period, surface_stream_eigenfunction, dimensionless_pressure
 using ..Params
 
 function mean_depth_condition(u,N)
@@ -15,9 +15,10 @@ function kinematic_surface_condition(u,N,m)
 end
 
 function dynamic_surface_condition(u,N,m)
-    Σ₂ = sum([j*surface_stream_eigenfunction(cosh,cos,u,N,m,j) for j in 1:N])
-    Σ₃ = sum([j*surface_stream_eigenfunction(sinh,sin,u,N,m,j) for j in 1:N])
-    return (-u[2N+U_INDEX] + Σ₂)^2 / 2 + Σ₃^2 / 2 + u[m+1] - u[2N+D_INDEX] - u[2N+R_INDEX]
+    kx = m/N * pi
+    kz = u[elevation_indexes(N)[m+begin]]
+
+    return dimensionless_pressure(u, N, kx, kz)
 end
 
 function height_condition(u,N,p)
