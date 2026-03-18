@@ -1,15 +1,15 @@
 module Index
 """
-`u[elevation_indexes(N)]`: free surface elevations *kη*
+`u[eta_indexes(N)]`: free surface elevations *kη*
 """
-function elevation_indexes(N)
+function eta_indexes(N)
 return 1:N+1
 end
 
 """
-`u[stream_indexes(N)]` : stream function coefficients *B*
+`u[psi_indexes(N)]` : stream function coefficients *B*
 """
-function stream_indexes(N)
+function psi_indexes(N)
 return N+2:2N+1
 end
 
@@ -43,8 +43,32 @@ const U_INDEX::Int = 6
 """
 const H_INDEX::Int = 7
 
+struct IndexStruct
+    eta
+    psi
+    D
+    C
+    R
+    H
+    U
+    Q
+end
+
+function default_indexes(N)
+    return IndexStruct(
+        eta_indexes(N),
+        psi_indexes(N),
+        2N+D_INDEX,
+        2N+C_INDEX,
+        2N+R_INDEX,
+        2N+H_INDEX,
+        2N+U_INDEX,
+        2N+Q_INDEX,
+    )
+end
+
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
 
-export elevation_indexes,stream_indexes
+export eta_indexes,psi_indexes
 
 end

@@ -57,11 +57,11 @@ function wave_power(u, N)
     velocity = u[2N+U_INDEX]
     bernoulli = u[2N+R_INDEX]
 
-    relative_elevation = u[elevation_indexes(N)] .- depth
+    relative_eta = u[eta_indexes(N)] .- depth
 
     U_e = celerity - velocity
     I_p = flux + depth * U_e
-    E_p = (relative_elevation[1]^2 + relative_elevation[end]^2 + 2 * sum(relative_elevation[2:end-1] .^ 2)) / 4N
+    E_p = (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4N
     Q = velocity / √depth - flux / depth^(1.5)
     E_k = 0.5 * (celerity * I_p - U_e * Q * depth^(1.5))
     U_b2 = 2 * bernoulli - celerity^2
@@ -71,7 +71,7 @@ end
 
 function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,kz,j)
     # takes index of jth stream function coefficient
-    B_index = stream_indexes(N)[j] 
+    B_index = psi_indexes(N)[j] 
 
     # retrieves jth stream function coefficient without creating an array
     B = u[B_index]
@@ -115,6 +115,6 @@ end
 
 export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
 
-export elevation_indexes,stream_indexes
+export eta_indexes,psi_indexes
 
 end
