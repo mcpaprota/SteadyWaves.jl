@@ -39,19 +39,25 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
-    idx = Index.default_indexes(N)
+    idx= Index.default_indexes(N)
+    
+
+    compiler = Index.WaveStruct(
+        Index.WaveStruct(idx);
+        H = u -> u[idx.D]*H / d
+    )
 
     u = init_conditions(d, H, P, Int(pc), N, M, idx)
 
     parameter_constant = parameter_condition_constant(pc, P, d, g)
-    _parameter_condition(u,N,idx) = parameter_condition_factory(pc)(
-        u,N,idx,
+    _parameter_condition(w) = parameter_condition_factory(pc)(
+        w,
         parameter_constant
     )
     _current_condition = current_condition_factory(cc)
 
     for m in 1:M
-        _height_condition(u, N, idx) = height_condition(u, N, idx, H / d * m / M)
+        _height_condition(w) = height_condition(w, H / d * m / M)
 
         conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
@@ -62,7 +68,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
             ConditionStruct(_height_condition)
         ]
 
-        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,N,conditions,idx)
+        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,conditions,compiler)
 
         problem = NonlinearProblem(_nonlinear_system!, u)
         solution = solve(problem, RobustMultiNewton())
@@ -96,20 +102,20 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
 function init_conditions(d, H, P, pc, N, M, idx)
-    return dimensionless_linear_solution(d,H / M, P, pc, N, idx)
+    return dimensionless_linear_solution(d,H / M, P, pc, idx)
 end
 
-function init(d,P,pc,N,idx)
+function init(d,P,pc,idx)
     k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P) # wave number (rad/s)
     u0 = zeros(idx.U)
 
     return k, u0
 end
 
-function dimensionless_linear_solution(d, H, P, pc, N, idx)
-    k, u0 = init(d, P, pc, N, idx)
+function dimensionless_linear_solution(d, H, P, pc, idx)
+    k, u0 = init(d, P, pc, idx)
 
-    u0[idx.eta] = @. k * d + 0.5 * k * H * cos((0:N) * π / N) # kη
+    u0[idx.eta] = @. k * d + 0.5 * k * H * cos((0:idx.N) * π / idx.N) # kη
     u0[idx.psi[begin]] = 0.5 * k * H / √tanh(k * d) # Bk/g
     u0[idx.C] = √tanh(k * d) # c√(k/g)
     u0[idx.D] = k * d # kη̄
@@ -119,10 +125,10 @@ function dimensionless_linear_solution(d, H, P, pc, N, idx)
     return u0
 end
 
-function dimensional_linear_solution(d, H, P, pc, N, idx, g = G)
-    k, u0 = init(d, P, pc, N, idx)
+function dimensional_linear_solution(d, H, P, pc, idx, g = G)
+    k, u0 = init(d, P, pc, idx)
 
-    u0[idx.eta] = @.d + 0.5 * H * cos((0:N) * π / N) # η
+    u0[idx.eta] = @.d + 0.5 * H * cos((0:N) * π / idx.N) # η
     u0[idx.psi[begin]] = 0.5 * g * H / √tanh(k * d) # B 
 
     u0[idx.C] = √(g *tanh(k * d) / k) # c
