@@ -65,10 +65,15 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `N`: number of solution eigenvalues, defaults to `N=10`
 """
 function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
-    init_conditions!(d_p / d, u, N, idx)
+    init_conditions!(d_p / d, u, idx)
 
-    _period_condition(u,N,idx) = period_condition(u, N, idx, T)
-    _power_condition(u,N,idx) = power_condition(u,N, idx,F)
+    compiler = Index.WaveStruct(
+        Index.WaveStruct(idx);
+    )
+
+
+    _period_condition(w) = period_condition(w, T)
+    _power_condition(w) = power_condition(w,F)
     _current_condition = current_condition_factory(cc)
 
     conditions = [
@@ -81,7 +86,7 @@ function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
         ConditionStruct(_power_condition)
     ]
 
-    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, N, conditions, idx)
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, conditions, compiler)
 
     problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
@@ -89,7 +94,7 @@ function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
     return nothing
 end
 
-function init_conditions!(ratio_d, u, N, idx)
+function init_conditions!(ratio_d, u, idx)
     u[idx.eta] =  1 .+ (u[idx.eta] .- 1) / ratio_d # kη
     u[idx.psi] /= √ratio_d # B
     u[idx.C] /= √ratio_d # c√(k/g)
