@@ -3,6 +3,7 @@
 # Functions for shoaling calculations based on Fourier Approximation Method
 module Shoaling
 
+using ..Index
 using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
@@ -30,6 +31,7 @@ for wave of length `L` and height `H`.
 - `K`: vector of shoaling coefficient values
 """
 function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G)
+    idx = Index.default_indexes(N)
     k = 2π / L # initial wave number (rad/m
     ω = √(g * k * tanh(k * d[1])) # initial angular wave frequency (rad/s)
 
@@ -40,7 +42,7 @@ function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G)
     T = wave_period(u, d[1], N) * √g # T * √g
     for i in eachindex(d)
         if i>1
-            fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i];  cc=cc, N=N)
+            fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i], idx;  cc=cc, N=N)
             K[i] = u[2N+H_INDEX] / u[2N+D_INDEX] * d[i] / H
         end
     end
@@ -62,11 +64,11 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 """
-function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
-    init_conditions!(d_p / d, u, N)
+function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
+    init_conditions!(d_p / d, u, N, idx)
 
-    _period_condition(u,N) = period_condition(u, N, T)
-    _power_condition(u,N) = power_condition(u,N,F)
+    _period_condition(u,N,idx) = period_condition(u, N, idx, T)
+    _power_condition(u,N,idx) = power_condition(u,N, idx,F)
     _current_condition = current_condition_factory(cc)
 
     conditions = [
@@ -79,7 +81,7 @@ function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
         ConditionStruct(_power_condition)
     ]
 
-    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, N, conditions)
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, N, conditions, idx)
 
     problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
     solution = solve(problem, RobustMultiNewton())
@@ -87,15 +89,15 @@ function fourier_approx!(u, d, d_p, F, T; cc=CC_STOKES, N=10)
     return nothing
 end
 
-function init_conditions!(ratio_d, u, N)
-    u[elevation_indexes(N)] =  1 .+ (u[elevation_indexes(N)] .- 1) / ratio_d # kη
-    u[stream_indexes(N)] /= √ratio_d # B
-    u[2N+C_INDEX] /= √ratio_d # c√(k/g)
-    u[2N+D_INDEX] /= ratio_d # kη̄
-    u[2N+Q_INDEX] /= √ratio_d^3 # q√(k³/g)
-    u[2N+R_INDEX] /= ratio_d # rk/g
-    u[2N+U_INDEX] /= √ratio_d # Ū√(k/g)
-    u[2N+H_INDEX] /= ratio_d # kH
+function init_conditions!(ratio_d, u, N, idx)
+    u[idx.eta] =  1 .+ (u[idx.eta] .- 1) / ratio_d # kη
+    u[idx.psi] /= √ratio_d # B
+    u[idx.C] /= √ratio_d # c√(k/g)
+    u[idx.D] /= ratio_d # kη̄
+    u[idx.Q] /= √ratio_d^3 # q√(k³/g)
+    u[idx.R] /= ratio_d # rk/g
+    u[idx.U] /= √ratio_d # Ū√(k/g)
+    u[idx.H] /= ratio_d # kH
     return nothing
 end
 

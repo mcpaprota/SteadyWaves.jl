@@ -3,6 +3,7 @@
 # Basic functions for Fourier Approximation Method (FAM)
 module Steady
 
+using ..Index
 using ..Output
 using ..Params
 using ..Physics
@@ -38,17 +39,19 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
-    u = init_conditions(d, H, P, Int(pc), N, M)
+    idx = Index.default_indexes(N)
+
+    u = init_conditions(d, H, P, Int(pc), N, M, idx)
 
     parameter_constant = parameter_condition_constant(pc, P, d, g)
-    _parameter_condition(u,N) = parameter_condition_factory(pc)(
-        u,N,
+    _parameter_condition(u,N,idx) = parameter_condition_factory(pc)(
+        u,N,idx,
         parameter_constant
     )
     _current_condition = current_condition_factory(cc)
 
     for m in 1:M
-        _height_condition(u, N) = height_condition(u, N, H / d * m / M)
+        _height_condition(u, N, idx) = height_condition(u, N, idx, H / d * m / M)
 
         conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
@@ -59,7 +62,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
             ConditionStruct(_height_condition)
         ]
 
-        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,N,conditions)
+        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,N,conditions,idx)
 
         problem = NonlinearProblem(_nonlinear_system!, u)
         solution = solve(problem, RobustMultiNewton())
@@ -92,41 +95,41 @@ propagating in water of depth `d` using linear wave theory.
 - `u[2N+5]`: Bernoulli constant *rk/g*
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 """
-function init_conditions(d, H, P, pc, N, M)
-    return dimensionless_linear_solution(d,H / M, P, pc, N)
+function init_conditions(d, H, P, pc, N, M, idx)
+    return dimensionless_linear_solution(d,H / M, P, pc, N, idx)
 end
 
-function init(d,P,pc,N)
+function init(d,P,pc,N,idx)
     k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P) # wave number (rad/s)
-    u0 = zeros(2N + U_INDEX)
+    u0 = zeros(idx.U)
 
     return k, u0
 end
 
-function dimensionless_linear_solution(d, H, P, pc, N)
-    k, u0 = init(d, P, pc, N)
+function dimensionless_linear_solution(d, H, P, pc, N, idx)
+    k, u0 = init(d, P, pc, N, idx)
 
-    u0[elevation_indexes(N)] = @. k * d + 0.5 * k * H * cos((0:N) * π / N) # kη
-    u0[stream_indexes(N)[begin]] = 0.5 * k * H / √tanh(k * d) # Bk/g
-    u0[2N+C_INDEX] = √tanh(k * d) # c√(k/g)
-    u0[2N+D_INDEX] = k * d # kη̄
-    u0[2N+Q_INDEX] = 0 # q√(k³/g)
-    u0[2N+R_INDEX] = tanh(k * d) / 2 # rk/g
-    u0[2N+U_INDEX] = √tanh(k * d) # Ū√(k/g)
+    u0[idx.eta] = @. k * d + 0.5 * k * H * cos((0:N) * π / N) # kη
+    u0[idx.psi[begin]] = 0.5 * k * H / √tanh(k * d) # Bk/g
+    u0[idx.C] = √tanh(k * d) # c√(k/g)
+    u0[idx.D] = k * d # kη̄
+    u0[idx.Q] = 0 # q√(k³/g)
+    u0[idx.R] = tanh(k * d) / 2 # rk/g
+    u0[idx.U] = √tanh(k * d) # Ū√(k/g)
     return u0
 end
 
-function dimensional_linear_solution(d, H, P, pc, N, g = G)
-    k, u0 = init(d, P, pc, N)
+function dimensional_linear_solution(d, H, P, pc, N, idx, g = G)
+    k, u0 = init(d, P, pc, N, idx)
 
-    u0[elevation_indexes(N)] = @.d + 0.5 * H * cos((0:N) * π / N) # η
-    u0[stream_indexes(N)[begin]] = 0.5 * g * H / √tanh(k * d) # B 
+    u0[idx.eta] = @.d + 0.5 * H * cos((0:N) * π / N) # η
+    u0[idx.psi[begin]] = 0.5 * g * H / √tanh(k * d) # B 
 
-    u0[2N+C_INDEX] = √(g *tanh(k * d) / k) # c
-    u0[2N+D_INDEX] = d # η̄
-    u0[2N+Q_INDEX] = 0 # q
-    u0[2N+R_INDEX] = 0.5 * g * tanh(k * d) / k # r 
-    u0[2N+U_INDEX] = √(g * tanh(k * d) / k) # Ū
+    u0[idx.C] = √(g *tanh(k * d) / k) # c
+    u0[idx.D] = d # η̄
+    u0[idx.Q] = 0 # q
+    u0[idx.R] = 0.5 * g * tanh(k * d) / k # r 
+    u0[idx.U] = √(g * tanh(k * d) / k) # Ū
     return u0
 end
 
