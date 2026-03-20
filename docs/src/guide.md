@@ -11,14 +11,14 @@ julia> using SteadyWaves
 
 ## Quick start
 
-In this example, we set define basic parameters of a regular wave with respect to wave_length $L$ and wave height $H$, while we use [`CairoMakie.jl`](https://github.com/MakieOrg/Makie.jl) for graphical presentation of results
+In this example, we set define basic parameters of a regular wave with respect to wavelength $L$ and wave height $H$, while we use [`CairoMakie.jl`](https://github.com/MakieOrg/Makie.jl) for graphical presentation of results
 ```@example 1
 using SteadyWaves
 using CairoMakie # use the plotting package
 
 d = 1.0 # water depth (m)
 H = 0.2 # wave height (m)
-L = 2.0 # wave_length (m)
+L = 2.0 # wavelength (m)
 k = 2π / L # wave number (rad/s)
 nothing # hide
 ```
@@ -56,12 +56,12 @@ H = 0.2 # wave height (m)
 T = 2.0 # wave period (s)
 nothing # hide
 ```
-and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` points with a parameter flag `pc=2`. wave_length is calculated using [`wave_length`](@ref) function.
+and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` points with a parameter flag `pc=2`. Wavelength is calculated using [`wavelength`](@ref) function.
 ```@example 2
 
 N = 40 # set the number of points
 u = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
-L = wave_length(u, d, N) # calculate wave_length (rad/s)
+L = wavelength(u, d, N) # calculate wavelength (rad/s)
 k = 2π / L # get wave number (rad/m)
 kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
 x = range(0, L, 2N + 1) # discretize L to match kη
@@ -117,7 +117,7 @@ We define initial deep-water conditions, where we calculate angular wave frequen
 # initial conditions
 g = 9.81 # gravitational acceleration (m/s²)
 d₀ = 1 # water depth (m)
-L₀ = 2 # wave_length (m)
+L₀ = 2 # wavelength (m)
 k₀ = 2π / L₀ # wave number (rad/m)
 ω₀ = √(g * k₀ * tanh(k₀ * d₀)) # angular wave frequency (rad/s)
 H₀ = H₀_L₀ * L₀ # wave heights (m)
