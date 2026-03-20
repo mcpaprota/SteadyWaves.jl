@@ -17,6 +17,10 @@ using .Params
 
 include("index.jl")
 
+include("surface.jl")
+
+include("wave.jl")
+
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,

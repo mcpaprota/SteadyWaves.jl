@@ -1,32 +1,32 @@
 module NonlinearSystem
 
-using ..Index:WaveStruct
+using ..Wave:WaveStruct
 using ..Output
 using ..Output: wave_power, wave_period, surface_stream_eigenfunction, dimensionless_pressure
 using ..Params
 
 function mean_depth_condition(w::WaveStruct)
-    return ((w.eta[begin] + w.eta[end]) / 2 + sum(w.eta[2:end-1])) / w.N - w.D
+    return w.eta.avg - w.D
 end
 
 function kinematic_surface_condition(w::WaveStruct,m)
     psi = sum([surface_stream_eigenfunction(sinh, cos, w.raw, w.N, m, j) for j in 1:w.N])
-    return psi - w.U * (w.eta[begin+m] - w.D) - w.Q
+    return psi - w.U * (w.eta.point(m) - w.D) - w.Q
 end
 
 function dynamic_surface_condition(w::WaveStruct,m)
     kx = m/w.N * pi
-    kz = w.eta[m+begin]
+    kz = w.eta.point(m)
 
     return dimensionless_pressure(w.raw, w.N, kx, kz)
 end
 
 function height_condition(w::WaveStruct, p)
-    return w.eta[begin] - w.eta[end] - w.D * p
+    return w.eta.max - w.eta.min - w.D * p
 end
 
 function height_condition(w::WaveStruct)
-    return w.eta[begin] - w.eta[end] - w.H
+    return w.eta.max - w.eta.min - w.H
 end
 
 function power_condition(w::WaveStruct, p)

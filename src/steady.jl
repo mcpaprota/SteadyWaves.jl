@@ -4,6 +4,8 @@
 module Steady
 
 using ..Index
+using ..Surface
+using ..Wave
 using ..Output
 using ..Params
 using ..Physics
@@ -39,11 +41,11 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
-    idx= Index.default_indexes(N)
-    
+    idx = Index.default_indexes(N)
 
-    compiler = Index.WaveStruct(
-        Index.WaveStruct(idx);
+    compiler = Wave.WaveStruct(
+        Wave.WaveStruct(idx);
+
         H = u -> u[idx.D]*H / d
     )
 

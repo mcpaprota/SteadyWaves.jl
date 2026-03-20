@@ -4,6 +4,8 @@
 module Shoaling
 
 using ..Index
+using ..Surface
+using ..Wave
 using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
@@ -67,10 +69,7 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, idx)
 
-    compiler = Index.WaveStruct(
-        Index.WaveStruct(idx);
-    )
-
+    compiler = Wave.WaveStruct(idx)
 
     _period_condition(w) = period_condition(w, T)
     _power_condition(w) = power_condition(w,F)
