@@ -33,6 +33,10 @@ function power_condition(w::WaveStruct, p)
     return wave_power(w.raw, w.N) - p * √w.D^5
 end
 
+function power_condition(w::WaveStruct)
+    return wave_power(w.raw, w.N) - w.F
+end
+
 function euler_condition(w::WaveStruct)
     return w.U - w.C
 end
@@ -45,8 +49,16 @@ function length_condition(w::WaveStruct, p)
     return w.D - 2π / p
 end
 
+function length_condition(w::WaveStruct)
+    return w.L - 2π 
+end
+
 function period_condition(w::WaveStruct, p)
-    return w.C * p * √w.D - 2π   
+    return w.C * p * √w.D - 2π
+end
+
+function period_condition(w::WaveStruct)
+    return w.C * w.T- 2π   
 end
 
 function current_condition_factory(cc)

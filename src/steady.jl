@@ -5,7 +5,7 @@ module Steady
 
 using ..Index
 using ..Surface
-using ..Wave
+using ..Wave:WaveStruct
 using ..Output
 using ..Params
 using ..Physics
@@ -41,33 +41,38 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
+    L , T = Params.L(P,pc), Params.T(P,pc)
+
     idx = Index.default_indexes(N)
 
-    compiler = Wave.WaveStruct(
-        Wave.WaveStruct(idx);
+    # create default compiler
+    compiler = WaveStruct(idx)
 
-        H = u -> u[idx.D]*H / d
-    )
+    # set height
+    compiler = WaveStruct(compiler; H = u -> u[idx.D] * H/d / M)
+
+    # set length
+    if  L !== nothing
+        compiler = WaveStruct(compiler; L = u -> u[idx.D] * P/d)
+    end
+    # set period
+    if T !== nothing
+        compiler = WaveStruct(compiler; T = u -> sqrt(u[idx.D] * g / d) *  P)
+    end
 
     u = init_conditions(d, H, P, Int(pc), N, M, idx)
 
-    parameter_constant = parameter_condition_constant(pc, P, d, g)
-    _parameter_condition(w) = parameter_condition_factory(pc)(
-        w,
-        parameter_constant
-    )
-    _current_condition = current_condition_factory(cc)
-
     for m in 1:M
-        _height_condition(w) = height_condition(w, H / d * m / M)
+        # update height
+        compiler = WaveStruct(compiler; H = u -> u[idx.D] * H/d * m/M)
 
         conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
             ConditionStruct(dynamic_surface_condition,0:N),
             ConditionStruct(mean_depth_condition),
-            ConditionStruct(_parameter_condition),
-            ConditionStruct(_current_condition),
-            ConditionStruct(_height_condition)
+            ConditionStruct(parameter_condition_factory(pc)),
+            ConditionStruct(current_condition_factory(cc)),
+            ConditionStruct(height_condition)
         ]
 
         _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,conditions,compiler)
@@ -78,6 +83,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     end
     push!(u, u[2N+3] / d * H)
     return u
+
 end
 
 """
