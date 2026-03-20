@@ -69,20 +69,23 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
     init_conditions!(d_p / d, u, idx)
 
+    # create default compiler
     compiler = Wave.WaveStruct(idx)
 
-    _period_condition(w) = period_condition(w, T)
-    _power_condition(w) = power_condition(w,F)
-    _current_condition = current_condition_factory(cc)
+    # set period and wave_power
+    compiler = Wave.WaveStruct(compiler;
+        T = u -> sqrt(u[idx.D]) *  T,
+        F = u -> sqrt(u[idx.D]^5) * F,
+    )
 
     conditions = [
         ConditionStruct(kinematic_surface_condition, 0:N),
         ConditionStruct(dynamic_surface_condition, 0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(_period_condition),
-        ConditionStruct(_current_condition),
+        ConditionStruct(period_condition),
+        ConditionStruct(current_condition_factory(cc)),
         ConditionStruct(height_condition),
-        ConditionStruct(_power_condition)
+        ConditionStruct(power_condition)
     ]
 
     _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, conditions, compiler)

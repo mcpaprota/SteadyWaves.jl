@@ -13,8 +13,11 @@ struct WaveStruct
     U
     Q
     N
+    L
+    T
+    F
     raw # u array to keep compatibility with not updated functions (u,N instead of w)
-    WaveStruct(eta,psi,D,C,R,H,U,Q,N,raw) = new(eta,psi,D,C,R,H,U,Q,N,raw)
+    WaveStruct(eta,psi,D,C,R,H,U,Q,N,L,T,F,raw) = new(eta,psi,D,C,R,H,U,Q,N,L,T,F,raw)
 
     # create struct that replaces values given as key words in default
     WaveStruct(
@@ -28,6 +31,9 @@ struct WaveStruct
         U = nothing,
         Q = nothing,
         N = nothing,
+        L = nothing,
+        T = nothing,
+        F = nothing,
         raw = nothing,
     ) = new(
         eta === nothing ? default.eta : eta,
@@ -39,6 +45,9 @@ struct WaveStruct
         U === nothing ? default.U : U,
         Q === nothing ? default.Q : Q,
         N === nothing ? default.N : N,
+        L === nothing ? default.L : L,
+        T === nothing ? default.T : T,
+        F === nothing ? default.F : F,
         raw === nothing ? default.raw : raw,
     )
 
@@ -53,6 +62,9 @@ struct WaveStruct
         u -> u[idx.U],
         u -> u[idx.Q],
         u -> idx.N,
+        u -> nothing,
+        u -> nothing,
+        u -> nothing,
         u -> u,
     )
 
@@ -67,6 +79,9 @@ struct WaveStruct
         compiler.U(u),
         compiler.Q(u),
         compiler.N(u),
+        compiler.L(u),
+        compiler.T(u),
+        compiler.F(u),
         compiler.raw(u),
     )
 
