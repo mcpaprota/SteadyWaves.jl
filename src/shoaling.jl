@@ -23,7 +23,7 @@ for wave of length `L` and height `H`.
 
 # Arguments
 - `d`: vector of decreasing water depths (m)
-- `L`: initial wave_length (m) - corresponding to d[1]
+- `L`: initial wavelength (m) - corresponding to d[1]
 - `H`: initial wave height (m) - corresponding to d[1]
 - `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
