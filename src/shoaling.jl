@@ -44,7 +44,7 @@ function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G)
     T = wave_period(u, d[1], N) * √g # T * √g
     for i in eachindex(d)
         if i>1
-            fourier_approx!(u, d[i], d[i-1], F / √d[i]^5, T / √d[i], idx;  cc=cc, N=N)
+            fourier_approx!(u, d[i], d[i-1], F, T, idx;  cc=cc, N=N)
             K[i] = u[2N+H_INDEX] / u[2N+D_INDEX] * d[i] / H
         end
     end
@@ -72,10 +72,13 @@ function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
     # create default compiler
     compiler = Wave.WaveStruct(idx)
 
-    # set period and wave_power
-    compiler = Wave.WaveStruct(compiler;
-        T = u -> sqrt(u[idx.D]) *  T,
-        F = u -> sqrt(u[idx.D]^5) * F,
+    # create dimensional_factor_compiler 
+    df_compiler = Wave.dimensional_factor_compiler(compiler.D, d, 1, 1)
+
+    # set dimensionless period and wave_power from dimensional values with respect to depth
+    compiler = Wave.WaveStruct(compiler, df_compiler;
+        T = T,
+        F = F,
     )
 
     conditions = [

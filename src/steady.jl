@@ -5,7 +5,7 @@ module Steady
 
 using ..Index
 using ..Surface
-using ..Wave:WaveStruct
+using ..Wave: WaveStruct, Wave
 using ..Output
 using ..Params
 using ..Physics
@@ -40,7 +40,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO)
     L , T = Params.L(P,pc), Params.T(P,pc)
 
     idx = Index.default_indexes(N)
@@ -48,23 +48,27 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G)
     # create default compiler
     compiler = WaveStruct(idx)
 
-    # set height
-    compiler = WaveStruct(compiler; H = u -> u[idx.D] * H/d / M)
+    # create dimensional factor compiler 
+    df_compiler = Wave.dimensional_factor_compiler(compiler.D, d, g, rho)
 
-    # set length
+    # set dimensionless height from dimensional value
+    compiler = WaveStruct(compiler, df_compiler; H = H/M)
+
+    # set dimensionless length from dimensional value
     if  L !== nothing
-        compiler = WaveStruct(compiler; L = u -> u[idx.D] * P/d)
+        compiler = WaveStruct(compiler, df_compiler; L = L)
+
     end
-    # set period
+    # set dimensionless period from dimensional value
     if T !== nothing
-        compiler = WaveStruct(compiler; T = u -> sqrt(u[idx.D] * g / d) *  P)
+        compiler = WaveStruct(compiler, df_compiler; T = T)
     end
 
     u = init_conditions(d, H, P, Int(pc), N, M, idx)
 
     for m in 1:M
         # update height
-        compiler = WaveStruct(compiler; H = u -> u[idx.D] * H/d * m/M)
+        compiler = WaveStruct(compiler, df_compiler; H = H * m/M)
 
         conditions = [
             ConditionStruct(kinematic_surface_condition,0:N),
