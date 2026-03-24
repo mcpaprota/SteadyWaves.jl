@@ -54,15 +54,15 @@ function wave_power(u, N)
     c = u[2N+C_INDEX]
     d = u[2N+D_INDEX]
     q = u[2N+Q_INDEX]
-    u = u[2N+U_INDEX]
+    v = u[2N+U_INDEX]
     r = u[2N+R_INDEX]
 
     relative_eta = u[eta_indexes(N)] .- d
 
-    u_e = c - u
+    u_e = c - v
     I_p = flux + d * u_e # mean wave momentum
     E_p = (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4N # mean potential energy
-    Q = u * d - q # volume flux
+    Q = v * d - q # volume flux
     E_k = 0.5 * (c * I_p - u_e * Q) # mean kinetic energy
     U_b2 = 2 * r - c^2 # mean square of bed velocity
     F = c * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + c * d) + c * u_e * Q # mean energy flux - wave power
