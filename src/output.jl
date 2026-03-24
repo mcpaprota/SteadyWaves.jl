@@ -51,21 +51,21 @@ end
 Calculate dimensionless wave power `F` from solution `u` (non-public function).
 """
 function wave_power(u, N)
-    celerity = u[2N+C_INDEX]
-    depth = u[2N+D_INDEX]
-    flux = u[2N+Q_INDEX]
-    velocity = u[2N+U_INDEX]
-    bernoulli = u[2N+R_INDEX]
+    c = u[2N+C_INDEX]
+    d = u[2N+D_INDEX]
+    q = u[2N+Q_INDEX]
+    u = u[2N+U_INDEX]
+    r = u[2N+R_INDEX]
 
-    relative_eta = u[eta_indexes(N)] .- depth
+    relative_eta = u[eta_indexes(N)] .- d
 
-    U_e = celerity - velocity
-    I_p = flux + depth * U_e
-    E_p = (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4N
-    Q = velocity / √depth - flux / depth^(1.5)
-    E_k = 0.5 * (celerity * I_p - U_e * Q * depth^(1.5))
-    U_b2 = 2 * bernoulli - celerity^2
-    F = celerity * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + celerity * depth) + celerity * U_e * (velocity * depth - flux)
+    u_e = c - u
+    I_p = flux + d * u_e # mean wave momentum
+    E_p = (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4N # mean potential energy
+    Q = u * d - q # volume flux
+    E_k = 0.5 * (c * I_p - u_e * Q) # mean kinetic energy
+    U_b2 = 2 * r - c^2 # mean square of bed velocity
+    F = c * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + c * d) + c * u_e * Q # mean energy flux - wave power
     return F
 end
 
