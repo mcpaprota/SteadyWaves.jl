@@ -49,7 +49,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     compiler = WaveStruct(idx)
 
     # create dimensional factor compiler 
-    df_compiler = Wave.dimensional_factor_compiler(compiler.D, d, g, rho)
+    df_compiler = Wave.dimensional_factor_compiler(d, g, rho)
 
     # set dimensionless height from dimensional value
     compiler = WaveStruct(compiler, df_compiler; H = H/M)

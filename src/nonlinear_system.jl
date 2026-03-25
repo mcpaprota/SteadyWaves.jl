@@ -2,7 +2,7 @@ module NonlinearSystem
 
 using ..Wave:WaveStruct
 using ..Output
-using ..Output: wave_power, wave_period, surface_stream_eigenfunction, dimensionless_pressure
+using ..Output: indirect_wave_power, surface_stream_eigenfunction, dimensionless_pressure
 using ..Params
 
 function mean_depth_condition(w::WaveStruct)
@@ -30,11 +30,11 @@ function height_condition(w::WaveStruct)
 end
 
 function power_condition(w::WaveStruct, p)
-    return wave_power(w.raw, w.N) - p * √w.D^5
+    return indirect_wave_power(w) - p * √w.D^5
 end
 
 function power_condition(w::WaveStruct)
-    return wave_power(w.raw, w.N) - w.F
+    return indirect_wave_power(w) - w.F
 end
 
 function euler_condition(w::WaveStruct)
