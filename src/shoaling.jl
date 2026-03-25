@@ -10,9 +10,8 @@ using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
 using ..Physics
-using NonlinearSolve
 using ..Steady: fourier_approx
-using ..NonlinearSystem: nonlinear_system_base!, period_condition, power_condition, current_condition_factory, height_condition,
+using ..NonlinearSystem: fourier_approx_base, period_condition, power_condition, current_condition_factory, height_condition,
         kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
         ConditionStruct
 """
@@ -91,11 +90,8 @@ function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
         ConditionStruct(power_condition)
     ]
 
-    _nonlinear_system!(du,u,p) = nonlinear_system_base!( du, u, conditions, compiler)
-
-    problem = NonlinearProblem(_nonlinear_system!, u[1:2N+7])
-    solution = solve(problem, RobustMultiNewton())
-    u[1:2N+7] = solution.u
+    w = fourier_approx_base(u,compiler,conditions)
+    u[1:2N+7] = w.raw
     return nothing
 end
 

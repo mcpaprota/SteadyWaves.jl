@@ -5,6 +5,8 @@ using ..Output
 using ..Output: wave_power, wave_period, surface_stream_eigenfunction, dimensionless_pressure
 using ..Params
 
+using NonlinearSolve
+
 function mean_depth_condition(w::WaveStruct)
     return w.eta.avg - w.D
 end
@@ -122,6 +124,17 @@ function nonlinear_system_base!(du, u, conditions,compiler)
     end
 
     return nothing
+end
+
+function fourier_approx_base(u,compiler,conditions)
+
+    _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,conditions,compiler)
+
+    problem = NonlinearProblem(_nonlinear_system!, u)
+    solution = solve(problem, RobustMultiNewton())
+    u[:] = solution.u
+
+    return WaveStruct(u,compiler)
 end
 
 end
