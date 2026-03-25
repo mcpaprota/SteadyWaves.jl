@@ -9,8 +9,7 @@ using ..Wave: WaveStruct, Wave
 using ..Output
 using ..Params
 using ..Physics
-using NonlinearSolve
-using ..NonlinearSystem: nonlinear_system_base!, parameter_condition_constant, parameter_condition_factory,
+using ..NonlinearSystem: fourier_approx_base, parameter_condition_constant, parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
     ConditionStruct
@@ -51,39 +50,32 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     # create dimensional factor compiler 
     df_compiler = Wave.dimensional_factor_compiler(compiler.D, d, g, rho)
 
-    # set dimensionless height from dimensional value
-    compiler = WaveStruct(compiler, df_compiler; H = H/M)
-
-    # set dimensionless length from dimensional value
-    if  L !== nothing
-        compiler = WaveStruct(compiler, df_compiler; L = L)
-
-    end
-    # set dimensionless period from dimensional value
-    if T !== nothing
-        compiler = WaveStruct(compiler, df_compiler; T = T)
-    end
+    # set dimensionless height, length and period from dimensional value
+    # if property is nothing given change is skipped
+    compiler = WaveStruct(compiler, df_compiler;
+        H = H/M,
+        L = L,
+        T = T,
+    )
 
     u = init_conditions(d, H, P, Int(pc), N, M, idx)
+
+    conditions = [
+        ConditionStruct(kinematic_surface_condition,0:N),
+        ConditionStruct(dynamic_surface_condition,0:N),
+        ConditionStruct(mean_depth_condition),
+        ConditionStruct(parameter_condition_factory(pc)),
+        ConditionStruct(current_condition_factory(cc)),
+        ConditionStruct(height_condition)
+    ]
+
 
     for m in 1:M
         # update height
         compiler = WaveStruct(compiler, df_compiler; H = H * m/M)
 
-        conditions = [
-            ConditionStruct(kinematic_surface_condition,0:N),
-            ConditionStruct(dynamic_surface_condition,0:N),
-            ConditionStruct(mean_depth_condition),
-            ConditionStruct(parameter_condition_factory(pc)),
-            ConditionStruct(current_condition_factory(cc)),
-            ConditionStruct(height_condition)
-        ]
-
-        _nonlinear_system!(du,u,p) = nonlinear_system_base!(du,u,conditions,compiler)
-
-        problem = NonlinearProblem(_nonlinear_system!, u)
-        solution = solve(problem, RobustMultiNewton())
-        u[:] = solution.u
+        w = fourier_approx_base(u,compiler,conditions)
+        u[:] = w.raw
     end
     push!(u, u[2N+3] / d * H)
     return u
