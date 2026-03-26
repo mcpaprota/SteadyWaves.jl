@@ -13,7 +13,8 @@ L = 10.0 # wavelength (m)
 k = 2π / L # wave number (rad/s)
 
 N = 40
-u = fourier_approx(d, H, L; pc=1, cc=1, N=N)
+w, _ = fourier_approx(d, H, L; pc=1, cc=1, N=N)
+u = w.raw # retrieve raw data
 x = range(0, L, 2N + 1)
 η = [reverse(u[2:N+1]); u[1:N+1]]
 

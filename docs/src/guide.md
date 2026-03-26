@@ -26,7 +26,8 @@ and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` 
 ```@example 1
 
 N = 40 # set the number of points
-u = fourier_approx(d, H, L; pc=1, cc=1, N=N) # apply Fourier Approximation Method
+w, _ = fourier_approx(d, H, L; pc=1, cc=1, N=N) # apply Fourier Approximation Method
+u = w.raw # retrieve raw data
 kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
 T = wave_period(u, d, N) # calculate wave period
 x = range(0, L, 2N + 1) # discretize L to match kη
@@ -60,7 +61,8 @@ and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` 
 ```@example 2
 
 N = 40 # set the number of points
-u = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
+w, _ = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
+u = w.raw # retrieve raw data
 L = wavelength(u, d, N) # calculate wavelength (rad/s)
 k = 2π / L # get wave number (rad/m)
 kη = [reverse(u[2:N+1]); u[1:N+1]] # vcat non-dimensional profile vector and its reverse
@@ -102,7 +104,7 @@ d_min = [0.019, 0.0275, 0.046, 0.0784, 0.1091, 0.1714] # set minimal depth value
 nothing # hide
 ```
 
-We set a number of points `N` for [`topo_approx`](@ref) (which uses in-place [`SteadyWaves.fourier_approx!`](@ref)), number of depth steps `N_d` and create a matrix container `results` for storing the outcome of analysis.
+We set a number of points `N` for [`topo_approx`](@ref) (which uses in-place [`SteadyWaves.update_depth_fourier_approx`](@ref)), number of depth steps `N_d` and create a matrix container `results` for storing the outcome of analysis.
 
 ```@example 3
 N = 40 # set number of points
