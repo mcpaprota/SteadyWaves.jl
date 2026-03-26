@@ -72,7 +72,7 @@ function fourier_approx!(u, d, d_p, F, T, idx; cc=CC_STOKES, N=10)
     compiler = Wave.WaveStruct(idx)
 
     # create dimensional_factor_compiler 
-    df_compiler = Wave.dimensional_factor_compiler(compiler.D, d, 1, 1)
+    df_compiler = Wave.dimensional_factor_compiler( d, 1, 1)
 
     # set dimensionless period and wave_power from dimensional values with respect to depth
     compiler = Wave.WaveStruct(compiler, df_compiler;
