@@ -19,7 +19,11 @@ include("index.jl")
 
 include("surface.jl")
 
+include("velocity.jl")
+
 include("wave.jl")
+
+include("dimensional_factor.jl")
 
 include("linear.jl")
 using .Linear: linear_wave_number, linear_solution
@@ -27,9 +31,7 @@ using .Linear: linear_wave_number, linear_solution
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
-    dimensionless_vertical_velocity, vertical_velocity,
-    dimensionless_horizontal_velocity, horizontal_velocity,
-    dimensionless_pressure, pressure
+    vertical_velocity, horizontal_velocity, pressure
 
 include("condition.jl")
 
@@ -43,9 +45,9 @@ using .Shoaling: topo_approx, update_depth_fourier_approx
 
 export fourier_approx,update_depth_fourier_approx, topo_approx, wave_number
 export wave_period, wavelength, wave_height, linear_wave_number
-export dimensionless_vertical_velocity, vertical_velocity
-export dimensionless_horizontal_velocity, horizontal_velocity
-export dimensionless_pressure, pressure
+export vertical_velocity
+export horizontal_velocity
+export pressure
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 export Output

@@ -2,7 +2,7 @@ module Condition
 
 using ..Wave:WaveStruct
 using ..Output
-using ..Output: indirect_wave_power, surface_stream_eigenfunction, dimensionless_pressure
+using ..Output: indirect_wave_power, pressure
 using ..Params
 
 
@@ -11,15 +11,17 @@ function mean_depth_condition(w::WaveStruct)
 end
 
 function kinematic_surface_condition(w::WaveStruct,m)
-    psi = sum([surface_stream_eigenfunction(sinh, cos, w.raw, w.N, m, j) for j in 1:w.N])
-    return psi - w.U * (w.eta.point(m) - w.D) - w.Q
+    kx = m/w.N * pi
+    kz = w.eta.point(m)
+
+    return w.v.psi(kx,kz) - w.U * (kz - w.D) - w.Q
 end
 
 function dynamic_surface_condition(w::WaveStruct,m)
     kx = m/w.N * pi
     kz = w.eta.point(m)
 
-    return dimensionless_pressure(w.raw, w.N, kx, kz)
+    return pressure(w,kx,kz)
 end
 
 function height_condition(w::WaveStruct, p)
