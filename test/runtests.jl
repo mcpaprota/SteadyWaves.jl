@@ -8,12 +8,17 @@ using Test
     N = 10
     # Test: no mass transport in a flume
     k = 2π / L
-    u1 = fourier_approx(d, H, L; cc=2)
+
+    w, _ = fourier_approx(d, H, L; cc=2)
+    u1 = w.raw
+
     @test u1[22] ≈ u1[26] # c√(k/g) = Ū√(k/g)
 
     # Test: c = L/T
     T = L / u1[22] * √(k / g) # T = c/L
-    u2 = fourier_approx(1, 0.1, T; pc=2, cc=2)
+    w, _ = fourier_approx(1, 0.1, T; pc=2, cc=2)
+    u2 = w.raw
+    
     @test u1[22] ≈ u2[22]
 
     # Test: wave_length

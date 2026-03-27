@@ -53,4 +53,16 @@ function potential_energy(u,idx::IndexStruct,w_c)
     return (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4idx.N
 end
 
+function fourier_point(u,m,idx::IndexStruct)
+    return fourier_z(u,pi * m/idx.N, idx)
+end
+
+function fourier_z(u,kx::Float64,idx::IndexStruct)
+    return u[idx.D] + sum(map(j -> a_f[j] * cos(j * kx), idx.eta))
+end
+
+function fourier_z(a_f,kx::Float64,kd::Float64)
+    return kd + sum(map(j -> a_f[j] * cos(j * kx), 1:lastindex(a_f)))
+end
+
 end

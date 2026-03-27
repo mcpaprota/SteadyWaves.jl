@@ -51,7 +51,7 @@ struct WaveStruct
         raw === nothing ? default.raw : raw,
     )
 
-        WaveStruct(
+    WaveStruct(
         default::WaveStruct,
         df::WaveStruct;
         eta = nothing,
@@ -101,21 +101,23 @@ struct WaveStruct
     )
 
     # create structure from array u and compiler X = compiler.X(compiler,u)
-    WaveStruct(u,compiler::WaveStruct) = new(
-        compiler.eta(compiler,u),
-        compiler.psi(compiler,u),
-        compiler.D(compiler,u),
-        compiler.C(compiler,u),
-        compiler.R(compiler,u),
-        compiler.H(compiler,u),
-        compiler.U(compiler,u),
-        compiler.Q(compiler,u),
-        compiler.N(compiler,u),
-        compiler.L(compiler,u),
-        compiler.T(compiler,u),
-        compiler.F(compiler,u),
-        compiler.raw(compiler,u),
+    WaveStruct(u,compiler::WaveStruct,inner_compiler::WaveStruct) = new(
+        compiler.eta(inner_compiler,u),
+        compiler.psi(inner_compiler,u),
+        compiler.D(inner_compiler,u),
+        compiler.C(inner_compiler,u),
+        compiler.R(inner_compiler,u),
+        compiler.H(inner_compiler,u),
+        compiler.U(inner_compiler,u),
+        compiler.Q(inner_compiler,u),
+        compiler.N(inner_compiler,u),
+        compiler.L(inner_compiler,u),
+        compiler.T(inner_compiler,u),
+        compiler.F(inner_compiler,u),
+        compiler.raw(inner_compiler,u),
     )
+
+    WaveStruct(u,compiler::WaveStruct) = WaveStruct(u,compiler,compiler)
 end
 
 function distance_factor(kd,d) 

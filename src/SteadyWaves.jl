@@ -21,6 +21,9 @@ include("surface.jl")
 
 include("wave.jl")
 
+include("linear.jl")
+using .Linear: linear_wave_number, linear_solution
+
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
@@ -31,12 +34,12 @@ using .Output: wave_height, wavelength, wave_power, wave_period,
 include("nonlinear_system.jl")
 
 include("steady.jl")
-using .Steady: fourier_approx, linear_wave_number
+using .Steady: fourier_approx
 
 include("shoaling.jl")
-using .Shoaling: topo_approx, fourier_approx!
+using .Shoaling: topo_approx, update_depth_fourier_approx
 
-export fourier_approx,fourier_approx!, topo_approx, wave_number
+export fourier_approx,update_depth_fourier_approx, topo_approx, wave_number
 export wave_period, wavelength, wave_height, linear_wave_number
 export dimensionless_vertical_velocity, vertical_velocity
 export dimensionless_horizontal_velocity, horizontal_velocity
