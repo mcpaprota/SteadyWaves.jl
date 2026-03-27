@@ -9,6 +9,7 @@ using ..Wave
 using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
+using ..DimensionalFactor: dimensional_factor_compiler
 using ..Physics
 using ..Wave: WaveStruct
 using ..Steady: fourier_approx
@@ -74,7 +75,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g
     compiler = Wave.WaveStruct(idx)
 
     # create dimensional_factor_compiler 
-    df_compiler = Wave.dimensional_factor_compiler(d, g, rho)
+    df_compiler = dimensional_factor_compiler(d, g, rho)
 
     # set dimensionless period and wave_power from dimensional values with respect to depth
     compiler = Wave.WaveStruct(compiler, df_compiler;

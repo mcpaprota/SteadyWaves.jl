@@ -46,73 +46,33 @@ function wave_height(u, d, N)
     return H
 end
 
-"""
-    wave_power(u, N)
-
-Calculate dimensionless wave power `F` from solution `u` (non-public function).
-"""
-function wave_power(u, N)
-    c = u[2N+C_INDEX]
-    d = u[2N+D_INDEX]
-    q = u[2N+Q_INDEX]
-    v = u[2N+U_INDEX]
-    r = u[2N+R_INDEX]
-
-    relative_eta = u[eta_indexes(N)] .- d
-
-    u_e = c - v
-    I_p = q + d * u_e # mean wave momentum
-    E_p = (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4N # mean potential energy
-    Q = v * d - q # volume flux
-    E_k = 0.5 * (c * I_p - u_e * Q) # mean kinetic energy
-    U_b2 = 2 * r - c^2 # mean square of bed velocity
-    F = c * (3E_k - 2E_p) + 0.5 * U_b2 * (I_p + c * d) + c * u_e * Q # mean energy flux - wave power
-    return F
+function vertical_velocity(w,kx,kz)
+    return w.v.z(kx,kz)
 end
 
-function stream_eigenfunction(hiperbolic,trigonometric,u,N,kx,kz,j)
-    # takes index of jth stream function coefficient
-    B_index = psi_indexes(N)[j] 
-
-    # retrieves jth stream function coefficient without creating an array
-    B = u[B_index]
-
-    return B * hiperbolic(j * kz) / cosh(j * u[2N+D_INDEX]) * trigonometric(j * kx)
+function vertical_velocity(w, x, z, df)
+    return w.v.z(x * df.L,z * df.D) / df.v.z
 end
 
-function surface_stream_eigenfunction(hiperbolic,trigonometric,u,N,m,j)
-   return stream_eigenfunction(hiperbolic, trigonometric, u, N, m/N * π, u[m+1], j) 
+function horizontal_velocity(w,kx,kz)
+    return w.v.x(kx,kz)
 end
 
-function dimensionless_vertical_velocity(u,N,kx,kz)
-    return sum([j*stream_eigenfunction(sinh, sin, u, N, kx, kz, j) for j in 1:N])
+function horizontal_velocity(w, x, z, df)
+    return w.v.x(x * df.L,z * df.D) / df.v.x
 end
 
-
-function vertical_velocity(u,N,x,z,k,g=G)
-    return sqrt(g/k)*dimensionless_vertical_velocity(u,N,k *x, k * z)
+function indirect_pressure(w,kx,kz)
+    return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2 - kz + w.D
 end
 
-function dimensionless_horizontal_velocity(u,N,kx,kz)
-    return -u[2N + U_INDEX] + sum([j*stream_eigenfunction(cosh, cos, u, N, kx, kz, j) for j in 1:N])
+function pressure(w,kx,kz)
+    return w.P === nothing ? indirect_pressure(w,kx,kz) : w.P(kx,kz)   
 end
 
-
-function horizontal_velocity(u,N,x,z,k,g=G)
-    return sqrt(g/k)*dimensionless_horizontal_velocity(u,N,k *x, k * z)
+function pressure(w,x,z,df)
+    return pressure(w,x * df.L, z * df.D) / df.P    
 end
-
-function dimensionless_pressure(u,N,kx,kz)
-    v_x = dimensionless_horizontal_velocity(u,N,kx,kz)
-    v_z = dimensionless_vertical_velocity(u,N,kx,kz)
-
-    return u[2N+R_INDEX] - v_x^2 / 2 - v_z^2 / 2 - kz + u[2N+D_INDEX]
-end
-
-function pressure(u,N,x,z,k,g=9.81,rho=RHO)
-    return rho * g / k * dimensionless_pressure(u, N, k * x, k * z)
-end
-
 
 function indirect_wave_period(w::WaveStruct)
     return w.L / w.C
