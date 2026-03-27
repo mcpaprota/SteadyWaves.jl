@@ -31,6 +31,8 @@ using .Output: wave_height, wavelength, wave_power, wave_period,
     dimensionless_horizontal_velocity, horizontal_velocity,
     dimensionless_pressure, pressure
 
+include("condition.jl")
+
 include("nonlinear_system.jl")
 
 include("steady.jl")

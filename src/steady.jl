@@ -10,10 +10,11 @@ using ..Output
 using ..Params
 using ..Physics
 using ..Linear
-using ..NonlinearSystem: fourier_approx_base, parameter_condition_constant, parameter_condition_factory,
+using ..NonlinearSystem: fourier_approx_base, ConditionStruct
+using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
-    kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
-    ConditionStruct
+    kinematic_surface_condition, dynamic_surface_condition,
+    mean_depth_condition
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
 

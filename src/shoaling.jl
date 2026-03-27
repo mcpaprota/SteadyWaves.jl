@@ -12,9 +12,9 @@ using ..Params
 using ..Physics
 using ..Wave: WaveStruct
 using ..Steady: fourier_approx
-using ..NonlinearSystem: fourier_approx_base, period_condition, power_condition, current_condition_factory, height_condition,
-        kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
-        ConditionStruct
+using ..NonlinearSystem: fourier_approx_base, ConditionStruct
+using ..Condition: period_condition, power_condition, current_condition_factory, height_condition,
+        kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition
 """
     topo_approx(d, H, L; cc=2, N=10, g=G)
 
