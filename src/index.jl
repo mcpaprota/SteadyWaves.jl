@@ -69,8 +69,4 @@ function default_indexes(N)
     )
 end
 
-export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
-
-export eta_indexes,psi_indexes
-
 end
