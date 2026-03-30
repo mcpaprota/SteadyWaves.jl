@@ -45,7 +45,7 @@ using Test
     @test 1e-4 < abs(w.v.z(π/N,   u2[2]/2))
 
     #Test: vertical_velocity
-    k = Output.wave_number(u2,d,N)
+    k = Output.wave_number(w, df)
     @test 0 ≈ vertical_velocity(w, 0,0, df)
 
     X = π/N

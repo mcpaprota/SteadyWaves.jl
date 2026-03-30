@@ -12,9 +12,21 @@ using ..Wave: WaveStruct
 
 Calculate dimensional wave period `T` from solution `u`.
 """
-function wave_period(u, d, N; g=G)
-    T = 2π / u[2N+C_INDEX] / √(u[2N+D_INDEX] / d * g)
-    return T
+function indirect_wave_period(w)
+    return w.L / w.C
+end
+
+function wave_period(w)
+    return w.T === nothing ? indirect_wave_period(w) : w.T
+end
+
+"""
+    wave_period(w, df)
+
+Calculate dimensional wave period `T` from solution `w` and dimensional factor `df`.
+"""
+function wave_period(w,df)
+    return w.T / df.T
 end
 
 """
@@ -22,28 +34,40 @@ end
 
 Calculate dimensional wavelength `L` from solution `u`.
 """
-function wavelength(u, d, N)
-    L = 2π * d / u[2N+D_INDEX]
-    return L
+function indirect_wavelength(w)
+    return w.C * w.T
+end
+
+function wavelength(w)
+    return w.L === nothing ? indirect_wavelength(w) : w.L
 end
 
 """
-    wave_number(u, d, N)
+    wavelength(w, df)
 
-Calculate dimensional wave number `k` from solution `u`.
+Calculate dimensional wavelength `L` from solution `w` and dimensional factor `df`.
 """
-function wave_number(u, d, N)
-    return u[2N+D_INDEX] / d
+function wavelength(w, df)
+    return w.L / df.L
+end
+
+
+"""
+    wave_number(w, df)
+
+Calculate dimensional wave number `K` from solution `w` and dimensional factor `df`.
+"""
+function wave_number(w, df)
+    return df.D
 end
 
 """
-    wave_height(u, d, N)
+    wave_height(w, df)
 
-Calculate dimensional wave height `H` from solution `u`.
+Calculate dimensional wave height `H` from solution `w` and dimensional factor `df`.
 """
-function wave_height(u, d, N)
-    H = u[2N+H_INDEX] / u[2N+D_INDEX] * d
-    return H
+function wave_height(w, df)
+    return w.H / df.H
 end
 
 function vertical_velocity(w,kx,kz)
@@ -115,9 +139,5 @@ end
 function wave_power(w::WaveStruct,df::WaveStruct)
     return wave_power(w) / df.F
 end
-
-export C_INDEX, D_INDEX, H_INDEX, Q_INDEX, R_INDEX, U_INDEX
-
-export eta_indexes,psi_indexes
 
 end
