@@ -80,6 +80,11 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
         w = fourier_approx_base(w.raw,compiler,conditions)
     end
 
+
+    w = WaveStruct(w;
+        eta = Surface.struct_with_fourier(w.eta,idx)
+    )
+
     push!(w.raw,w.H)
     return w, WaveStruct(w.raw, df_compiler, compiler)
 
