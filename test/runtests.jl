@@ -63,5 +63,12 @@ using Test
     # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
     @test k ≈ linear_wave_number(d, ω)
+    
+    w2,df2 = fourier_approx(1, 0.1, T; pc=2, cc=2, sigma=SteadyWaves.Physics.SIGMA)
 
+    @test w2.eta.point(0) /df2.H < w.eta.point(0) /df.H
+
+    @test w2.eta.point(N) /df2.H < w.eta.point(N) /df.H
+
+    @test w2.eta.point(Int(N/2)) /df2.H > w.eta.point(Int(N/2)) /df.H
 end

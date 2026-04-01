@@ -4,6 +4,8 @@ using ..Index: IndexStruct
 
 struct SurfaceStruct
     point
+    point_der_1
+    point_der_2
     min
     max
     avg
@@ -13,6 +15,8 @@ struct SurfaceStruct
 
     SurfaceStruct(u,compiler::SurfaceStruct,wave_compiler) = new(
         m -> compiler.point(u,m),
+        m -> compiler.point_der_1(wave_compiler,u,m),
+        m -> compiler.point_der_2(wave_compiler,u,m),
         compiler.min(u),
         compiler.max(u),
         compiler.avg(u),
@@ -21,6 +25,8 @@ struct SurfaceStruct
 
     SurfaceStruct(idx::IndexStruct) = new(
         (u,m) -> direct_point(u,m,idx),
+        (w_c,u,m) -> direct_point_der_1(m -> w_c.eta.point(u,m),m,idx),
+        (w_c,u,m) -> direct_point_der_2(m -> w_c.eta.point(u,m),m,idx),
         (u) -> direct_min(u,idx),
         (u) -> direct_max(u,idx),
         (u) -> direct_avg(u,idx),
@@ -32,7 +38,20 @@ struct SurfaceStruct
 end
 
 function direct_point(u,m,idx::IndexStruct)
+    P = 2idx.N
+    m = (P + m%P)%P #ensure that m is in <0,P-1> range even if m < 0
+    m = idx.N - abs(idx.N - m)
     return u[idx.eta[begin+m]]
+end
+
+function direct_point_der_1(point,m,idx::IndexStruct)
+    dkx = pi / idx.N
+    return (point(m-1) - point(m+1))/ 2dkx
+end
+
+function direct_point_der_2(point,m,idx::IndexStruct)
+    dkx = pi / idx.N
+    return (point(m-1) - 2point(m) + point(m+1)) / dkx^2
 end
 
 function direct_min(u,idx::IndexStruct)

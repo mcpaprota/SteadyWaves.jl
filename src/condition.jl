@@ -24,6 +24,21 @@ function dynamic_surface_condition(w::WaveStruct,m)
     return pressure(w,kx,kz)
 end
 
+function gravitational_capilary_dynamic_condition(w::WaveStruct,m)
+    kx = m/w.N * pi
+    kz = w.eta.point(m)
+
+    surface_tension = 0
+
+    if w.sigma != 0
+        kz_d1 = w.eta.point_der_1(m)
+        kz_d2 = w.eta.point_der_2(m)
+        surface_tension =  w.sigma * kz_d2 / (1 + kz_d1^2)^1.5
+    end
+
+    return pressure(w,kx,kz) - surface_tension
+end
+
 function height_condition(w::WaveStruct, p)
     return w.eta.max - w.eta.min - w.D * p
 end

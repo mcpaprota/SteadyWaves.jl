@@ -15,7 +15,7 @@ using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition, dynamic_surface_condition,
-    mean_depth_condition
+    mean_depth_condition, gravitational_capilary_dynamic_condition
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
 
@@ -42,7 +42,7 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO)
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO, sigma=0.0)
     L , T = Params.L(P,pc), Params.T(P,pc)
 
     idx = Index.default_indexes(N)
@@ -59,6 +59,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
         H = H/M,
         L = L,
         T = T,
+        sigma = sigma,
     )
 
     # initial conditions
@@ -66,7 +67,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
-        ConditionStruct(dynamic_surface_condition,0:N),
+        ConditionStruct(gravitational_capilary_dynamic_condition,0:N),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(parameter_condition_factory(pc)),
         ConditionStruct(current_condition_factory(cc)),
