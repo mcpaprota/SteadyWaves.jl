@@ -31,7 +31,7 @@ using .Linear: linear_wave_number, linear_solution
 include("output.jl")
 using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
-    vertical_velocity, horizontal_velocity, pressure
+    vertical_velocity, horizontal_velocity, pressure, elevation
 
 include("condition.jl")
 
@@ -44,7 +44,7 @@ include("shoaling.jl")
 using .Shoaling: topo_approx, update_depth_fourier_approx
 
 export fourier_approx,update_depth_fourier_approx, topo_approx, wave_number
-export wave_period, wavelength, wave_height, linear_wave_number
+export wave_period, wavelength, wave_height, linear_wave_number, elevation
 export vertical_velocity
 export horizontal_velocity
 export pressure

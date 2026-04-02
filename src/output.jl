@@ -140,4 +140,12 @@ function wave_power(w::WaveStruct,df::WaveStruct)
     return wave_power(w) / df.F
 end
 
+function elevation(w::WaveStruct,kx)
+    return w.eta.z(kx)
+end
+
+function elevation(w::WaveStruct,x, df)
+    return elevation(w, x * df.L) / df.eta
+end
+
 end

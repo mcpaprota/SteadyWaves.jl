@@ -25,7 +25,7 @@ function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler,g=G)
 
     kd = k * d
 
-    inner = x -> Surface.fourier_z([0.5 * w.H], x, w.D)
+    inner = x -> Surface.fourier_z([w.D, 0.5 * w.H], x)
 
     u[idx.eta] = map(inner, (0:idx.N) * π / idx.N) # kη
 
