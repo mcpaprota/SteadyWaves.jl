@@ -131,7 +131,9 @@ We loop over wave cases each time defining a vector of depth values `d` from dee
 ```@example 3
 for i in eachindex(H₀)
     d = reverse(logrange(d_min[i], 1, N_d))  * d₀ # water depths (m)
-    K = topo_approx(d, H₀[i], L₀; N=N) # shoaling coefficients
+    K = topo_approx(d, H₀[i], L₀; N=N,
+        eta_type = SteadyWaves.Params.DIRECT_ELEVATION
+    ) # shoaling coefficients
     # save results
     results[:, 2i-1] = k₀ * d
     results[:, 2i] = K

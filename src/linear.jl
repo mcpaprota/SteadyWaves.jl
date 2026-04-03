@@ -17,7 +17,7 @@ function init(d,P,pc,idx, g=G)
     return k, u
 end
 
-function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler,g=G)
+function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,eta_type::Params.ElevationType =Params.FOURIER_ELEVATION)
     k, u = init(d, P, pc, idx,g)
 
     df = WaveStruct(u, df_compiler, compiler)
@@ -26,9 +26,18 @@ function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler,g=G)
 
     kd = k * d
 
-    inner = x -> Surface.fourier_z([w.D, 0.5 * w.H], x)
+    amplitudes = [w.D, 0.5 * w.H]
 
-    u[idx.eta] = map(inner, (0:idx.N) * π / idx.N) # kη
+    if eta_type == Params.DIRECT_ELEVATION
+
+        u[idx.eta] = (m -> Surface.fourier_z(amplitudes, w.eta.point_x(m))).(0:idx.N)
+
+    elseif eta_type == Params.FOURIER_ELEVATION
+
+        u[idx.eta[begin:begin+1]] = amplitudes
+
+    end
+   
 
     u[idx.psi[begin]] = 0.5 * w.H / √tanh(kd) # Bk/g
     u[idx.C] = √tanh(kd) # c√(k/g)

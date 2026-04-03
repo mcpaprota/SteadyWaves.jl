@@ -7,7 +7,12 @@ end
 
 @enum ParameterCriterion begin
     PC_LENGTH = 1
-    PC_PERIOD= 2
+    PC_PERIOD = 2
+end
+
+@enum ElevationType begin
+    DIRECT_ELEVATION = 1
+    FOURIER_ELEVATION = 2
 end
 
 function T(P,pc)
@@ -21,4 +26,6 @@ end
 export CurrentCriterion, CC_EULER, CC_STOKES
 
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
+
+export ElevationType
 end

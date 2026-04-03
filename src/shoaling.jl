@@ -33,22 +33,20 @@ for wave of length `L` and height `H`.
 # Output
 - `K`: vector of shoaling coefficient values
 """
-function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO)
+function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, eta_type=Params.FOURIER_ELEVATION)
     idx = Index.default_indexes(N)
     k = 2π / L # initial wave number (rad/m
 
     K = zero(float(d))
     K[1] = 1
-    w, df = fourier_approx(d[1], H, L; cc=cc, N=N,g=g, rho=rho)
+    w, df = fourier_approx(d[1], H, L; cc=cc, N=N,g=g, rho=rho,eta_type=eta_type)
 
     F = wave_power(w,df)
     T = wave_period(w,df)
 
-    for i in eachindex(d)
-        if i>1
-            w, df = update_depth_fourier_approx(w, d[i], d[i-1], F, T, idx;  cc=cc, N=N,g=g,rho=rho)
-            K[i] = w.H / df.H / H
-        end
+    for i in eachindex(d)[begin+1:end]
+        w, df = update_depth_fourier_approx(w, d[i], d[i-1], F, T, idx;  cc=cc, N=N,g=g,rho=rho, eta_type=eta_type)
+        K[i] = w.H / df.H / H
     end
     return K
 end
@@ -68,11 +66,11 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 """
-function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g=G,rho=RHO)
-    init_conditions!(d_p / d, w.raw, idx)
+function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g=G,rho=RHO,eta_type = Params.FOURIER_ELEVATION)
+    init_conditions!(d_p / d, w.raw, idx,eta_type)
 
     # create default compiler
-    compiler = Wave.WaveStruct(idx)
+    compiler = Wave.WaveStruct(idx,eta_type)
 
     # create dimensional_factor_compiler 
     df_compiler = dimensional_factor_compiler(d, g, rho)
@@ -100,8 +98,18 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g
     return w, df
 end
 
-function init_conditions!(ratio_d, u, idx)
-    u[idx.eta] =  1 .+ (u[idx.eta] .- 1) / ratio_d # kη
+function init_conditions!(ratio_d, u, idx,eta_type)
+
+    if eta_type == Params.DIRECT_ELEVATION
+        
+        u[idx.eta] =  1 .+ (u[idx.eta] .- 1) / ratio_d # kη
+        
+    elseif eta_type == Params.FOURIER_ELEVATION
+
+        u[idx.eta[begin]] =  1 .+ (u[idx.eta[begin]] .- 1) / ratio_d # kη
+        u[idx.eta[begin+1:end]] /= ratio_d
+
+    end
     u[idx.psi] /= √ratio_d # B
     u[idx.C] /= √ratio_d # c√(k/g)
     u[idx.D] /= ratio_d # kη̄
@@ -111,5 +119,6 @@ function init_conditions!(ratio_d, u, idx)
     u[idx.H] /= ratio_d # kH
     return nothing
 end
+
 
 end

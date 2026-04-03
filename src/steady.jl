@@ -42,13 +42,15 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO)
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,
+    eta_type::ElevationType = Params.FOURIER_ELEVATION
+    )
     L , T = Params.L(P,pc), Params.T(P,pc)
 
     idx = Index.default_indexes(N)
 
     # create default compiler
-    compiler = WaveStruct(idx)
+    compiler = WaveStruct(idx,eta_type)
 
     # create dimensional factor compiler 
     df_compiler = dimensional_factor_compiler(d, g, rho)
@@ -62,7 +64,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     )
 
     # initial conditions
-    w, _ = Linear.linear_solution(d, P, pc, idx, compiler, df_compiler)
+    w, _ = Linear.linear_solution(d, P, pc, idx, compiler, df_compiler;eta_type=eta_type)
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
@@ -82,7 +84,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
 
     w = WaveStruct(w;
-        eta = Surface.struct_with_fourier(w.eta,idx)
+        eta = Surface.struct_with_derived_values(w.eta,idx,eta_type)
     )
 
     push!(w.raw,w.H)
