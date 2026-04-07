@@ -72,3 +72,22 @@ using Test
     @test abs(elevation(w, pi)-w.eta.point(N)) < 1e-10
 
 end
+
+@testset "SteadyWaves.jl - dimensional factor" begin
+
+    using SteadyWaves.DimensionalFactor: DimensionalFactor as DF
+
+    d, L, g, rho = 1, 1, G, RHO
+
+    kd = 2pi/L * d
+
+    @test DF.dimensional_factor(kd,d,g,rho;L=1) ≈ DF.distance_factor(kd,d)
+
+    @test DF.dimensional_factor(kd,d,g,rho;T=1) ≈ DF.period_factor(kd,d,g)
+
+    @test DF.dimensional_factor(kd,d,g,rho;L=1,T=-1) ≈ DF.speed_factor(kd,d,g)
+
+    @test DF.dimensional_factor(kd,d,g,rho;L=1,T=-3,M=1) ≈ DF.power_factor(kd,d,g,rho)
+
+    @test DF.dimensional_factor(kd,d,g,rho;L=-1,T=-2,M=1) ≈ DF.pressure_factor(kd,d,g,rho)
+end
