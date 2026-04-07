@@ -16,7 +16,7 @@ function speed_factor(kd,d,g)
 end
 
 function power_factor(kd,d,g,rho)
-    return rho * kd/d * sqrt((g * kd/d)^3)    
+    return kd/d * sqrt((kd/d / g)^3) / rho
 end
 
 function bernoulli_factor(kd,d,g)
@@ -39,6 +39,17 @@ function velocity_struct_factor(w_c,u,g,d)
             speed_factor(kd,d, g),
             bernoulli_factor(kd, d, g),
     )
+end
+
+function dimensional_factor(kd,d,g,rho;L=0,M=0,T=0)
+    k = kd/d
+
+    R = -M
+    G = T/2
+
+    K = G - 3R + L
+
+    return k^K * g^G * rho^R
 end
 
 # returns compiler that produce factor to multiply dimensional values into dimentionless 
