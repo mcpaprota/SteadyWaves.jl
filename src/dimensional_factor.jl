@@ -53,7 +53,9 @@ function dimensional_factor(kd,d,g,rho;L=0,M=0,T=0)
 end
 
 # returns compiler that produce factor to multiply dimensional values into dimentionless 
-function dimensional_factor_compiler(d,g,rho) 
+function dimensional_factor_compiler(d,physics)
+    g = physics.g
+    rho = physics.rho 
 
     return WaveStruct(
 	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # eta

@@ -17,8 +17,29 @@ function init(d,P,pc,idx, g=G)
     return k, u
 end
 
+function linear_eta_solution(u,w,idx,config)
+    amplitudes = [w.D, 0.5 * w.H]
+
+    if config.eta_type == Params.DIRECT_ELEVATION
+
+        u[idx.eta] = (m -> Surface.fourier_z(amplitudes, w.eta.point_x(m))).(0:idx.N)
+
+    elseif config.eta_type == Params.FOURIER_ELEVATION
+
+        u[idx.eta[begin:begin+1]] = amplitudes
+
+    end
+end
+
 function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,eta_type::Params.ElevationType =Params.FOURIER_ELEVATION)
-    k, u = init(d, P, pc, idx,g)
+    
+    config = Params.ConfigStruct(pc=pc, eta_type=eta_type)
+
+    return linear_solution(d,P,config,idx,compiler,df_compiler;g=g)
+end
+
+function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
+    k, u = init(d, P, config.pc, idx,g)
 
     df = WaveStruct(u, df_compiler, compiler)
 
@@ -26,18 +47,7 @@ function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,
 
     kd = k * d
 
-    amplitudes = [w.D, 0.5 * w.H]
-
-    if eta_type == Params.DIRECT_ELEVATION
-
-        u[idx.eta] = (m -> Surface.fourier_z(amplitudes, w.eta.point_x(m))).(0:idx.N)
-
-    elseif eta_type == Params.FOURIER_ELEVATION
-
-        u[idx.eta[begin:begin+1]] = amplitudes
-
-    end
-   
+    linear_eta_solution(u,w,idx,config)
 
     u[idx.psi[begin]] = 0.5 * w.H / √tanh(kd) # Bk/g
     u[idx.C] = √tanh(kd) # c√(k/g)

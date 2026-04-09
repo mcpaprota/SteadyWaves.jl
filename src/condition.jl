@@ -53,20 +53,20 @@ function period_condition(w::WaveStruct)
 end
 
 
-function current_condition_factory(cc)
-    if Int(cc) == Int(CC_STOKES)
+function current_condition_factory(cc::Params.CurrentCriterion)
+    if cc == CC_STOKES
         return stokes_condition
-    elseif Int(cc) == Int(CC_EULER)
+    elseif cc == CC_EULER
         return euler_condition
     else
         throw(error("Unknown current criterion $cc"))
     end
 end
 
-function parameter_condition_factory(pc)
-    if Int(pc) == Int(PC_LENGTH)
+function parameter_condition_factory(pc::Params.ParameterCriterion)
+    if pc == PC_LENGTH
         return length_condition
-    elseif Int(pc) == Int(PC_PERIOD)
+    elseif pc == PC_PERIOD
         return period_condition
     else
         throw(error("Unknown parameter criterion $pc"))

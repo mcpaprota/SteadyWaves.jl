@@ -45,15 +45,26 @@ propagating in water of depth `d` using Fourier Approximation Method.
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,
     eta_type::ElevationType = Params.FOURIER_ELEVATION
     )
-    L , T = Params.L(P,pc), Params.T(P,pc)
+
+    config = Params.ConfigStruct(cc=cc, pc=pc, eta_type=eta_type)
+
+    physics = Physics.PhysicsStruct(g,rho) 
+
+    return fourier_approx(d,H,P,config, physics; N=N,M=M)
+end
+
+
+function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
+
+    L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
     idx = Index.default_indexes(N)
 
     # create default compiler
-    compiler = WaveStruct(idx,eta_type)
+    compiler = WaveStruct(idx,config.eta_type)
 
     # create dimensional factor compiler 
-    df_compiler = dimensional_factor_compiler(d, g, rho)
+    df_compiler = dimensional_factor_compiler(d, physics)
 
     # set dimensionless height, length and period from dimensional value
     # if property is nothing given change is skipped
@@ -64,14 +75,14 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     )
 
     # initial conditions
-    w, _ = Linear.linear_solution(d, P, pc, idx, compiler, df_compiler;eta_type=eta_type)
+    w, _ = Linear.linear_solution(d, P, config, idx, compiler, df_compiler)
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_surface_condition,0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(parameter_condition_factory(pc)),
-        ConditionStruct(current_condition_factory(cc)),
+        ConditionStruct(parameter_condition_factory(config.pc)),
+        ConditionStruct(current_condition_factory(config.cc)),
         ConditionStruct(height_condition)
     ]
 
@@ -84,7 +95,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
 
     w = WaveStruct(w;
-        eta = Surface.struct_with_derived_values(w.eta,idx,eta_type)
+        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type)
     )
 
     push!(w.raw,w.H)

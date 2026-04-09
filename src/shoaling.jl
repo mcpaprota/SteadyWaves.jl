@@ -34,18 +34,27 @@ for wave of length `L` and height `H`.
 - `K`: vector of shoaling coefficient values
 """
 function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, eta_type=Params.FOURIER_ELEVATION)
+    
+    config = Params.ConfigStruct(pc=PC_LENGTH, cc=cc, eta_type=eta_type)
+   
+    physics = Physics.PhysicsStruct(g,rho)
+
+    return topo_approx(d,H,L,config,physics,N=N)
+end
+
+function topo_approx(d, H, L, config,physics; N=10)
     idx = Index.default_indexes(N)
     k = 2π / L # initial wave number (rad/m
 
     K = zero(float(d))
     K[1] = 1
-    w, df = fourier_approx(d[1], H, L; cc=cc, N=N,g=g, rho=rho,eta_type=eta_type)
+    w, df = fourier_approx(d[1], H, L,config,physics; N=N)
 
     F = wave_power(w,df)
     T = wave_period(w,df)
 
     for i in eachindex(d)[begin+1:end]
-        w, df = update_depth_fourier_approx(w, d[i], d[i-1], F, T, idx;  cc=cc, N=N,g=g,rho=rho, eta_type=eta_type)
+        w, df = update_depth_fourier_approx(w, d[i], d[i-1], F, T, idx, config, physics; N=N)
         K[i] = w.H / df.H / H
     end
     return K
@@ -67,13 +76,22 @@ propagating in water of changing depth from `d` to `d_p` using Fourier Approxima
 - `N`: number of solution eigenvalues, defaults to `N=10`
 """
 function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g=G,rho=RHO,eta_type = Params.FOURIER_ELEVATION)
-    init_conditions!(d_p / d, w.raw, idx,eta_type)
+    
+    config = Params.ConditionStruct(cc=cc, eta_type=eta_type)
+
+    physics = Physics.PhysicsStruct(g,rho)
+
+    return update_depth_fourier_approx(w,d,d_p,F,T,idx,config,physics,N=N)
+end
+
+function update_depth_fourier_approx(w, d, d_p, F, T, idx,config,physics; N=10)
+    init_conditions!(d_p / d, w.raw, idx,config)
 
     # create default compiler
-    compiler = Wave.WaveStruct(idx,eta_type)
+    compiler = Wave.WaveStruct(idx,config.eta_type)
 
     # create dimensional_factor_compiler 
-    df_compiler = dimensional_factor_compiler(d, g, rho)
+    df_compiler = dimensional_factor_compiler(d, physics)
 
     # set dimensionless period and wave_power from dimensional values with respect to depth
     compiler = Wave.WaveStruct(compiler, df_compiler;
@@ -86,7 +104,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g
         ConditionStruct(dynamic_surface_condition, 0:N),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(period_condition),
-        ConditionStruct(current_condition_factory(cc)),
+        ConditionStruct(current_condition_factory(config.cc)),
         ConditionStruct(height_condition),
         ConditionStruct(power_condition)
     ]
@@ -98,13 +116,13 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g
     return w, df
 end
 
-function init_conditions!(ratio_d, u, idx,eta_type)
+function init_conditions!(ratio_d, u, idx,config)
 
-    if eta_type == Params.DIRECT_ELEVATION
+    if config.eta_type == Params.DIRECT_ELEVATION
         
         u[idx.eta] =  1 .+ (u[idx.eta] .- 1) / ratio_d # kη
         
-    elseif eta_type == Params.FOURIER_ELEVATION
+    elseif config.eta_type == Params.FOURIER_ELEVATION
 
         u[idx.eta[begin]] =  1 .+ (u[idx.eta[begin]] .- 1) / ratio_d # kη
         u[idx.eta[begin+1:end]] /= ratio_d
