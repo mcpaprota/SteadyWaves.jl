@@ -15,7 +15,8 @@ using ..Wave: WaveStruct
 using ..Steady: fourier_approx
 using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: period_condition, power_condition, current_condition_factory, height_condition,
-        kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition
+        kinematic_surface_condition, dynamic_surface_condition, mean_depth_condition,
+        dynamic_condition_factory
 """
     topo_approx(d, H, L; cc=2, N=10, g=G)
 
@@ -33,11 +34,13 @@ for wave of length `L` and height `H`.
 # Output
 - `K`: vector of shoaling coefficient values
 """
-function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, eta_type=Params.FOURIER_ELEVATION)
+function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, sigma=0,
+        eta_type=Params.FOURIER_ELEVATION
+    )
     
     config = Params.ConfigStruct(pc=PC_LENGTH, cc=cc, eta_type=eta_type)
    
-    physics = Physics.PhysicsStruct(g,rho)
+    physics = Physics.PhysicsStruct(g,rho,sigma)
 
     return topo_approx(d,H,L,config,physics,N=N)
 end
@@ -79,7 +82,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g
     
     config = Params.ConditionStruct(cc=cc, eta_type=eta_type)
 
-    physics = Physics.PhysicsStruct(g,rho)
+    physics = Physics.PhysicsStruct(g,rho,sigma)
 
     return update_depth_fourier_approx(w,d,d_p,F,T,idx,config,physics,N=N)
 end
@@ -101,7 +104,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx,config,physics; N=10)
 
     conditions = [
         ConditionStruct(kinematic_surface_condition, 0:N),
-        ConditionStruct(dynamic_surface_condition, 0:N),
+        ConditionStruct(dynamic_condition_factory(config), 0:N),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(period_condition),
         ConditionStruct(current_condition_factory(config.cc)),

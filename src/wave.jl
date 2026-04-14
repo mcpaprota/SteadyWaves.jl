@@ -19,8 +19,9 @@ struct WaveStruct
     T
     F
     P
+    sigma
     raw # u array to keep compatibility with not updated functions (u,N instead of w)
-    WaveStruct(eta,v,D,C,R,H,U,Q,N,L,T,F,P,raw) = new(eta,v,D,C,R,H,U,Q,N,L,T,F,P,raw)
+    WaveStruct(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw) = new(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw)
 
     # create struct that replaces values given as key words in default
     WaveStruct(
@@ -38,6 +39,7 @@ struct WaveStruct
         T = nothing,
         F = nothing,
         P = nothing,
+        sigma = nothing,
         raw = nothing,
     ) = new(
         eta === nothing ? default.eta : eta,
@@ -53,6 +55,7 @@ struct WaveStruct
         T === nothing ? default.T : T,
         F === nothing ? default.F : F,
         P === nothing ? default.P : P,
+        sigma === nothing ? default.sigma : sigma,
         raw === nothing ? default.raw : raw,
     )
 
@@ -72,6 +75,7 @@ struct WaveStruct
         T = nothing,
         F = nothing,
         P = nothing,
+        sigma = nothing,
         raw = nothing,
     ) = new(
         eta === nothing ? default.eta : (w_c, u) -> eta * df.eta(w_c,u),
@@ -87,6 +91,7 @@ struct WaveStruct
         T   === nothing ? default.T   : (w_c, u) -> T   * df.T(w_c,u),
         F   === nothing ? default.F   : (w_c, u) -> F   * df.F(w_c,u),
         P   === nothing ? default.P   : (w_c, u) -> P   * df.P(w_c,u),
+        sigma === nothing ? default.sigma : (w_c, u) -> sigma   * df.sigma(w_c,u),
         raw === nothing ? default.raw : (w_c, u) -> raw * df.raw(w_c,u),
     )
 
@@ -105,6 +110,7 @@ struct WaveStruct
         (w_c, u) -> nothing,
         (w_c, u) -> nothing,
         (w_c, u) -> nothing,
+        (w_c, u) -> 0,
         (w_c, u) -> u,
     )
 
@@ -123,6 +129,7 @@ struct WaveStruct
         compiler.T(inner_compiler,u),
         compiler.F(inner_compiler,u),
         compiler.P(inner_compiler,u),
+        compiler.sigma(inner_compiler,u),
         compiler.raw(inner_compiler,u),
     )
 
