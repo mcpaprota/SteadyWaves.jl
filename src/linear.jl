@@ -22,7 +22,7 @@ function linear_eta_solution(u,w,idx,config)
 
     if config.eta_type == Params.DIRECT_ELEVATION
 
-        u[idx.eta] = (m -> Surface.fourier_z(amplitudes, w.eta.point_x(m))).(0:idx.N)
+        u[idx.eta] = (m -> Surface.fourier_z(amplitudes, w.eta.point.x(m))).(0:idx.N)
 
     elseif config.eta_type == Params.FOURIER_ELEVATION
 
