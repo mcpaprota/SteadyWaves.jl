@@ -9,23 +9,23 @@ propagating in water of constant depth.
 """
 module SteadyWaves
 
-include("physics.jl")
+include("wave/physics.jl")
 using .Physics: G, RHO
 
-include("params.jl")
+include("system/params.jl")
 using .Params
 
-include("index.jl")
+include("wave/index.jl")
 
-include("surface.jl")
+include("wave/surface.jl")
 
-include("velocity.jl")
+include("wave/velocity.jl")
 
-include("wave.jl")
+include("wave/wave.jl")
 
 include("crapper.jl")
 
-include("dimensional_factor.jl")
+include("wave/dimensional_factor.jl")
 
 include("linear.jl")
 using .Linear: linear_wave_number, linear_solution
@@ -37,7 +37,7 @@ using .Output: wave_height, wavelength, wave_power, wave_period,
 
 include("condition.jl")
 
-include("nonlinear_system.jl")
+include("system/nonlinear_system.jl")
 
 include("steady.jl")
 using .Steady: fourier_approx
