@@ -19,7 +19,7 @@ end
     N = 40
     # Test: no mass transport in a flume
     k = 2π / L
-    @time w1, df = fourier_approx(d, H, L; cc=2, N=N,
+    @time w1, df = reduced_fourier_approx(d, H, L; cc=2, N=N,
         eta_type = SteadyWaves.Params.DIRECT_ELEVATION
     )
 

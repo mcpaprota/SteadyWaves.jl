@@ -103,4 +103,65 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
 
 end
 
+function reduced_fourier_approx(d, H, P; N=10, M=1, g=G,rho=RHO,
+    eta_type::ElevationType = Params.FOURIER_ELEVATION
+    )
+
+    config = Params.ConfigStruct(cc=CC_STOKES, pc=PC_PERIOD, eta_type=eta_type)
+
+    physics = Physics.PhysicsStruct(g,rho) 
+
+    return fourier_approx(d,H,P,config, physics; N=N,M=M)
+end
+
+
+function reduced_fourier_approx(d, H, T,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
+    idx = Index.reduced_indexes(N)
+
+    # create default compiler
+    compiler = WaveStruct(idx,config.eta_type)
+
+    # create dimensional factor compiler 
+    df_compiler = dimensional_factor_compiler(d, physics)
+
+    compiler = WaveStruct(compiler;
+        C = (w_c,u) -> 2pi/w_c.T(w_c,u),
+        Q = (w_c,u) -> w_c.D(w_c,u)*(w_c.U(w_c,u)- w_c.C(w_c,u)),
+        D = (w_c,u) -> w_c.eta(w_c,u).avg
+    )
+
+
+    # set dimensionless height, length and period from dimensional value
+    # if property is nothing given change is skipped
+    compiler = WaveStruct(compiler, df_compiler;
+        H = H/M,
+        T = T,
+    )
+
+    # initial conditions
+    w, _ = Linear.linear_solution(d, P, config, idx, compiler, df_compiler)
+
+    conditions = [
+        ConditionStruct(kinematic_surface_condition,0:N),
+        ConditionStruct(dynamic_surface_condition,0:N),
+        ConditionStruct(height_condition)
+    ]
+
+    for m in 1:M
+        # update height
+        compiler = WaveStruct(compiler, df_compiler; H = H * m/M)
+
+        w = fourier_approx_base(w.raw,compiler,conditions)
+    end
+
+
+    w = WaveStruct(w;
+        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type)
+    )
+
+    push!(w.raw,w.H)
+    return w, WaveStruct(w.raw, df_compiler, compiler)
+
+end
+
 end

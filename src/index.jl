@@ -69,4 +69,19 @@ function default_indexes(N)
     )
 end
 
+function reduced_indexes(N)
+    OFFSET = 2N+1
+    return IndexStruct(
+        eta_indexes(N),
+        psi_indexes(N),
+        OFFSET+1,
+        nothing,
+        OFFSET+2,
+        nothing,
+        OFFSET+3,
+        nothing,
+        N
+    )
+end
+
 end
