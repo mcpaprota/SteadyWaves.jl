@@ -5,7 +5,6 @@ using ..Params
 
 struct SurfaceStruct
     point
-    point_x
     keypoints
     min
     max
@@ -14,24 +13,22 @@ struct SurfaceStruct
     a
     z
 
-    SurfaceStruct(point,point_x,keypoints,min,max,avg,e_p,a,z) = new(point,point_x,keypoints,min,max,avg,e_p,a,z)
+    SurfaceStruct(point,keypoints,min,max,avg,e_p,a,z) = new(point,keypoints,min,max,avg,e_p,a,z)
 
     SurfaceStruct(u,compiler::SurfaceStruct,wave_compiler) = new(
-        m -> compiler.point(wave_compiler,u,m),
-        compiler.point_x,
+        compiler.point(wave_compiler,u),
         compiler.keypoints(wave_compiler,u),
         compiler.min(u),
         compiler.max(u),
         compiler.avg(u),
         compiler.e_p(wave_compiler,u),
         compiler.a(u),
-        kx -> compiler.z(u,kx)
+        compiler.z(u)
     )
 
     SurfaceStruct(
         default::SurfaceStruct;
         point=nothing,
-        point_x= nothing,
         keypoints=nothing,
         min=nothing,
         max=nothing,
@@ -41,7 +38,6 @@ struct SurfaceStruct
         z=nothing,
     ) = new(
             something(point,     default.point),
-            something(point_x,   default.point_x),
             something(keypoints, default.keypoints),
             something(min,       default.min),
             something(max,       default.max),
@@ -62,51 +58,91 @@ struct SurfaceStruct
     (compiler::SurfaceStruct)(w_c,u::Vector) = return SurfaceStruct(u,compiler,w_c)
 end
 
+struct EtaSupportStruct
+    z
+    x
+    dz_dx_1
+    dz_dx_2
+
+
+    EtaSupportStruct(z,x,dz_dx_1,dz_dx_2) = new(z,x,dz_dx_1,dz_dx_2)
+
+
+    (e_c::EtaSupportStruct)(w_c,u) = return EtaSupportStruct(
+        e_c.z(w_c,u),
+        e_c.x(w_c,u),
+        e_c.dz_dx_1(w_c,u),
+        e_c.dz_dx_2(w_c,u),
+    )
+    (e_c::EtaSupportStruct)(m) = return e_c.z(m)
+end
+
+function direct_point_der_1(point,m,idx::IndexStruct)
+    dkx = pi / idx.N
+    return (point(m-1) - point(m+1))/ 2dkx
+end
+
+function direct_point_der_2(point,m,idx::IndexStruct)
+    dkx = pi / idx.N
+    return (point(m-1) - 2point(m) + point(m+1)) / dkx^2
+end
 
 function direct_elevation_struct(idx)
+    point = EtaSupportStruct(
+        (w_c,u) -> m -> direct_point(u,m,idx),
+        (w_c,u) -> m -> point_x(m,idx),
+        (w_c,u) -> m -> direct_point_der_1(j -> direct_point(u,j,idx),m,idx),
+        (w_c,u) -> m -> direct_point_der_2(j -> direct_point(u,j,idx),m,idx),
+    )
+
+
     return SurfaceStruct(
-        (w_c,u,m) -> keypoint_point(
-            w_c.eta.keypoints(w_c,u),
-            m,idx
-        ),
-        m -> point_x(m,idx),
+        point,
         (w_c,u) -> direct_keypoints(u,idx),
         (u) -> direct_min(u,idx),
         (u) -> direct_max(u,idx),
         (u) -> direct_avg(u,idx),
         (w_c,u) -> direct_potential_energy(u,idx,w_c),
         u -> nothing,
-        (u,kx) -> nothing,
+        u -> nothing,
     )
 end
 
 function fourier_elevation_struct(idx)
+    point = EtaSupportStruct(
+        (w_c,u) -> m -> fourier_point(w_c,u,m,idx),
+        (w_c,u) -> m -> point_x(m,idx),
+        (w_c,u) -> m -> fourier_point_der_1(w_c,u,m,idx),
+        (w_c,u) -> m -> fourier_point_der_2(w_c,u,m,idx),
+    )
+
     return SurfaceStruct(
-        (w_c,u,m) -> fourier_point(w_c,u,m,idx),
-        m -> point_x(m,idx),
+        point,
         (w_c,u) -> nothing,
         u -> fourier_min(u,idx),
         u -> fourier_max(u,idx),
         u -> fourier_avg(u,idx),
         (w_c,u) -> fourier_potential_energy(u,idx,w_c),
         u -> fourier_amplitudes(u,idx),
-        (u,kx) -> fourier_z(fourier_amplitudes(u,idx),kx),
+        u -> fourier_z_support_struct(u[idx.eta]),
     )
 end
-
 
 function point_x(m,idx::IndexStruct)
     return m * pi/idx.N
 end
 
 function keypoint_point(keypoint,m,idx::IndexStruct)
+    println(m)
     m = idx.N - abs(idx.N - m%2idx.N)
     return keypoint[begin+m]
 end
 
 function direct_point(u,m,idx::IndexStruct)
     # triangular index function 
-    m = idx.N - abs(idx.N - m%2idx.N)
+    P = 2idx.N
+    m = (P + m%P)%P #ensure that m is in <0,P-1> range even if m < 0
+    m = idx.N - abs(idx.N - m)
     return u[idx.eta[begin+m]]
 end
 
@@ -140,15 +176,36 @@ function fourier_z(a,kx)
     return sum(map(j -> a[begin+j] * cos(j * kx), 0:lastindex(a)-1))
 end
 
+function fourier_dz_dx_1(a,kx)
+    return sum(map(j -> -j*a[begin+j] * sin(j * kx), 0:lastindex(a)-1))
+end
+
+function fourier_dz_dx_2(a,kx)
+    return sum(map(j -> -(j^2)*a[begin+j] * cos(j * kx), 0:lastindex(a)-1))
+end
+
 function fourier_z(u,kx,idx)
     return fourier_z(u[idx.eta],kx)
 end
 
 function fourier_point(w_c,u,m::Int,idx::IndexStruct)
     return fourier_z(
-        u,
-        w_c.eta.point_x(m),
-        idx
+        u[idx.eta],
+        w_c.eta.point(w_c,u).x(m),
+    )
+end
+
+function fourier_point_der_1(w_c,u,m,idx)
+    return fourier_dz_dx_1(
+        u[idx.eta],
+        w_c.eta.point(w_c,u).x(m),
+    )
+end
+
+function fourier_point_der_2(w_c,u,m,idx)
+    return fourier_dz_dx_2(
+        u[idx.eta],
+        w_c.eta.point(w_c,u).x(m),
     )
 end
 
@@ -191,13 +248,22 @@ function struct_with_derived_values(eta::SurfaceStruct,idx::IndexStruct,type::El
     end
 end
 
+function fourier_z_support_struct(a)
+    return EtaSupportStruct(
+        kx -> fourier_z(a,kx),
+        kx -> kx,
+        kx -> fourier_dz_dx_1(a,kx),
+        kx -> fourier_dz_dx_2(a,kx),
+    )
+    
+end
 
 function struct_with_fourier(eta::SurfaceStruct,idx::IndexStruct)
-    a = fourier_from_points(eta.point,eta.point_x,idx.N)
+    a = fourier_from_points(eta.point,eta.point.x,idx.N)
 
     return SurfaceStruct(eta;
         a = a,
-        z = kx -> fourier_z(a,kx),
+        z = fourier_z_support_struct(a),
     )
 end
 

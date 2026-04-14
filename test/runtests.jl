@@ -19,7 +19,7 @@ end
     N = 40
     # Test: no mass transport in a flume
     k = 2π / L
-    @time w1, df = fourier_approx(d, H, L; cc=2, N=N,
+    @time w1, df1 = fourier_approx(d, H, L; cc=2, N=N,
         eta_type = SteadyWaves.Params.DIRECT_ELEVATION
     )
 
@@ -40,7 +40,7 @@ end
     @test T ≈ wave_period(w, df)
 
     # Test: shoaling
-    K = topo_approx([d, d], H, L)
+    K = topo_approx([d, d], H, L, eta_type=SteadyWaves.Params.DIRECT_ELEVATION)
     @test K[1] ≈ K[2]
  # Test: w.v.z
     #velocity at 3 bottom points
@@ -82,6 +82,15 @@ end
 
     @test abs(elevation(w, pi)-w.eta.point(N)) < 1e-10
 
+    #Test: derivative
+    @test w.eta.point.dz_dx_1(0) ≈ 0
+
+    @test abs(w.eta.point.dz_dx_1(N)) < 1e-15
+
+    @test w.eta.z.dz_dx_1(0) ≈ 0
+    
+    @test abs(w.eta.z.dz_dx_1(π)) < 1e-15
+
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -91,7 +100,7 @@ end
     N = 40
     # Test: no mass transport in a flume
     k = 2π / L
-    @time w1, df = fourier_approx(d, H, L; cc=2, N=N,
+    @time w1, df1 = fourier_approx(d, H, L; cc=2, N=N,
         eta_type = SteadyWaves.Params.FOURIER_ELEVATION
     )
 
