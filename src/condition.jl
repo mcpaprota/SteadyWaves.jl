@@ -24,6 +24,17 @@ function dynamic_surface_condition(w::WaveStruct,m)
     return pressure(w,kx,kz)
 end
 
+function dynamic_condition_factory(config::Params.ConfigStruct)
+    if config.wave_type == Params.GRAVITY_WAVE
+
+        return dynamic_surface_condition
+
+    else
+        throw(error("Unknown wave type $pc"))
+    end
+
+end
+
 function height_condition(w::WaveStruct, p)
     return w.eta.max - w.eta.min - w.D * p
 end

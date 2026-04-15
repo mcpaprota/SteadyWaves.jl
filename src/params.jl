@@ -18,6 +18,13 @@ end
     INVALID_ELEVATION = 0
 end
 
+@enum WaveType begin
+    GRAVITY_WAVE = 1
+    CAPILLARY_WAVE = 2
+    GRAVITY_CAPILLARY_WAVE = 3
+    INVALID_WAVE = 0
+end
+
 function T(P,pc)
     return Int(pc) == Int(PC_PERIOD) ? P : nothing
 end
@@ -30,15 +37,18 @@ struct ConfigStruct
     cc::CurrentCriterion
     pc::ParameterCriterion
     eta_type::ElevationType
+    wave_type::WaveType
 
     ConfigStruct(;
         cc=CC_INVALID,
         pc=PC_INVALID,
-        eta_type=INVALID_ELEVATION
+        eta_type=INVALID_ELEVATION,
+        wave_type=GRAVITY_WAVE,
     ) = new(
         typeof(cc) == Int ? CurrentCriterion(cc) : cc,
         typeof(pc) == Int ? ParameterCriterion(pc) : pc,
-        typeof(eta_type) == Int ? ElevationType(eta_type) : eta_type
+        typeof(eta_type) == Int ? ElevationType(eta_type) : eta_type,
+        typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type
     )
 end
 
@@ -47,5 +57,7 @@ export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
 
 export ElevationType
+
+export WaveType
 
 end

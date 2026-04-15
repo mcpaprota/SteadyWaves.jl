@@ -31,6 +31,10 @@ function pressure_factor(kd,d,g,rho)
     return kd/d / g / rho
 end
 
+function surface_tension_factor(kd,d,g,rho)
+    return (kd/d)^2 / g / rho
+end
+
 function velocity_struct_factor(w_c,u,g,d)
     kd = w_c.D(w_c,u)
 
@@ -71,6 +75,7 @@ function dimensional_factor_compiler(d,physics)
 	    (w_c, u) -> period_factor(     w_c.D(w_c,u), d, g),	        # T
 	    (w_c, u) -> power_factor(      w_c.D(w_c,u), d, g, rho),	# F
         (w_c, u) -> pressure_factor(   w_c.D(w_c,u), d, g, rho),
+        (w_c, u) -> surface_tension_factor( w_c.D(w_c,u), d, g, rho),
 	    (w_c, u) -> 1	                                            # raw
     )
 end

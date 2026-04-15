@@ -15,7 +15,7 @@ using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition, dynamic_surface_condition,
-    mean_depth_condition
+    mean_depth_condition, dynamic_condition_factory
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
 
@@ -42,13 +42,13 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+6]`: mean flow velocity *Ū√(k/g)*
 - `u[2N+7]`: wave height *kH*
 """
-function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,
+function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
     eta_type::ElevationType = Params.FOURIER_ELEVATION
     )
 
     config = Params.ConfigStruct(cc=cc, pc=pc, eta_type=eta_type)
 
-    physics = Physics.PhysicsStruct(g,rho) 
+    physics = Physics.PhysicsStruct(g,rho,sigma) 
 
     return fourier_approx(d,H,P,config, physics; N=N,M=M)
 end
@@ -79,7 +79,7 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
-        ConditionStruct(dynamic_surface_condition,0:N),
+        ConditionStruct(dynamic_condition_factory(config),0:N),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(parameter_condition_factory(config.pc)),
         ConditionStruct(current_condition_factory(config.cc)),
