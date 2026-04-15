@@ -14,7 +14,7 @@ using ..Linear
 using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
-    kinematic_surface_condition, dynamic_surface_condition,
+    kinematic_surface_condition,
     mean_depth_condition, dynamic_condition_factory
 """
     fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
@@ -72,6 +72,7 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
         H = H/M,
         L = L,
         T = T,
+        sigma = physics.sigma
     )
 
     # initial conditions

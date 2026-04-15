@@ -87,14 +87,21 @@ function direct_point_der_2(point,m,idx::IndexStruct)
     return (point(m-1) - 2point(m) + point(m+1)) / dkx^2
 end
 
-function direct_elevation_struct(idx)
-    point = EtaSupportStruct(
-        (w_c,u) -> m -> direct_point(u,m,idx),
-        (w_c,u) -> m -> point_x(m,idx),
-        (w_c,u) -> m -> direct_point_der_1(j -> direct_point(u,j,idx),m,idx),
-        (w_c,u) -> m -> direct_point_der_2(j -> direct_point(u,j,idx),m,idx),
-    )
 
+function direct_elevation_struct(idx)
+    _point_x = m -> point_x(m,idx)
+
+    point = (w_c,u) -> begin
+        _point = m -> direct_point(u,m,idx)
+        
+
+        return EtaSupportStruct(
+            _point,
+            _point_x,
+            m-> direct_point_der_1(_point,m,idx),
+            m-> direct_point_der_2(_point,m,idx),
+        )        
+    end
 
     return SurfaceStruct(
         point,

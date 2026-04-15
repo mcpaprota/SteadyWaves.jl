@@ -148,4 +148,17 @@ function elevation(w::WaveStruct,x, df)
     return elevation(w, x * df.L) / df.eta
 end
 
+function surface_tension(w,kx)
+    return indirect_surface_tension(
+        w.sigma,
+        w.eta.z.dz_dx_1(kx),
+        w.eta.z.dz_dx_2(kx)
+    )
+end
+
+function indirect_surface_tension(sigma,kz_d1,kz_d2)
+    return sigma * kz_d2 / (1 + kz_d1^2)^1.5
+end
+
+
 end
