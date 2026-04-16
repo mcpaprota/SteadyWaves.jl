@@ -105,6 +105,24 @@ end
         deep_water = true
 
     )
+    w2,df2 = fourier_approx(1, 0.1, L; pc=2, cc=2,N = N, 
+    eta_type=SteadyWaves.Params.DIRECT_ELEVATION,
+    wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE
+    )
+
+    @test w2.eta.point(0) /df2.H < w1.eta.point(0) /df1.H
+
+    @test w2.eta.point(N) /df2.H < w1.eta.point(N) /df1.H
+
+    @test w2.eta.point(Int(N/2)) /df2.H > w1.eta.point(Int(N/2)) /df1.H
+    
+    w3,df3 = fourier_approx(1, 0.001, 0.01; pc=2, cc=2,N = N, 
+    eta_type=SteadyWaves.Params.DIRECT_ELEVATION,
+    wave_type=SteadyWaves.Params.CAPILLARY_WAVE
+    )
+
+    @test Linear.test_solution_for_linearity(w3)
+
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -180,6 +198,23 @@ end
 
     )
 
+    w2,df2 = fourier_approx(1, 0.1, L; pc=2, cc=2,N = N, 
+    eta_type=SteadyWaves.Params.FOURIER_ELEVATION,
+    wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE)
+
+    @test w2.eta.point(0) /df2.H < w1.eta.point(0) /df1.H
+
+    @test w2.eta.point(N) /df2.H < w1.eta.point(N) /df1.H
+
+    @test w2.eta.point(Int(N/2)) /df2.H > w1.eta.point(Int(N/2)) /df1.H
+
+
+    w3,df3 = fourier_approx(1, 0.001, 0.01; pc=2, cc=2,N = N, 
+    eta_type=SteadyWaves.Params.FOURIER_ELEVATION,
+    wave_type=SteadyWaves.Params.CAPILLARY_WAVE
+    )
+
+    @test Linear.test_solution_for_linearity(w3)
 end
 
 @testset "SteadyWaves.jl - dimensional factor" begin

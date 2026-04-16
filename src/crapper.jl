@@ -13,7 +13,7 @@ function c0_c_ratio_squared(;kH)
 end 
 
 function c0_squared(k, physics::PhysicsStruct)
-    return k * physics.sigma/physics.rho
+    return k * k / physics.g * physics.sigma/physics.rho
 end
 
 function c0_squared(w::WaveStruct)
