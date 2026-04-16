@@ -31,6 +31,13 @@ function linear_eta_solution(u,w,idx,config)
     end
 end
 
+function linear_angular_frequency(w,config)
+    value = config.wave_type == Params.CAPILLARY_WAVE ? 0 : 1
+    value += config.wave_type == Params.GRAVITY_WAVE ? 0 : w.sigma
+
+    return value*tanh(w.D)
+end
+
 function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,eta_type::Params.ElevationType =Params.FOURIER_ELEVATION)
     
     config = Params.ConfigStruct(pc=pc, eta_type=eta_type)
@@ -49,12 +56,16 @@ function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, co
 
     linear_eta_solution(u,w,idx,config)
 
-    u[idx.psi[begin]] = 0.5 * w.H / √tanh(kd) # Bk/g
-    u[idx.C] = √tanh(kd) # c√(k/g)
+    freq = linear_angular_frequency(w,config)
+
+    omega = √freq #dispersion relation
+
+    u[idx.psi[begin]] = 0.5 * w.H / omega # Bk/g
+    u[idx.C] = omega # c√(k/g)
     u[idx.D] = w.D # kη̄
     u[idx.Q] = 0 # q√(k³/g)
-    u[idx.R] = tanh(kd) / 2 # rk/g
-    u[idx.U] = √tanh(kd) # Ū√(k/g)
+    u[idx.R] = freq / 2 # rk/g
+    u[idx.U] = omega # Ū√(k/g)
 
     return WaveStruct(u,compiler), df
 end
