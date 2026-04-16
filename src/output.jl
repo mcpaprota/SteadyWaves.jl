@@ -86,6 +86,10 @@ function horizontal_velocity(w, x, z, df)
     return w.v.x(x * df.L,z * df.D) / df.v.x
 end
 
+function indirect_dynamic_pressure(w,kx,kz)
+    return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2
+end
+
 function indirect_pressure(w,kx,kz)
     return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2 - kz + w.D
 end
