@@ -23,6 +23,8 @@ include("velocity.jl")
 
 include("wave.jl")
 
+include("crapper.jl")
+
 include("dimensional_factor.jl")
 
 include("linear.jl")
@@ -42,6 +44,8 @@ using .Steady: fourier_approx
 
 include("shoaling.jl")
 using .Shoaling: topo_approx, update_depth_fourier_approx
+
+
 
 export fourier_approx,update_depth_fourier_approx, topo_approx, wave_number
 export wave_period, wavelength, wave_height, linear_wave_number, elevation
