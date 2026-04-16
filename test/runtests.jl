@@ -10,6 +10,9 @@ using Test
     # Test: dispersion relation
     ω = √(g * k * tanh(k * d))
     @test k ≈ linear_wave_number(d, ω)
+
+
+    @test SteadyWaves.Output.indirect_surface_tension(1,1,0) ≈ 0
 end
 
 @testset "SteadyWaves.jl - direct elevation" begin
@@ -91,6 +94,7 @@ end
     
     @test abs(w.eta.z.dz_dx_1(π)) < 1e-15
 
+    @test SteadyWaves.Output.surface_tension(w,0) < 0
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -153,6 +157,8 @@ end
     @test pressure(w, X/k, Z/k, df) ≈ rho * g / k * pressure(w, X, Z)
 
     @test 1e-12 > abs(pressure(w,0,w.eta.point(0)))
+
+    @test SteadyWaves.Output.surface_tension(w,0) < 0
 
 end
 
