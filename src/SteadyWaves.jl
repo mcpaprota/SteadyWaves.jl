@@ -63,6 +63,7 @@ export Steady
 export Shoaling
 export Index
 export Linear
+export Crapper
 
 export G, RHO
 
