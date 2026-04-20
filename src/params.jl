@@ -38,17 +38,20 @@ struct ConfigStruct
     pc::ParameterCriterion
     eta_type::ElevationType
     wave_type::WaveType
+    deep_water::Bool
 
     ConfigStruct(;
         cc=CC_INVALID,
         pc=PC_INVALID,
         eta_type=INVALID_ELEVATION,
         wave_type=GRAVITY_WAVE,
+        deep_water::Bool=false
     ) = new(
         typeof(cc) == Int ? CurrentCriterion(cc) : cc,
         typeof(pc) == Int ? ParameterCriterion(pc) : pc,
         typeof(eta_type) == Int ? ElevationType(eta_type) : eta_type,
-        typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type
+        typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type,
+        deep_water,
     )
 end
 

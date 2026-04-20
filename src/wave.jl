@@ -2,7 +2,7 @@ module Wave
 
 using ..Index:IndexStruct
 using ..Surface:SurfaceStruct, Surface
-using ..Velocity:VelocityStruct
+using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
 
 struct WaveStruct
@@ -96,9 +96,9 @@ struct WaveStruct
     )
 
     # creates compiler X = (w_c, u) -> u[idx.X] from IndexStruct
-    WaveStruct(idx::IndexStruct,eta_type::Params.ElevationType = Params.DIRECT_ELEVATION) = new(
-        SurfaceStruct(idx,eta_type),
-        VelocityStruct(idx),
+    WaveStruct(idx::IndexStruct,config::Params.ConfigStruct) = new(
+        SurfaceStruct(idx,config.eta_type),
+        velocity_struct_factory(idx,config),
         (w_c, u) -> u[idx.D],
         (w_c, u) -> u[idx.C],
         (w_c, u) -> u[idx.R],

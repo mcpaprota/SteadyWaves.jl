@@ -91,7 +91,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx,config,physics; N=10)
     init_conditions!(d_p / d, w.raw, idx,config)
 
     # create default compiler
-    compiler = Wave.WaveStruct(idx,config.eta_type)
+    compiler = Wave.WaveStruct(idx,config)
 
     # create dimensional_factor_compiler 
     df_compiler = dimensional_factor_compiler(d, physics)

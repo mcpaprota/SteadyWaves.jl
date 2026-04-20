@@ -95,6 +95,12 @@ end
     @test abs(w.eta.z.dz_dx_1(π)) < 1e-15
 
     @test SteadyWaves.Output.surface_tension(w,0) < 0
+
+    @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
+        eta_type = SteadyWaves.Params.DIRECT_ELEVATION,
+        deep_water = true
+
+    )
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -159,6 +165,12 @@ end
     @test 1e-12 > abs(pressure(w,0,w.eta.point(0)))
 
     @test SteadyWaves.Output.surface_tension(w,0) < 0
+
+    @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
+        eta_type = SteadyWaves.Params.FOURIER_ELEVATION,
+        deep_water = true
+
+    )
 
 end
 
