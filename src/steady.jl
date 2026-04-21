@@ -43,10 +43,15 @@ propagating in water of depth `d` using Fourier Approximation Method.
 - `u[2N+7]`: wave height *kH*
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
-    eta_type::ElevationType = Params.FOURIER_ELEVATION
+    eta_type::ElevationType = Params.FOURIER_ELEVATION,
+    deep_water::Bool = false
     )
 
-    config = Params.ConfigStruct(cc=cc, pc=pc, eta_type=eta_type)
+    config = Params.ConfigStruct(
+        cc=cc, pc=pc,
+        eta_type=eta_type,
+        deep_water=deep_water,
+    )
 
     physics = Physics.PhysicsStruct(g,rho,sigma) 
 
@@ -61,7 +66,7 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
     idx = Index.default_indexes(N)
 
     # create default compiler
-    compiler = WaveStruct(idx,config.eta_type)
+    compiler = WaveStruct(idx,config)
 
     # create dimensional factor compiler 
     df_compiler = dimensional_factor_compiler(d, physics)
