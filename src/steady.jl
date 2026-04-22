@@ -69,15 +69,19 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
     compiler = WaveStruct(idx,config)
 
     # create dimensional factor compiler 
-    df_compiler = dimensional_factor_compiler(d, physics)
+    df_compiler = dimensional_factor_compiler(L,T, physics)
 
     # set dimensionless height, length and period from dimensional value
     # if property is nothing given change is skipped
     compiler = WaveStruct(compiler, df_compiler;
         H = H/M,
-        L = L,
-        T = T,
+        D = d,
         sigma = physics.sigma
+    )
+
+    compiler = WaveStruct(compiler,
+        L= (w_c,u) -> 2pi,
+        T= (w_c,u) -> u[idx.D]
     )
 
     # initial conditions

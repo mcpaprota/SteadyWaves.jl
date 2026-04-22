@@ -17,6 +17,8 @@ end
 
 function nonlinear_system_base!(du, u, conditions,compiler)
 
+    @assert sum(u) !== NaN "$u"
+
     w = WaveStruct(u,compiler)
 
     index = 1
