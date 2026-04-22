@@ -54,7 +54,15 @@ export horizontal_velocity
 export pressure
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
+
 export Output
+export Params
+export Physics
+export NonlinearSystem
+export Steady
+export Shoaling
+export Index
+
 export G, RHO
 
 end
