@@ -62,6 +62,7 @@ export NonlinearSystem
 export Steady
 export Shoaling
 export Index
+export Linear
 
 export G, RHO
 

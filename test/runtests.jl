@@ -26,6 +26,8 @@ end
         eta_type = SteadyWaves.Params.DIRECT_ELEVATION
     )
 
+    @test Linear.test_solution_for_linearity(w1) > 1e-5
+
     @test w1.C ≈ w1.U # c√(k/g) = Ū√(k/g)
 
     # Test: c = L/T
@@ -33,6 +35,8 @@ end
     @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=2, N=N,
         eta_type = SteadyWaves.Params.DIRECT_ELEVATION
     )
+
+    @test Linear.test_solution_for_linearity(w1) > 1e-5
     
     @test w1.C ≈ w.C
 
@@ -114,6 +118,8 @@ end
         eta_type = SteadyWaves.Params.FOURIER_ELEVATION
     )
 
+    @test Linear.test_solution_for_linearity(w1) > 1e-5
+
     @test w1.C ≈ w1.U # c√(k/g) = Ū√(k/g)
 
     # Test: c = L/T
@@ -122,6 +128,8 @@ end
         eta_type = SteadyWaves.Params.FOURIER_ELEVATION
     )
     
+    @test Linear.test_solution_for_linearity(w1) > 1e-5
+
     @test w1.C ≈ w.C
 
     # Test: wave_length
