@@ -58,6 +58,48 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     return fourier_approx(d,H,P,config, physics; N=N,M=M)
 end
 
+function fourier_approx(H; L,d=1.0, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
+    eta_type::ElevationType = Params.FOURIER_ELEVATION,
+    deep_water::Bool = false
+    )
+    
+    pc = L === nothing ? PC_PERIOD : PC_LENGTH
+
+    if d == Inf
+        d = 1.0
+        deep_water = true
+    end
+
+    config = Params.ConfigStruct(
+        cc=cc, pc=pc,
+        eta_type=eta_type,
+        deep_water=deep_water,
+    )
+
+    physics = Physics.PhysicsStruct(g,rho,sigma) 
+
+    @assert H > 0
+
+    @assert L > 0 | L === nothing
+
+    @assert T > 0 | T === nothing
+
+    @assert (L === nothing) ^ (T === nothing) #xor
+
+    @assert d > 0
+
+    @assert N > 1
+
+    @assert M > 0
+
+    @assert (deep_water & (config.cc == CC_STOKES) ) == false
+
+    @assert (deep_water & (d != 1.0)) == false
+
+
+    return fourier_approx(d,H,P,config, physics; N=N,M=M)
+end
+
 
 function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
 

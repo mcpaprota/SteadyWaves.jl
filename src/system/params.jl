@@ -55,6 +55,16 @@ struct ConfigStruct
     )
 end
 
+function validate(physics)
+
+    @assert physics.rho > 0
+
+    @assert physics.sigma >= 0
+
+    @assert physics.g > 0
+    
+end
+
 export CurrentCriterion, CC_EULER, CC_STOKES
 
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
