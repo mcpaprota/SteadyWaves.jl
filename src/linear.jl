@@ -140,5 +140,8 @@ function linear_wave_number(d, ω, g=G, ϵ=10^-12)
     end
 end
 
+function test_solution_for_linearity(w)
+    return sum((w.eta.a[begin+2:end]).^2)/(w.eta.a[begin+1])^2
+end
 
 end
