@@ -96,11 +96,13 @@ end
 
     @test SteadyWaves.Output.surface_tension(w,0) < 0
 
-    @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
+    @time w_cu, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
         eta_type = SteadyWaves.Params.DIRECT_ELEVATION,
         deep_water = true
 
     )
+
+    println.(w.raw,w_cu.raw)
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -171,6 +173,18 @@ end
         deep_water = true
 
     )
+
+end
+
+@testset "SteadyWaves - cumulative " begin
+    
+    @time w, df = fourier_approx(1, 0.1, 10; pc=2, cc=SteadyWaves.Params.CC_EULER, N=16,
+        eta_type = SteadyWaves.Params.FOURIER_ELEVATION,
+    )
+
+    config = Params.ConfigStruct(pc=2, cc=SteadyWaves.Params.CC_EULER, eta_type = SteadyWaves.Params.FOURIER_ELEVATION)
+
+    @time w, df = Steady.cumulative_fourier_approx(1, 0.1, 10,config, Physics.DEFAULT_PHYSICS)
 
 end
 

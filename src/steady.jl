@@ -59,7 +59,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 end
 
 
-function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
+function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1,raw=nothing)
 
     L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
@@ -81,7 +81,13 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
     )
 
     # initial conditions
-    w, _ = Linear.linear_solution(d, P, config, idx, compiler, df_compiler)
+    if raw === nothing
+
+        w, _ = Linear.linear_solution(d, P, config, idx, compiler, df_compiler)
+
+        raw = w.raw
+
+    end
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
@@ -96,7 +102,7 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
         # update height
         compiler = WaveStruct(compiler, df_compiler; H = H * m/M)
 
-        w = fourier_approx_base(w.raw,compiler,conditions)
+        w = fourier_approx_base(raw,compiler,conditions)
     end
 
 
@@ -104,8 +110,33 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
         eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type)
     )
 
-    push!(w.raw,w.H)
+    #push!(w.raw,w.H)
     return w, WaveStruct(w.raw, df_compiler, compiler)
+
+end
+
+function cumulative_fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct;M=1, N=[2,4,8,16])
+
+    w,df = fourier_approx(d,H,P,config, physics,M=M, N=N[begin])
+
+    idx = Index.default_indexes(N[begin])
+
+    for n in N[begin+1:end]
+        println(n)
+        new_idx = Index.default_indexes(n)
+
+        new_raw = zeros(new_idx.U)
+
+        Index.upsize!(w.raw,idx, new_raw, new_idx)
+
+        w,df = fourier_approx(d,H,P,config, physics,M=M, N=n,raw=new_raw)
+
+        println(w.eta.a)
+
+        idx = new_idx
+    end
+
+    return w, df
 
 end
 

@@ -69,4 +69,45 @@ function default_indexes(N)
     )
 end
 
+function upsize!(old_raw,old_index::IndexStruct,new_raw,new_index::IndexStruct)
+
+    upsize_splice!(old_raw, old_index.eta, new_raw, new_index.eta)
+
+    upsize_splice!(old_raw, old_index.psi, new_raw, new_index.psi)
+
+    upsize_value!(old_raw,old_index.D, new_raw, new_index.D)
+
+    upsize_value!(old_raw,old_index.C, new_raw, new_index.C)
+
+    upsize_value!(old_raw,old_index.R, new_raw, new_index.R)
+
+    upsize_value!(old_raw,old_index.H, new_raw, new_index.H)
+
+    upsize_value!(old_raw,old_index.U, new_raw, new_index.U)
+
+    upsize_value!(old_raw,old_index.Q, new_raw, new_index.Q)
+    
+end
+
+function upsize_splice!(old_raw,old_i,new_raw,new_i)
+    
+    new_nonzero_i = old_i .- old_i[begin] .+ new_i[begin]
+
+    new_raw[new_nonzero_i] = old_raw[old_i]
+
+end
+
+function upsize_value!(old_raw,old_i,new_raw,new_i)
+    # skip if doesn't exist in the old_raw
+    if length(old_raw) < old_i
+        return 
+    end
+
+    @assert length(new_raw) >= new_i "Can't pass existing value to  the upsized array $(length(old_raw)) $old_i $(length(new_raw)) $new_i"
+
+    new_raw[new_i] = old_raw[old_i]
+
+end
+
+
 end
