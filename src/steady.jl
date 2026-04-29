@@ -44,8 +44,8 @@ propagating in water of depth `d` using Fourier Approximation Method.
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
     eta_type::ElevationType = Params.FOURIER_ELEVATION,
-    deep_water::Bool = false,
     wave_type::Params.WaveType = Params.GRAVITY_WAVE,
+    deep_water = false
     )
 
     config = Params.ConfigStruct(
