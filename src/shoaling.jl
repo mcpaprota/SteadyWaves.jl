@@ -107,7 +107,7 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx,config,physics; N=10)
         ConditionStruct(dynamic_condition_factory(config), 0:N),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(period_condition),
-        ConditionStruct(current_condition_factory(config.cc)),
+        ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition),
         ConditionStruct(power_condition)
     ]
