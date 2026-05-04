@@ -196,7 +196,6 @@ end
     )
 end
 
-
 @testset "SteadyWaves.jl - fourier capillary" begin
     
     N = 20
@@ -275,6 +274,50 @@ end
     @test abs(Crapper.crapper_test_of_solution(wgc)) < abs(Crapper.crapper_test_of_solution(wg))
 
     @test abs(Crapper.crapper_test_of_solution(wc)) < abs(Crapper.crapper_test_of_solution(wgc))
+
+end
+
+@testset "SteadyWaves.jl - dimensionless input" begin
+    N = 32
+    kd = 1
+    kH = 0.2
+
+    k = 1
+    L = 2pi/k
+
+    d = kd/k
+    H = kH/k
+
+
+    @time w, _ = Steady.fourier_approx(d,H,L,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_EULER,
+        pc=Params.PC_LENGTH,
+        ),
+        Physics.DEFAULT_PHYSICS,
+        N=N
+    )
+
+    @time wd, _ = Steady.dimensionless_fourier_approx(kd,kH,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_EULER
+        ),
+        dimensionless_sigma = 0,
+        N = N
+    )
+
+    @test sum(abs.(w.eta.a .- wd.eta.a)) < 1e-10
+
+    @test w.D ≈ wd.D
+
+    @test w.C ≈ wd.C
+    
+    @test w.Q ≈ wd.Q
+
+    @test w.R ≈ wd.R
+
+    @test w.U ≈ wd.U
+
 
 end
 
