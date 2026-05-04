@@ -11,21 +11,22 @@ function mean_depth_condition(w::WaveStruct)
 end
 
 function kinematic_surface_condition(w::WaveStruct,m)
-    kx = m/w.N * pi
+    kx = w.eta.point.x(m)
     kz = w.eta.point(m)
 
     return w.v.psi(kx,kz) - w.U * (kz - w.D) - w.Q
 end
 
+
 function gravity_dynamic_surface_condition(w::WaveStruct,m)
-    kx = m/w.N * pi
+    kx = w.eta.point.x(m)
     kz = w.eta.point(m)
 
     return pressure(w,kx,kz)
 end
 
 function gravity_capillary_dynamic_surface_condition(w::WaveStruct,m)
-    kx = m/w.N * pi
+    kx = w.eta.point.x(m)
     kz = w.eta.point(m)
 
     dz_dx_1 = w.eta.point.dz_dx_1(m)
@@ -44,13 +45,9 @@ function dynamic_condition_factory(config::Params.ConfigStruct)
         return gravity_capillary_dynamic_surface_condition
 
     else
-        throw(error("Unknown wave type $pc"))
+        throw(error("Unknown wave type $(config.wave_type)"))
     end
 
-end
-
-function height_condition(w::WaveStruct, p)
-    return w.eta.max - w.eta.min - w.D * p
 end
 
 function height_condition(w::WaveStruct)
@@ -77,24 +74,23 @@ function period_condition(w::WaveStruct)
     return w.C * w.T- 2π   
 end
 
-
-function current_condition_factory(cc::Params.CurrentCriterion)
-    if cc == CC_STOKES
+function current_condition_factory(config::Params.ConfigStruct)
+    if config.cc == CC_STOKES
         return stokes_condition
-    elseif cc == CC_EULER
+    elseif config.cc == CC_EULER
         return euler_condition
     else
-        throw(error("Unknown current criterion $cc"))
+        throw(error("Unknown current criterion $(config.cc)"))
     end
 end
 
-function parameter_condition_factory(pc::Params.ParameterCriterion)
-    if pc == PC_LENGTH
+function parameter_condition_factory(config::Params.ConfigStruct)
+    if config.pc == PC_LENGTH
         return length_condition
-    elseif pc == PC_PERIOD
+    elseif config.pc == PC_PERIOD
         return period_condition
     else
-        throw(error("Unknown parameter criterion $pc"))
+        throw(error("Unknown parameter criterion $(config.pc)"))
     end
 end
 

@@ -87,8 +87,8 @@ function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.Ph
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(parameter_condition_factory(config.pc)),
-        ConditionStruct(current_condition_factory(config.cc)),
+        ConditionStruct(parameter_condition_factory(config)),
+        ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition)
     ]
 
