@@ -2,7 +2,7 @@ module Condition
 
 using ..Wave:WaveStruct
 using ..Output
-using ..Output: indirect_wave_power, pressure, indirect_surface_tension
+using ..Output: indirect_wave_power, pressure, indirect_surface_tension,indirect_dynamic_pressure
 using ..Params
 
 
@@ -35,6 +35,17 @@ function gravity_capillary_dynamic_surface_condition(w::WaveStruct,m)
     return pressure(w,kx,kz) - indirect_surface_tension(w.sigma, dz_dx_1, dz_dx_2)
 end
 
+function capillary_dynamic_surface_condition(w::WaveStruct,m)
+    kx = m/w.N * pi
+    kz = w.eta.point(m)
+
+    dz_dx_1 = w.eta.point.dz_dx_1(m)
+    dz_dx_2 = w.eta.point.dz_dx_2(m)
+
+    return indirect_dynamic_pressure(w,kx,kz) - indirect_surface_tension(w.sigma, dz_dx_1, dz_dx_2)
+end
+
+
 function dynamic_condition_factory(config::Params.ConfigStruct)
     if config.wave_type == Params.GRAVITY_WAVE
 
@@ -43,6 +54,10 @@ function dynamic_condition_factory(config::Params.ConfigStruct)
     elseif config.wave_type == Params.GRAVITY_CAPILLARY_WAVE
 
         return gravity_capillary_dynamic_surface_condition
+
+    elseif config.wave_type == Params.CAPILLARY_WAVE
+
+        return capillary_dynamic_surface_condition
 
     else
         throw(error("Unknown wave type $(config.wave_type)"))

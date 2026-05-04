@@ -105,6 +105,11 @@ end
         deep_water = true
 
     )
+    w2,df2 = fourier_approx(1, 0.1, L; pc=2, cc=2,N = N, 
+    eta_type=SteadyWaves.Params.DIRECT_ELEVATION,
+    wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE
+    )
+
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -179,6 +184,88 @@ end
         deep_water = true
 
     )
+
+end
+
+
+@testset "SteadyWaves.jl - fourier capillary" begin
+    
+    N = 20
+
+    L = 0.01
+
+    H = 0.2*L
+
+    eta_type = SteadyWaves.Params.FOURIER_ELEVATION
+
+    wg,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type= eta_type,
+    wave_type=SteadyWaves.Params.GRAVITY_WAVE,
+    deep_water = true
+    )
+
+    wc,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type=eta_type,
+    wave_type=SteadyWaves.Params.CAPILLARY_WAVE,
+    deep_water = true
+    )
+
+    wgc,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type=eta_type,
+    wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE,
+    deep_water = true
+    )
+
+    @test Linear.test_solution_for_linearity(wg) > 1e-5
+
+    @test Linear.test_solution_for_linearity(wc) > 1e-5
+
+    @test Linear.test_solution_for_linearity(wgc) > 1e-5
+
+    @test abs(Crapper.crapper_test_of_solution(wgc)) < abs(Crapper.crapper_test_of_solution(wg))
+
+    @test abs(Crapper.crapper_test_of_solution(wc)) < abs(Crapper.crapper_test_of_solution(wgc))
+
+end
+
+
+@testset "SteadyWaves.jl - direct capillary" begin
+    
+    N = 20
+
+    L = 0.01
+
+    H = 0.2*L
+
+    eta_type = SteadyWaves.Params.DIRECT_ELEVATION
+
+    wg,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type= eta_type,
+    wave_type=SteadyWaves.Params.GRAVITY_WAVE,
+    deep_water = true
+    )
+
+    wc,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type=eta_type,
+    wave_type=SteadyWaves.Params.CAPILLARY_WAVE,
+    deep_water = true
+    )
+
+    wgc,_ = fourier_approx(1, H, L; pc=1, cc=2,N = N, 
+    eta_type=eta_type,
+    wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE,
+    deep_water = true
+    )
+
+    @test Linear.test_solution_for_linearity(wg) > 1e-5
+
+    @test Linear.test_solution_for_linearity(wc) > 1e-5
+
+    @test Linear.test_solution_for_linearity(wgc) > 1e-5
+
+    @test abs(Crapper.crapper_test_of_solution(wgc)) < abs(Crapper.crapper_test_of_solution(wg))
+
+    @test abs(Crapper.crapper_test_of_solution(wc)) < abs(Crapper.crapper_test_of_solution(wgc))
 
 end
 
