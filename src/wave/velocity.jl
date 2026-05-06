@@ -1,4 +1,6 @@
 module Velocity
+
+using ..Params
     
 struct VelocityStruct
     x
@@ -14,66 +16,72 @@ struct VelocityStruct
     )
 end
 
-function default_velocity_struct(idx)
+function shallow_velocity_struct(idx)
     return VelocityStruct(
-        (w_c,u) -> (kx,kz) -> stream_horizontal_velocity(u,idx,w_c,kx,kz),
-        (w_c,u) -> (kx,kz) -> stream_vertical_velocity(u,idx,w_c,kx,kz),
-        (w_c,u) -> (kx,kz) -> stream(u,idx,w_c,kx,kz),
+        (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, shallow_stream_eigenfunction(cosh,cos)),
+        (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, shallow_stream_eigenfunction(sinh,sin)),
+        (w_c,u) -> stream(                      u, idx, w_c, shallow_stream_eigenfunction(sinh,cos)),
     )
 end
 
 function deep_water_velocity_struct(idx)
     return VelocityStruct(
-        (w_c,u) -> (kx,kz) -> deep_water_stream_horizontal_velocity(u,idx,w_c,kx,kz),
-        (w_c,u) -> (kx,kz) -> deep_water_stream_vertical_velocity(u,idx,w_c,kx,kz),
-        (w_c,u) -> (kx,kz) -> deep_water_stream(u,idx,w_c,kx,kz),
+        (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, deep_water_stream_eigenfunction(cos)),
+        (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, deep_water_stream_eigenfunction(sin)),
+        (w_c,u) -> stream(                      u, idx, w_c, deep_water_stream_eigenfunction(cos)),
+    )
+end
+
+function stable_velocity_struct(idx)
+    return VelocityStruct(
+        (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, stable_stream_eigenfunction(cosh,sinh,cos)),
+        (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, stable_stream_eigenfunction(sinh,cosh,sin)),
+        (w_c,u) -> stream(                      u, idx, w_c, stable_stream_eigenfunction(sinh,cosh,cos)),
     )
 end
 
 function velocity_struct_factory(idx,config)
-    if config.deep_water
+    if config.deep_water == Params.DEEP_WATER
         return deep_water_velocity_struct(idx)
+    elseif config.deep_water == Params.SHALLOW_WATER
+        return shallow_velocity_struct(idx)
     else
-        return default_velocity_struct(idx)
+        return stable_velocity_struct(idx)
     end
 end
 
-function stream_eigenfunction(hiperbolic,trigonometric,B,kd,kx,kz,j)
-    return B * hiperbolic(j * kz) / cosh(j * kd) * trigonometric(j * kx)
+
+function shallow_stream_eigenfunction(hiperbolic,trigonometric)
+    return (B,kd,kx,kz,j) -> B * hiperbolic(j * kz) / cosh(j * kd) * trigonometric(j * kx)
 end
 
-function deep_water_stream_eigenfunction(trigonometric,B,kx,kz,j)
-    return B * exp(j*kz)*trigonometric(j*kx)
+function stable_stream_eigenfunction(h_single,h_multiplied,trigonometric)
+    return (B,kd,kx,kz,j) -> B * (h_single(j * (kz-kd)) + tanh(j * kd)*h_multiplied(j * (kz-kd)) )* trigonometric(j * kx)
 end
 
-function stream_horizontal_velocity(u, idx, w_c, kx, kz)
+function stable_stream_eigenfunction(multi,trigonometric)
+    return (B,kd,kx,kz,j) -> B * (exp(kz-kd) + multi * exp(-kz-kd)) / (1 + exp(-kd)) * trigonometric(j * kx)
+end
+
+
+function deep_water_stream_eigenfunction(trigonometric)
+    return (B,kd,kx,kz,j) -> B * exp(j*(kz-kd))*trigonometric(j*kx)
+end
+
+
+function stream_horizontal_velocity(u, idx, w_c,stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return -w_c.U(w_c,u) + sum([j*stream_eigenfunction(cosh, cos, u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+    return (kx,kz) -> -w_c.U(w_c,u) + sum([j*stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
-function stream_vertical_velocity(u, idx, w_c, kx, kz)
+function stream_vertical_velocity(u, idx, w_c,stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return sum([j*stream_eigenfunction(sinh, sin, u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+    return (kx,kz) -> sum([j*stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
-function stream(u, idx, w_c, kx, kz)
+function stream(u, idx, w_c, stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return sum([stream_eigenfunction(sinh, cos, u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
-end
-
-function deep_water_stream_horizontal_velocity(u, idx, w_c, kx, kz)
-    kd = w_c.D(w_c,u)
-    return -w_c.U(w_c,u) + sum([j* deep_water_stream_eigenfunction(cos,u[idx.psi[j]],kx,kz-kd,j) for j in 1:idx.N])
-end
-
-function deep_water_stream_vertical_velocity(u, idx,w_c, kx, kz)
-    kd = w_c.D(w_c,u)
-    return sum([j*deep_water_stream_eigenfunction( sin, u[idx.psi[j]], kx, kz-kd, j) for j in 1:idx.N])
-end
-
-function deep_water_stream(u, idx,w_c, kx, kz)
-    kd = w_c.D(w_c,u)
-    return sum([deep_water_stream_eigenfunction( cos, u[idx.psi[j]], kx, kz-kd, j) for j in 1:idx.N])
+    return (kx,kz) -> sum([stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
 end

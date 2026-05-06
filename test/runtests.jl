@@ -110,6 +110,11 @@ end
     wave_type=SteadyWaves.Params.GRAVITY_CAPILLARY_WAVE
     )
 
+
+    @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
+        eta_type = SteadyWaves.Params.DIRECT_ELEVATION,
+        deep_water = Params.STABLE
+    )
 end
 
 @testset "SteadyWaves.jl - fourier elevation" begin
@@ -185,6 +190,10 @@ end
 
     )
 
+    @time w, df = fourier_approx(1, 0.1, T; pc=2, cc=SteadyWaves.Params.CC_EULER, N=N,
+        eta_type = SteadyWaves.Params.FOURIER_ELEVATION,
+        deep_water = Params.STABLE
+    )
 end
 
 

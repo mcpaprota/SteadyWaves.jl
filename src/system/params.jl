@@ -25,6 +25,16 @@ end
     INVALID_WAVE = 0
 end
 
+@enum DepthType begin
+    DEEP_WATER = 1
+    SHALLOW_WATER = 2
+    STABLE = 3
+end
+
+function parse_depth_type(deep::Bool)
+    return deep ? DEEP_WATER : SHALLOW_WATER
+end
+
 function T(P,pc)
     return Int(pc) == Int(PC_PERIOD) ? P : nothing
 end
@@ -38,20 +48,20 @@ struct ConfigStruct
     pc::ParameterCriterion
     eta_type::ElevationType
     wave_type::WaveType
-    deep_water::Bool
+    deep_water::DepthType
 
     ConfigStruct(;
         cc=CC_INVALID,
         pc=PC_INVALID,
         eta_type=INVALID_ELEVATION,
         wave_type=GRAVITY_WAVE,
-        deep_water::Bool=false
+        deep_water=SHALLOW_WATER
     ) = new(
         typeof(cc) == Int ? CurrentCriterion(cc) : cc,
         typeof(pc) == Int ? ParameterCriterion(pc) : pc,
         typeof(eta_type) == Int ? ElevationType(eta_type) : eta_type,
         typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type,
-        deep_water,
+        typeof(deep_water) == Bool ? parse_depth_type(deep_water) : deep_water,
     )
 end
 
