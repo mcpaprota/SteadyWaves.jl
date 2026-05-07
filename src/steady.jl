@@ -57,12 +57,27 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
     physics = Physics.PhysicsStruct(g,rho,sigma) 
 
+    L , T = Params.L(P,config.pc), Params.T(P,config.pc)
+
+    validate_config(d,H,L,T,config,physics,N,M)
+
     return fourier_approx(d,H,P,config, physics; N=N,M=M)
 end
 
+function validate_config(d,H,L,T,config,physics,N,M)
+    Physics.validate_constants(physics)
 
-function fourier_approx(d, H, P,config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
+    Physics.validate_parameters(H,L,T,d)
 
+    @assert (L === nothing) || (config.pc === PC_LENGTH)
+    @assert (T === nothing) || (config.pc === PC_PERIOD)
+
+    @assert N > 1
+
+    @assert M > 0
+end
+
+function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
     L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
     idx = Index.default_indexes(N)
