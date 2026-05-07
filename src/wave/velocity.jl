@@ -6,13 +6,15 @@ struct VelocityStruct
     x
     z
     psi
+    b
 
-    VelocityStruct(x,z,psi) = new(x,z,psi)
+    VelocityStruct(x,z,psi,b) = new(x,z,psi,b)
 
     (v::VelocityStruct)(w_c,u) = return VelocityStruct(
         v.x(w_c,u),
         v.z(w_c,u),
-        v.psi(w_c,u)
+        v.psi(w_c,u),
+        v.b(w_c,u)
     )
 end
 
@@ -21,6 +23,7 @@ function shallow_velocity_struct(idx)
         (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, shallow_stream_eigenfunction(cosh,cos)),
         (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, shallow_stream_eigenfunction(sinh,sin)),
         (w_c,u) -> stream(                      u, idx, w_c, shallow_stream_eigenfunction(sinh,cos)),
+        b(idx),
     )
 end
 
@@ -29,6 +32,7 @@ function deep_water_velocity_struct(idx)
         (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, deep_water_stream_eigenfunction(cos)),
         (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, deep_water_stream_eigenfunction(sin)),
         (w_c,u) -> stream(                      u, idx, w_c, deep_water_stream_eigenfunction(cos)),
+        b(idx),
     )
 end
 
@@ -37,6 +41,7 @@ function stable_velocity_struct(idx)
         (w_c,u) -> stream_horizontal_velocity(  u, idx, w_c, stable_stream_eigenfunction(cosh,sinh,cos)),
         (w_c,u) -> stream_vertical_velocity(    u, idx, w_c, stable_stream_eigenfunction(sinh,cosh,sin)),
         (w_c,u) -> stream(                      u, idx, w_c, stable_stream_eigenfunction(sinh,cosh,cos)),
+        b(idx),
     )
 end
 
@@ -82,6 +87,10 @@ end
 function stream(u, idx, w_c, stream_eigenfunction)
     kd = w_c.D(w_c,u)
     return (kx,kz) -> sum([stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+end
+
+function b(idx)
+    return (w_c,u) -> u[idx.psi]
 end
 
 end
