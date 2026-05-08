@@ -42,6 +42,7 @@ function velocity_struct_factor(w_c,u,g,d)
             speed_factor(kd,d,g),
             speed_factor(kd,d, g),
             bernoulli_factor(kd, d, g),
+            1
     )
 end
 
