@@ -1,6 +1,7 @@
 module DimensionalFactor
 
 using ..Velocity: VelocityStruct
+using ..Surface: SurfaceStruct, EtaSupportStruct
 using ..Wave: WaveStruct
 
 function distance_factor(kd,d) 
@@ -46,6 +47,26 @@ function velocity_struct_factor(w_c,u,g,d)
     )
 end
 
+function surface_struct_factor(k,g,rho)
+    func = EtaSupportStruct(
+        k,
+        k,
+        1,
+        1/k
+    )
+    return SurfaceStruct(
+        func,
+        k,
+        k,
+        k,
+        k,
+        (k^4)/(g*rho),
+        k,
+        func
+    )
+end
+
+
 function dimensional_factor(kd,d,g,rho;L=0,M=0,T=0)
     k = kd/d
 
@@ -63,7 +84,7 @@ function dimensional_factor_compiler(d,physics)
     rho = physics.rho 
 
     return WaveStruct(
-	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # eta
+	    (w_c, u) -> surface_struct_factor(w_c.D(w_c,u)/d,g,rho),	# eta
 	    (w_c, u) -> velocity_struct_factor(w_c, u, g, d),           # v
 	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # D
 	    (w_c, u) -> speed_factor(      w_c.D(w_c,u), d, g),	        # C
@@ -82,4 +103,51 @@ function dimensional_factor_compiler(d,physics)
 end
 
 
+
+function dimensional_wave_struct(w,df)
+    eta = w.eta
+    return WaveStruct(
+        SurfaceStruct(
+            EtaSupportStruct(
+                m -> eta.point.z(m)/df.eta.z,
+                m -> eta.point.x(m)/df.eta.x,
+                eta.point.dz_dx_1 / df.eta.dz_dx_1,
+                m -> eta.point.dz_dx_2 / df.eta.dz_dx_2,
+            ),
+            eta.keypoints ./ df.eta.z,
+            eta.min/df.eta.z,
+            eta.max/df.eta.z,
+            eta.avg/df.eta.z,
+            eta.e_p/df.eta.e_p,
+            eta.a ./df.eta.z,
+            EtaSupportStruct(
+                x -> eta.z(x*df.L)/df.eta.z,
+                x -> x,
+                eta.z.dz_dx_1,
+                m -> eta.z.dz_dx_2 *df.eta.dz_dx_2,
+            ),
+
+        ),
+        VelocityStruct(
+            (x,z) -> w.v.x(x*df.L,z*df.D)/df.v.x,
+            (x,z) -> w.v.x(x*df.L,z*df.D)/df.v.x,
+            (x,z) -> w.v.psi(x*df.L,z*df.D)/df.v.psi,
+            w.v.b,
+        ),
+        df.D*w.D,
+        df.C*w.C,
+        df.R*w.R,
+        df.H*w.H,
+        df.U*w.U,
+        df.Q*w.Q,
+        w.N,
+        df.L*w.L,
+        df.T*w.T,
+        df.F*w.F,
+        (x,z) -> df.P*w.P(x*df.L,z*df.D),
+        df.sigma*w.sigma,
+        w.raw
+    )
+
+end
 end

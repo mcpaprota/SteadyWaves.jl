@@ -149,7 +149,7 @@ function elevation(w::WaveStruct,kx)
 end
 
 function elevation(w::WaveStruct,x, df)
-    return elevation(w, x * df.L) / df.eta
+    return elevation(w, x * df.L) / df.eta.z
 end
 
 function surface_tension(w,kx)
