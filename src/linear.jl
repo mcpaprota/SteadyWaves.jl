@@ -1,7 +1,7 @@
 module Linear
 
 using ..Params
-using ..Index: IndexStruct
+using ..Index: Index,IndexStruct
 using ..Surface
 using ..Wave: WaveStruct
 using ..Physics
@@ -46,13 +46,12 @@ function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,
 end
 
 function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
+
     k, u = init(d, P, config.pc, idx,g)
 
     df = WaveStruct(u, df_compiler, compiler)
 
     w = WaveStruct(u, compiler)
-
-    kd = k * d
 
     linear_eta_solution(u,w,idx,config)
 
@@ -69,6 +68,27 @@ function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, co
 
     return WaveStruct(u,compiler), df
 end
+
+function dimensionless_linear_solution(config::Params.ConfigStruct, idx::IndexStruct, compiler)
+    u = zeros(Index.max_index(idx))
+
+    w = WaveStruct(u, compiler)
+
+    linear_eta_solution(u,w,idx,config)
+
+    freq = linear_angular_frequency(w,config)
+
+    omega = √freq #dispersion relation
+
+    u[idx.psi[begin]] = 0.5 * w.H / omega # Bk/g
+    u[idx.C] = omega # c√(k/g)
+    u[idx.Q] = 0 # q√(k³/g)
+    u[idx.R] = freq / 2 # rk/g
+    u[idx.U] = omega # Ū√(k/g)
+
+    return WaveStruct(u,compiler), nothing
+end
+
 
 function wave_number_condition(k,d,k_0)
     return k * tanh(k *d) - k_0
