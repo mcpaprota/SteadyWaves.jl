@@ -117,9 +117,7 @@ function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.P
     end
 
 
-    w = WaveStruct(w;
-        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type)
-    )
+    w = output_wave(w,idx,config)
 
     push!(w.raw,w.H)
     return w, WaveStruct(w.raw, df_compiler, compiler)
@@ -152,9 +150,6 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
     # initial conditions
     w, _ = Linear.dimensionless_linear_solution(config, idx, compiler)
 
-    println(length(w.raw))
-    println(idx)
-
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
@@ -165,12 +160,18 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
 
     w = fourier_approx_base(w.raw,compiler,conditions)
 
-    w = WaveStruct(w;
-        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type)
-    )
+    w = output_wave(w,idx,config)
 
     return w, nothing
 
+end
+
+function output_wave(w,idx,config)
+    return WaveStruct(w;
+        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
+        P = (kx,kz) -> Output.indirect_pressure(w,kx,kz),
+        F = Output.indirect_wave_power(w),
+    )
 end
 
 end
