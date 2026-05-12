@@ -171,6 +171,8 @@ function output_wave(w,idx,config)
         eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
         P = (kx,kz) -> Output.indirect_pressure(w,kx,kz),
         F = Output.indirect_wave_power(w),
+        L = w.L === nothing ? Output.indirect_wavelength(w) : nothing,
+        T = w.T === nothing ? Output.indirect_wave_period(w) : nothing,
     )
 end
 

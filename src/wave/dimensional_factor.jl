@@ -102,31 +102,28 @@ function dimensional_factor_compiler(d,physics)
     )
 end
 
-
+function wrap_eta_support(eta,df_in,df_eta)
+     EtaSupportStruct(
+       x -> eta.z(x*df_in)/df_eta.z,
+       x -> eta.x(x*df_in)/df_eta.x,
+       x -> eta.dz_dx_1(x*df_in)/df_eta.dz_dx_1,
+       x -> eta.dz_dx_2(x*df_in)/df_eta.dz_dx_2,
+     )
+end
 
 function dimensional_wave_struct(w,df)
     eta = w.eta
+
     return WaveStruct(
         SurfaceStruct(
-            EtaSupportStruct(
-                m -> eta.point.z(m)/df.eta.z,
-                m -> eta.point.x(m)/df.eta.x,
-                eta.point.dz_dx_1 / df.eta.dz_dx_1,
-                m -> eta.point.dz_dx_2 / df.eta.dz_dx_2,
-            ),
-            eta.keypoints ./ df.eta.z,
-            eta.min/df.eta.z,
-            eta.max/df.eta.z,
-            eta.avg/df.eta.z,
+            wrap_eta_support(eta.point, 1, df.eta.point),
+            eta.keypoints ./ df.eta.z.z,
+            eta.min/df.eta.z.z,
+            eta.max/df.eta.z.z,
+            eta.avg/df.eta.z.z,
             eta.e_p/df.eta.e_p,
-            eta.a ./df.eta.z,
-            EtaSupportStruct(
-                x -> eta.z(x*df.L)/df.eta.z,
-                x -> x,
-                eta.z.dz_dx_1,
-                m -> eta.z.dz_dx_2 *df.eta.dz_dx_2,
-            ),
-
+            eta.a ./df.eta.z.z,
+            wrap_eta_support(eta.z, df.eta.z.x, df.eta.z)
         ),
         VelocityStruct(
             (x,z) -> w.v.x(x*df.L,z*df.D)/df.v.x,
@@ -134,18 +131,18 @@ function dimensional_wave_struct(w,df)
             (x,z) -> w.v.psi(x*df.L,z*df.D)/df.v.psi,
             w.v.b,
         ),
-        df.D*w.D,
-        df.C*w.C,
-        df.R*w.R,
-        df.H*w.H,
-        df.U*w.U,
-        df.Q*w.Q,
+        w.D/df.D,
+        w.C/df.C,
+        w.R/df.R,
+        w.H/df.H,
+        w.U/df.U,
+        w.Q/df.Q,
         w.N,
-        df.L*w.L,
-        df.T*w.T,
-        df.F*w.F,
-        (x,z) -> df.P*w.P(x*df.L,z*df.D),
-        df.sigma*w.sigma,
+        w.L/df.L,
+        w.T/df.T,
+        w.F/df.F,
+        (x,z) -> w.P(x*df.L,z*df.D)/df.P,
+        w.sigma/df.sigma,
         w.raw
     )
 
