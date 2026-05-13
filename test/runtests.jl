@@ -12,7 +12,7 @@ using Test
     @test k ≈ linear_wave_number(d, ω)
 
 
-    @test SteadyWaves.Output.indirect_surface_tension(1,1,0) ≈ 0
+    @test SteadyWaves.Indirect.indirect_surface_tension(1,1,0) ≈ 0
 end
 
 @testset "SteadyWaves.jl - direct elevation" begin
@@ -40,11 +40,13 @@ end
     
     @test w1.C ≈ w.C
 
+    wd = dimensional(w,df)
+
     # Test: wave_length
-    @test L ≈ wavelength(w, df)
+    @test L ≈ wavelength(wd)
 
     # Test: wave_period
-    @test T ≈ wave_period(w, df)
+    @test T ≈ wave_period(wd)
 
     # Test: shoaling
     K = topo_approx([d, d], H, L, eta_type=SteadyWaves.Params.DIRECT_ELEVATION)
@@ -65,18 +67,18 @@ end
     @test 1e-4 < abs(w.v.z(π/N,   w.eta.point(1)/2))
 
     #Test: vertical_velocity
-    k = Output.wave_number(w, df)
-    @test 0 ≈ vertical_velocity(w, 0,0, df)
+    k = Output.wave_number(wd)
+    @test 0 ≈ vertical_velocity(wd, 0,0)
 
     X = π/N
     Z = w.eta.point(1)/2
-    @test vertical_velocity(w, X/k, Z/k, df) ≈ sqrt(g/k) * w.v.z(X, Z)
+    @test vertical_velocity(wd, X/k, Z/k) ≈ sqrt(g/k) * w.v.z(X, Z)
     
     #Test: horizontal_velocity
-    @test horizontal_velocity(w, X/k, Z/k, df) ≈ sqrt(g/k) * w.v.x(X, Z)
+    @test horizontal_velocity(wd, X/k, Z/k) ≈ sqrt(g/k) * w.v.x(X, Z)
 
     #Test: pressure
-    @test pressure(w, X/k, Z/k, df) ≈ rho * g / k * pressure(w, X, Z)
+    @test pressure(wd, X/k, Z/k) ≈ rho * g / k * pressure(w, X, Z)
 
     @test 1e-12 > abs(pressure(w,0,w.eta.point(0)))
 
@@ -141,15 +143,16 @@ end
     @test Linear.test_solution_for_linearity(w1) > 1e-5
 
     @test w1.C ≈ w.C
+    wd = dimensional(w,df)
 
     # Test: wave_length
-    @test L ≈ wavelength(w, df)
+    @test L ≈ wavelength(wd)
 
     # Test: wave_period
-    @test T ≈ wave_period(w, df)
+    @test T ≈ wave_period(wd)
 
     # Test: shoaling
-    K = topo_approx([d, d], H, L)
+    K = topo_approx([d, d], H, L, eta_type=SteadyWaves.Params.DIRECT_ELEVATION)
     @test K[1] ≈ K[2]
  # Test: w.v.z
     #velocity at 3 bottom points
@@ -167,18 +170,18 @@ end
     @test 1e-4 < abs(w.v.z(π/N,   w.eta.point(1)/2))
 
     #Test: vertical_velocity
-    k = Output.wave_number(w, df)
-    @test 0 ≈ vertical_velocity(w, 0,0, df)
+    k = Output.wave_number(wd)
+    @test 0 ≈ vertical_velocity(wd, 0,0)
 
     X = π/N
     Z = w.eta.point(1)/2
-    @test vertical_velocity(w, X/k, Z/k, df) ≈ sqrt(g/k) * w.v.z(X, Z)
+    @test vertical_velocity(wd, X/k, Z/k) ≈ sqrt(g/k) * w.v.z(X, Z)
     
     #Test: horizontal_velocity
-    @test horizontal_velocity(w, X/k, Z/k, df) ≈ sqrt(g/k) * w.v.x(X, Z)
+    @test horizontal_velocity(wd, X/k, Z/k) ≈ sqrt(g/k) * w.v.x(X, Z)
 
     #Test: pressure
-    @test pressure(w, X/k, Z/k, df) ≈ rho * g / k * pressure(w, X, Z)
+    @test pressure(wd, X/k, Z/k) ≈ rho * g / k * pressure(w, X, Z)
 
     @test 1e-12 > abs(pressure(w,0,w.eta.point(0)))
 

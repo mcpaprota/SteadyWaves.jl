@@ -8,6 +8,7 @@ using ..Surface
 using ..Wave: WaveStruct, Wave
 using ..DimensionalFactor: dimensional_factor_compiler
 using ..Output
+using ..Indirect
 using ..Params
 using ..Physics
 using ..Linear
@@ -176,10 +177,10 @@ function output_wave(w,idx,config)
     return Wave.set_values(w,
         WaveStruct(
             eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
-            P = (kx,kz) -> Output.indirect_pressure(w,kx,kz),
-            F = Output.indirect_wave_power(w),
-            L = w.L === nothing ? Output.indirect_wavelength(w) : nothing,
-            T = w.T === nothing ? Output.indirect_wave_period(w) : nothing,
+            P = (kx,kz) -> Indirect.indirect_pressure(w,kx,kz),
+            F = Indirect.indirect_wave_power(w),
+            L = w.L === nothing ? Indirect.indirect_wavelength(w) : nothing,
+            T = w.T === nothing ? Indirect.indirect_wave_period(w) : nothing,
         )
     )
 end

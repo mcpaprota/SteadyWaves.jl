@@ -28,9 +28,12 @@ include("wave/wave.jl")
 include("crapper.jl")
 
 include("wave/dimensional_factor.jl")
+using .DimensionalFactor: dimensional, dimensionless
 
 include("linear.jl")
 using .Linear: linear_wave_number, linear_solution
+
+include("wave/indirect.jl")
 
 include("output.jl")
 using .Output
@@ -56,6 +59,8 @@ export horizontal_velocity
 export pressure
 export CurrentCriterion, CC_EULER, CC_STOKES
 export ParameterCriterion, PC_LENGTH, PC_PERIOD
+
+export dimensional, dimensionless
 
 export Output
 export Params

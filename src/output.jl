@@ -6,163 +6,158 @@ using ..Physics
 
 using ..Index
 using ..Wave: WaveStruct
+using ..Indirect
 
 """
-    wave_period(u, d, N; g=G)
+    wave_period(w)
 
-Calculate dimensional wave period `T` from solution `u`.
+Calculate wave period `T` from solution `w`.
+
+Dimensionality of result depend on dimensionality of struct `w`
+
 """
-function indirect_wave_period(w)
-    return w.L / w.C
-end
-
 function wave_period(w)
-    return w.T === nothing ? indirect_wave_period(w) : w.T
+    return w.T
 end
 
 """
-    wave_period(w, df)
+    wavelength(w)
 
-Calculate dimensional wave period `T` from solution `w` and dimensional factor `df`.
-"""
-function wave_period(w,df)
-    return w.T / df.T
-end
+Calculate wavelength `L` from solution `w`.
+
+Dimensionality of result depend on dimensionality of struct `w`
 
 """
-    wavelength(u, d, N)
-
-Calculate dimensional wavelength `L` from solution `u`.
-"""
-function indirect_wavelength(w)
-    return w.C * w.T
-end
-
 function wavelength(w)
-    return w.L === nothing ? indirect_wavelength(w) : w.L
+    return w.L
 end
 
 """
-    wavelength(w, df)
+    wave_number(w)
 
-Calculate dimensional wavelength `L` from solution `w` and dimensional factor `df`.
-"""
-function wavelength(w, df)
-    return w.L / df.L
-end
+Calculate wave number `K` from solution `w`.
 
+Dimensionality of result depend on dimensionality of struct `w`
 
 """
-    wave_number(w, df)
-
-Calculate dimensional wave number `K` from solution `w` and dimensional factor `df`.
-"""
-function wave_number(w, df)
-    return df.D
+function wave_number(w)
+    return 2pi/w.L
 end
 
 """
-    wave_height(w, df)
+    wave_height(w)
 
-Calculate dimensional wave height `H` from solution `w` and dimensional factor `df`.
+Calculate wave height `H` from solution `w`.
+
+Dimensionality of result depend on dimensionality of struct `w`
+
 """
-function wave_height(w, df)
-    return w.H / df.H
+function wave_height(w)
+    return w.H
 end
 
+"""
+    vertical_velocity(w, kx, kz)
+
+Calculate vertical velocity from solution `w`
+at coordinates (`kx`, `kz`) or (`x`, `z`).
+
+If `w` is dimensional provide dimensional (`x`, `z`).
+If not provide (`k*x`, `k*z`).
+
+"""
 function vertical_velocity(w,kx,kz)
     return w.v.z(kx,kz)
 end
 
-function vertical_velocity(w, x, z, df)
-    return w.v.z(x * df.L,z * df.D) / df.v.z
-end
+"""
+    horizontal_velocity(w, kx, kz)
 
+Calculate horizontal velocity from solution `w`
+at coordinates (`kx`, `kz`) or (`x`, `z`).
+
+If `w` is dimensional provide dimensional (`x`, `z`).
+If not provide (`k*x`, `k*z`).
+
+"""
 function horizontal_velocity(w,kx,kz)
     return w.v.x(kx,kz)
 end
 
-function horizontal_velocity(w, x, z, df)
-    return w.v.x(x * df.L,z * df.D) / df.v.x
-end
+"""
+    pressure(w, kx, kz)
 
-function indirect_dynamic_pressure(w,kx,kz)
-    return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2
-end
+Calculate pressure from solution `w`
+at coordinates (`kx`, `kz`) or (`x`, `z`).
 
-function indirect_pressure(w,kx,kz)
-    return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2 - kz + w.D
-end
+If `w` is dimensional provide dimensional (`x`, `z`).
+If not provide (`k*x`, `k*z`).
 
+"""
 function pressure(w,kx,kz)
-    return w.P === nothing ? indirect_pressure(w,kx,kz) : w.P(kx,kz)   
+    return w.P(kx,kz)
 end
 
-function pressure(w,x,z,df)
-    return pressure(w,x * df.L, z * df.D) / df.P    
-end
+"""
+    wave_period(w::WaveStruct)
 
-function indirect_wave_period(w::WaveStruct)
-    return w.L / w.C
-end
+Calculate wave period `T` from wave struct `w`.
 
+"""
 function wave_period(w::WaveStruct)
-    return w.T === nothing ? indirect_wave_period(w) : w.T
+    return w.T
 end
 
-function wave_period(w::WaveStruct, df::WaveStruct)
-    return wave_period(w) / df.T    
-end
+"""
+    wavelength(w::WaveStruct)
 
-function indirect_wavelength(w::WaveStruct)
-    return w.T * w.C
-end
+Calculate wavelength `L` from wave struct `w`.
 
+"""
 function wavelength(w::WaveStruct)
-    return w.L === nothing ? indirect_wavelength(w) : w.L
+    return w.L
 end
 
-function wavelength(w::WaveStruct,df::WaveStruct)
-    return wavelength(w) / df.L
-end
+"""
+    wave_power(w::WaveStruct)
 
-function indirect_wave_power(w)
-    u_e = w.C - w.U
-    I_p = w.Q + w.D * u_e # mean wave momentum
-    Q = w.U * w.D - w.Q # volume flux
-    E_k = 0.5 * (w.C * I_p - u_e * Q) # mean kinetic energy
-    U_b2 = 2 * w.R - w.C^2 # mean square of bed velocity
-    F = w.C * (3E_k - 2w.eta.e_p) + 0.5 * U_b2 * (I_p + w.C * w.D) + w.C * u_e * Q # mean energy flux - wave power
-    return F
-end
+Calculate wave power `F` from wave struct `w`.
 
+"""
 function wave_power(w::WaveStruct)
-    return w.F === nothing ? indirect_wave_power(w) : w.F
+    return w.F
 end
 
-function wave_power(w::WaveStruct,df::WaveStruct)
-    return wave_power(w) / df.F
-end
+"""
+    elevation(w::WaveStruct, kx)
 
+Calculate free surface elevation from solution `w`
+at coordinate `kx` or `x`.
+
+If `w` is dimensional provide dimensional `x`.
+If not provide `k*x`.
+
+"""
 function elevation(w::WaveStruct,kx)
     return w.eta.z(kx)
 end
 
-function elevation(w::WaveStruct,x, df)
-    return elevation(w, x * df.L) / df.eta.z
-end
+"""
+    surface_tension(w, kx)
 
+Calculate surface tension from solution `w`
+at coordinate `kx` or `x`.
+
+If `w` is dimensional provide dimensional `x`.
+If not provide `k*x`.
+
+"""
 function surface_tension(w,kx)
-    return indirect_surface_tension(
+    return Indirect.indirect_surface_tension(
         w.sigma,
         w.eta.z.dz_dx_1(kx),
         w.eta.z.dz_dx_2(kx)
     )
 end
-
-function indirect_surface_tension(sigma,kz_d1,kz_d2)
-    return sigma * kz_d2 / (1 + kz_d1^2)^1.5
-end
-
 
 end

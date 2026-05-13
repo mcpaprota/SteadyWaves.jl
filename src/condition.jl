@@ -2,7 +2,7 @@ module Condition
 
 using ..Wave:WaveStruct
 using ..Output
-using ..Output: indirect_wave_power, pressure, indirect_surface_tension,indirect_dynamic_pressure
+using ..Indirect: indirect_wave_power, indirect_pressure, indirect_surface_tension,indirect_dynamic_pressure
 using ..Params
 
 
@@ -22,7 +22,7 @@ function gravity_dynamic_surface_condition(w::WaveStruct,m)
     kx = w.eta.point.x(m)
     kz = w.eta.point(m)
 
-    return pressure(w,kx,kz)
+    return indirect_pressure(w,kx,kz)
 end
 
 function gravity_capillary_dynamic_surface_condition(w::WaveStruct,m)
@@ -32,7 +32,7 @@ function gravity_capillary_dynamic_surface_condition(w::WaveStruct,m)
     dz_dx_1 = w.eta.point.dz_dx_1(m)
     dz_dx_2 = w.eta.point.dz_dx_2(m)
 
-    return pressure(w,kx,kz) - indirect_surface_tension(w.sigma, dz_dx_1, dz_dx_2)
+    return indirect_pressure(w,kx,kz) - indirect_surface_tension(w.sigma, dz_dx_1, dz_dx_2)
 end
 
 function capillary_dynamic_surface_condition(w::WaveStruct,m)
