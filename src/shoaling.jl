@@ -97,9 +97,12 @@ function update_depth_fourier_approx(w, d, d_p, F, T, idx,config,physics; N=10)
     df_compiler = dimensional_factor_compiler(d, physics)
 
     # set dimensionless period and wave_power from dimensional values with respect to depth
-    compiler = Wave.WaveStruct(compiler, df_compiler;
-        T = T,
-        F = F,
+    compiler = Wave.set_compilator_values(compiler,
+        Wave.WaveStruct(
+            T = T,
+            F = F,
+        ),
+        df_compiler
     )
 
     conditions = [

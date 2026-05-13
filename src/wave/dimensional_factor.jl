@@ -3,6 +3,8 @@ module DimensionalFactor
 using ..Velocity: VelocityStruct
 using ..Surface: SurfaceStruct, EtaSupportStruct
 using ..Wave: WaveStruct
+using ..StructOperator: map, combine
+
 
 function distance_factor(kd,d) 
     return kd/d
@@ -102,49 +104,26 @@ function dimensional_factor_compiler(d,physics)
     )
 end
 
-function wrap_eta_support(eta,df_in,df_eta)
-     EtaSupportStruct(
-       x -> eta.z(x*df_in)/df_eta.z,
-       x -> eta.x(x*df_in)/df_eta.x,
-       x -> eta.dz_dx_1(x*df_in)/df_eta.dz_dx_1,
-       x -> eta.dz_dx_2(x*df_in)/df_eta.dz_dx_2,
-     )
+function dimensional(str,df)
+    if typeof(df) <: Number
+        if typeof(str) <: Function
+            return (args...) -> str(args...)/df
+        else
+            return str/df
+        end
+    end
+    return combine(str,df,dimensional)
 end
 
-function dimensional_wave_struct(w,df)
-    eta = w.eta
-
-    return WaveStruct(
-        SurfaceStruct(
-            wrap_eta_support(eta.point, 1, df.eta.point),
-            eta.keypoints ./ df.eta.z.z,
-            eta.min/df.eta.z.z,
-            eta.max/df.eta.z.z,
-            eta.avg/df.eta.z.z,
-            eta.e_p/df.eta.e_p,
-            eta.a ./df.eta.z.z,
-            wrap_eta_support(eta.z, df.eta.z.x, df.eta.z)
-        ),
-        VelocityStruct(
-            (x,z) -> w.v.x(x*df.L,z*df.D)/df.v.x,
-            (x,z) -> w.v.x(x*df.L,z*df.D)/df.v.x,
-            (x,z) -> w.v.psi(x*df.L,z*df.D)/df.v.psi,
-            w.v.b,
-        ),
-        w.D/df.D,
-        w.C/df.C,
-        w.R/df.R,
-        w.H/df.H,
-        w.U/df.U,
-        w.Q/df.Q,
-        w.N,
-        w.L/df.L,
-        w.T/df.T,
-        w.F/df.F,
-        (x,z) -> w.P(x*df.L,z*df.D)/df.P,
-        w.sigma/df.sigma,
-        w.raw
-    )
-
+function dimensionless(str,df)
+    if typeof(df) <: Number
+        if typeof(str) <: Function
+            return (args...) -> str(args...) * df
+        else
+            return str * df
+        end
+    end
+    return combine(str,df,dimensional)
 end
+
 end

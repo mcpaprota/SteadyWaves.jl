@@ -90,11 +90,15 @@ function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.P
 
     # set dimensionless height, length and period from dimensional value
     # if property is nothing given change is skipped
-    compiler = WaveStruct(compiler, df_compiler;
-        H = H/M,
-        L = L,
-        T = T,
-        sigma = physics.sigma,
+    compiler = Wave.set_compilator_values(
+        compiler,
+        WaveStruct(
+            H = H/M,
+            L = L,
+            T = T,
+            sigma = physics.sigma,
+        ),
+        df_compiler,
     )
 
     # initial conditions
@@ -111,7 +115,7 @@ function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.P
 
     for m in 1:M
         # update height
-        compiler = WaveStruct(compiler, df_compiler; H = H * m/M)
+        compiler = Wave.set_compilator_values(compiler, WaveStruct(H = H * m/M), df_compiler)
 
         w = fourier_approx_base(w.raw,compiler,conditions)
     end
@@ -138,13 +142,15 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
     compiler = WaveStruct(idx,config)
 
     # set dimensionless height and sigma
-    compiler = WaveStruct(compiler;
-        D = (w_c,u) -> kd,
-        H = (w_c,u) -> kH,
-        sigma = (w_c,u) -> dimensionless_sigma,
-        L = (w_c,u) -> 2pi,
-        T = (w_c,u) -> 2pi/w_c.C(w_c,u)
-
+    compiler = Wave.set_compilator_values(
+        compiler,
+        WaveStruct(
+            D = kd,
+            H = kH,
+            sigma = dimensionless_sigma,
+            L = 2pi,
+            T = (w_c,u) -> 2pi/w_c.C(w_c,u)
+        )
     )
 
     # initial conditions
@@ -167,12 +173,14 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
 end
 
 function output_wave(w,idx,config)
-    return WaveStruct(w;
-        eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
-        P = (kx,kz) -> Output.indirect_pressure(w,kx,kz),
-        F = Output.indirect_wave_power(w),
-        L = w.L === nothing ? Output.indirect_wavelength(w) : nothing,
-        T = w.T === nothing ? Output.indirect_wave_period(w) : nothing,
+    return Wave.set_values(w,
+        WaveStruct(
+            eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
+            P = (kx,kz) -> Output.indirect_pressure(w,kx,kz),
+            F = Output.indirect_wave_power(w),
+            L = w.L === nothing ? Output.indirect_wavelength(w) : nothing,
+            T = w.T === nothing ? Output.indirect_wave_period(w) : nothing,
+        )
     )
 end
 
