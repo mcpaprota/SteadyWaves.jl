@@ -1,7 +1,7 @@
 module Linear
 
 using ..Params
-using ..Index: Index,IndexStruct
+using ..Index: Index,IndexStruct,set
 using ..Surface
 using ..Wave: WaveStruct
 using ..Physics
@@ -12,7 +12,7 @@ function init(d,P,pc,idx, g=G)
     k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P, g) # wave number (rad/s)
     u = zeros(idx.U)
 
-    u[idx.D] = k * d
+    set(u,idx.D,k*d)
 
     return k, u
 end
@@ -59,12 +59,12 @@ function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, co
 
     omega = √freq #dispersion relation
 
-    u[idx.psi[begin]] = 0.5 * w.H / omega # Bk/g
-    u[idx.C] = omega # c√(k/g)
-    u[idx.D] = w.D # kη̄
-    u[idx.Q] = 0 # q√(k³/g)
-    u[idx.R] = freq / 2 # rk/g
-    u[idx.U] = omega # Ū√(k/g)
+    set(u, idx.psi[begin], 0.5 * w.H / omega)  # Bk/g
+    set(u, idx.C, omega)                       # c√(k/g)
+    set(u, idx.D, w.D)                         # kη̄
+    set(u, idx.Q, 0)                           # q√(k³/g)
+    set(u, idx.R, freq / 2)                    # rk/g
+    set(u, idx.U, omega)                       # Ū√(k/g)
 
     return WaveStruct(u,compiler), df
 end
@@ -80,11 +80,11 @@ function dimensionless_linear_solution(config::Params.ConfigStruct, idx::IndexSt
 
     omega = √freq #dispersion relation
 
-    u[idx.psi[begin]] = 0.5 * w.H / omega # Bk/g
-    idx.C > 0 ? u[idx.C] = omega :# c√(k/g)
-    u[idx.Q] = 0 # q√(k³/g)
-    u[idx.R] = freq / 2 # rk/g
-    u[idx.U] = omega # Ū√(k/g)
+    set(u, idx.psi[begin], 0.5 * w.H / omega)  # Bk/g
+    set(u, idx.C, omega)                       # c√(k/g)
+    set(u, idx.Q, 0)                           # q√(k³/g)
+    set(u, idx.R, freq / 2)                    # rk/g
+    set(u, idx.U, omega)                       # Ū√(k/g)
 
     return WaveStruct(u,compiler), nothing
 end
