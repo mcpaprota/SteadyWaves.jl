@@ -28,8 +28,10 @@ and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` 
 N = 40 # set the number of points
 w, df = fourier_approx(d, H, L; pc=1, cc=1, N=N) # apply Fourier Approximation Method
 u = w.raw # retrieve raw data
+wd = dimensional(w,df) # calculate dimensional wave struct
+
 kη = w.eta.point.([N:-1:1;0:N]) # vcat non-dimensional profile vector and its reverse
-T = wave_period(w, df) # calculate wave period
+T = wave_period(wd) # calculate wave period
 x = range(0, L, 2N + 1) # discretize L to match kη
 η = kη / k # use dimensional values
 
@@ -63,7 +65,8 @@ and calculate wave profile using [`fourier_approx`](@ref) function along `2N+1` 
 N = 40 # set the number of points
 w, df = fourier_approx(d, H, T; pc=2, cc=1, N=N) # apply Fourier Approximation Method
 u = w.raw # retrieve raw data
-L = wavelength(w, df) # calculate wavelength (rad/s)
+wd = dimensional(w,df)  # calculate dimensional wave struct
+L = wavelength(wd) # calculate wavelength (rad/s)
 k = 2π / L # get wave number (rad/m)
 kη = w.eta.point.([N:-1:1;0:N]) # vcat non-dimensional profile vector and its reverse
 x = range(0, L, 2N + 1) # discretize L to match kη
@@ -86,7 +89,7 @@ end
 We may also check the [`wave_height`](@ref).
 
 ```@example 2
-println("The wave height is $(wave_height(w, df)) m.")
+println("The wave height is $(wave_height(wd)) m.")
 ```
 
 ## Shoaling waves

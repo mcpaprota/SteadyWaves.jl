@@ -104,26 +104,34 @@ function dimensional_factor_compiler(d,physics)
     )
 end
 
-function dimensional(str,df)
+function dimensional(str,df,full_df=nothing)
+    if full_df === nothing
+        full_df = df
+    end
+
     if typeof(df) <: Number
         if typeof(str) <: Function
-            return (args...) -> str(args...)/df
+            return (args...) -> str((args.*full_df.H)...)/df
         else
             return str/df
         end
     end
-    return combine(str,df,dimensional)
+    return combine(str,df,(str,df) -> dimensional(str,df,full_df))
 end
 
-function dimensionless(str,df)
+function dimensionless(str,df,full_df=nothing)
+    if full_df === nothing
+        full_df = df
+    end
+
     if typeof(df) <: Number
         if typeof(str) <: Function
-            return (args...) -> str(args...) * df
+            return (args...) -> str((args./full_df.H)...)*df
         else
-            return str * df
+            return str*df
         end
     end
-    return combine(str,df,dimensional)
+    return combine(str,df,(str,df) -> dimensionless(str,df,full_df))
 end
 
 end

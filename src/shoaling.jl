@@ -9,7 +9,7 @@ using ..Wave
 using ..Output
 using ..Output: wave_power, wave_period
 using ..Params
-using ..DimensionalFactor: dimensional_factor_compiler
+using ..DimensionalFactor: dimensional, dimensional_factor_compiler
 using ..Physics
 using ..Wave: WaveStruct
 using ..Steady: fourier_approx
@@ -53,11 +53,10 @@ function topo_approx(d, H, L, config,physics; N=10)
     K[1] = 1
     w, df = fourier_approx(d[1], H, L,config,physics; N=N)
 
-    F = wave_power(w,df)
-    T = wave_period(w,df)
+    wd = dimensional(w,df)
 
     for i in eachindex(d)[begin+1:end]
-        w, df = update_depth_fourier_approx(w, d[i], d[i-1], F, T, idx, config, physics; N=N)
+        w, df = update_depth_fourier_approx(w, d[i], d[i-1], wd.F, wd.T, idx, config, physics; N=N)
         K[i] = w.H / df.H / H
     end
     return K
