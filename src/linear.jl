@@ -81,7 +81,7 @@ function dimensionless_linear_solution(config::Params.ConfigStruct, idx::IndexSt
     omega = √freq #dispersion relation
 
     u[idx.psi[begin]] = 0.5 * w.H / omega # Bk/g
-    u[idx.C] = omega # c√(k/g)
+    idx.C > 0 ? u[idx.C] = omega :# c√(k/g)
     u[idx.Q] = 0 # q√(k³/g)
     u[idx.R] = freq / 2 # rk/g
     u[idx.U] = omega # Ū√(k/g)

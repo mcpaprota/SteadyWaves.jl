@@ -1,6 +1,7 @@
 module Indirect
 
 import ..Wave: WaveStruct
+import ..Params: Params, ConfigStruct
 
 function indirect_wave_period(w)
     return w.L / w.C
@@ -24,6 +25,24 @@ end
 
 function indirect_wavelength(w::WaveStruct)
     return w.T * w.C
+end
+
+function indirect_celerity_from_euler_condition(w::WaveStruct)
+    return w.U
+end
+
+function indirect_celerity_from_stokes_condition(w::WaveStruct)
+    return w.U - w.Q / w.D
+end
+
+function indirect_celerity_factory(config::ConfigStruct)
+    if config.cc == Params.CC_STOKES
+        return indirect_celerity_from_stokes_condition
+    elseif config.cc == Params.CC_EULER
+        return indirect_celerity_from_euler_condition
+    else
+        throw(error("Unknown current criterion $(config.cc)"))
+    end
 end
 
 function indirect_wave_power(w)
