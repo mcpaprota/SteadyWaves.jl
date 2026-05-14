@@ -29,7 +29,7 @@ noting that $c=L/T$.
 
 The wave problem is defined by parameters $d$, $H$, $L$ or $T$, and the mean current $\bar{u}$. There are two possible ways of defining the current criterion. The first one corresponds to the time-mean Eulerian current $c_E$
 
-$$c - c_E + \bar{u} = 0,$$
+$$c - c_E - \bar{u} = 0,$$
 
 while the second one corresponds to the mean mass-transport velocity $c_S$
 
