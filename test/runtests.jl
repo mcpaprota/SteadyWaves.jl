@@ -321,6 +321,26 @@ end
 
     @test w.U ≈ wd.U
 
+    @time wd, _ = Steady.dimensionless_fourier_approx(kd,kH,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_EULER,
+        indirect_celerity = true,
+        ),
+        dimensionless_sigma = 0,
+        N = N
+    )
+
+    @test sum(abs.(w.eta.a .- wd.eta.a)) < 1e-10
+
+    @test w.D ≈ wd.D
+
+    @test w.C ≈ wd.C
+    
+    @test w.Q ≈ wd.Q
+
+    @test w.R ≈ wd.R
+
+    @test w.U ≈ wd.U
 
 end
 

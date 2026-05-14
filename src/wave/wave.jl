@@ -66,7 +66,7 @@ struct WaveStruct
         SurfaceStruct(idx,config.eta_type),
         velocity_struct_factory(idx,config),
         (w_c, u) -> u[idx.D],
-        (w_c, u) -> u[idx.C],
+        (w_c, u) -> idx.C == 0 ? nothing : u[idx.C],
         (w_c, u) -> u[idx.R],
         (w_c, u) -> u[idx.H],
         (w_c, u) -> u[idx.U],
@@ -101,7 +101,11 @@ function set_compilator_values(default::WaveStruct,dim::WaveStruct,df::WaveStruc
 end
 
 function set_values(default,values)
-    return combine(values,default,something)
+    return combine(values,default,something_with_default(nothing))
+end
+
+function something_with_default(default)
+    return (a,b) -> a !== nothing ? a : b !== nothing ? b : default
 end
 
 end

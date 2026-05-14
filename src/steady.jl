@@ -133,7 +133,7 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
     idx = Index.dynamic_indexes(N,
         eta=1:N+1,
         psi=1:N,
-        C=true,
+        C= config.indirect_celerity == false,
         R=true,
         U=true,
         Q=true
@@ -150,7 +150,6 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
             H = kH,
             sigma = dimensionless_sigma,
             L = 2pi,
-            T = (w_c,u) -> 2pi/w_c.C(w_c,u)
         )
     )
 
@@ -161,9 +160,12 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition)
     ]
+
+    if config.indirect_celerity == false
+        append!(conditions,[ConditionStruct(current_condition_factory(config))])
+    end
 
     w = fourier_approx_base(w.raw,compiler,conditions)
 
@@ -174,6 +176,10 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
 end
 
 function output_wave(w,idx,config)
+    if config.indirect_celerity
+        w = Wave.set_values(w,WaveStruct(C = Indirect.indirect_celerity_factory(config)(w)))
+    end
+
     return Wave.set_values(w,
         WaveStruct(
             eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
