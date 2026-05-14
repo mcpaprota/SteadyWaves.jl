@@ -6,6 +6,24 @@ using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
 using ..StructOperator: combine, map, safe
 
+"""
+Structure with wave properties:
+- `eta`: structure with properties related to free surface
+- `v`: structure with properties related to velocity
+- `D`: depth
+- `C`: celerity
+- `R`: wave-related parameter
+- `H`: wave height
+- `U`: average velocity
+- `Q`: flow-related parameter
+- `N`: number of control points along a wave
+- `L`: wavelength
+- `T`: wave period
+- `F`: wave flux
+- `P`: wave pressure function `P(x, z)`
+- `sigma`: surface tension coefficient
+- `raw`: internal representesion of equation system variables
+"""
 struct WaveStruct
     eta
     v
@@ -21,7 +39,7 @@ struct WaveStruct
     F
     P
     sigma
-    raw # u array to keep compatibility with not updated functions (u,N instead of w)
+    raw
     WaveStruct(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw) = new(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw)
 
     # create struct that replaces values given as key words in default
@@ -70,13 +88,13 @@ struct WaveStruct
     WaveStruct(u,compiler::WaveStruct) = WaveStruct(u,compiler,compiler)
 end
 
-function set_compilator_values(default,dless)
+function set_compilator_values(default::WaveStruct,dless::WaveStruct)
     wrapped = map(dless,safe(dl -> typeof(dl) <: Real ? (w_c,u) -> dl : dl))
 
     return combine(wrapped,default,something)
 end
 
-function set_compilator_values(default,dim,df)
+function set_compilator_values(default::WaveStruct,dim::WaveStruct,df::WaveStruct)
     dless = combine(dim,df,safe((dim,df)-> (w_c, u) -> dim * df(w_c,u)))
 
     return combine(dless,default,something)

@@ -2,7 +2,17 @@
 module Surface
 using ..Index: IndexStruct
 using ..Params
-
+"""
+Structure with properties of the free surface:
+- `point`: properties at control points
+- `keypoints`: free surface at keypoints
+- `min`: minimum of the free surface
+- `max`: maximum of the free surface
+- `avg`: average of the free surface
+- `e_p`: potential energy of the wave
+- `a`: amplitudes of wave frequencies
+- `z`: properties of the free surface at any x
+"""
 struct SurfaceStruct
     point
     keypoints
@@ -12,6 +22,7 @@ struct SurfaceStruct
     e_p
     a
     z
+
 
     SurfaceStruct(point,keypoints,min,max,avg,e_p,a,z) = new(point,keypoints,min,max,avg,e_p,a,z)
 
@@ -59,10 +70,10 @@ struct SurfaceStruct
 end
 
 struct EtaSupportStruct
-    z
-    x
-    dz_dx_1
-    dz_dx_2
+    z           # value of z
+    x           # value of x. Either `x(x) = x` or `x(m)` = x where `m` is control point number.
+    dz_dx_1     # value of first derivative `dz/dx`
+    dz_dx_2     # value of second derivative `(d^2 z)/dx^2`
 
 
     EtaSupportStruct(z,x,dz_dx_1,dz_dx_2) = new(z,x,dz_dx_1,dz_dx_2)
