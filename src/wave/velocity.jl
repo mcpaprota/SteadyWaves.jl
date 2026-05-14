@@ -1,7 +1,13 @@
 module Velocity
 
 using ..Params
-    
+"""
+Structure with velocity field properties:
+- `x`: horizontal velocity
+- `z`: vertical velocity
+- `psi`: value of stream function
+- `b`: dimensionless amplitudes of stream function
+"""
 struct VelocityStruct
     x
     z
