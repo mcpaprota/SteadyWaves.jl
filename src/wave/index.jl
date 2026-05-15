@@ -83,4 +83,24 @@ function max_index(index::IndexStruct)
     )
 end
 
+function invalid(idx)
+    return (idx === nothing) || (idx == 0) || (idx == 0:0)
+end
+
+function set(u,idx,v)
+    if invalid(idx)
+        return
+    end
+
+    u[idx]=v
+end
+
+function get(u,idx)
+    if invalid(idx)
+        return nothing
+    end
+
+    return u[idx]
+end
+
 end

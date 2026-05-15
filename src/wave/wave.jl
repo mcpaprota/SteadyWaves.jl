@@ -1,6 +1,6 @@
 module Wave
 
-using ..Index:IndexStruct
+using ..Index:IndexStruct,get
 using ..Surface:SurfaceStruct, Surface
 using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
@@ -65,12 +65,12 @@ struct WaveStruct
     WaveStruct(idx::IndexStruct,config::Params.ConfigStruct) = new(
         SurfaceStruct(idx,config.eta_type),
         velocity_struct_factory(idx,config),
-        (w_c, u) -> u[idx.D],
-        (w_c, u) -> idx.C == 0 ? nothing : u[idx.C],
-        (w_c, u) -> u[idx.R],
-        (w_c, u) -> u[idx.H],
-        (w_c, u) -> u[idx.U],
-        (w_c, u) -> u[idx.Q],
+        (w_c, u) -> get(u,idx.D),
+        (w_c, u) -> get(u,idx.C),
+        (w_c, u) -> get(u,idx.R),
+        (w_c, u) -> get(u,idx.H),
+        (w_c, u) -> get(u,idx.U),
+        (w_c, u) -> get(u,idx.Q),
         (w_c, u) -> idx.N,
         (w_c, u) -> nothing,
         (w_c, u) -> nothing,
