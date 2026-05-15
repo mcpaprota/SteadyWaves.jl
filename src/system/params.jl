@@ -1,30 +1,73 @@
 module Params
 
+"""
+Current Criterion selects condition that relates `c` to `u`
+
+- CC_EULER - euler condition `u - c = 0`
+- CC_STOKES - stokes condition `u - c - Q/d = 0`
+- CC_INVALID - for internal use only. Most likely value was:
+    - not selected
+    - used in invalid context
+"""
 @enum CurrentCriterion begin
     CC_STOKES = 1
     CC_EULER = 2
     CC_INVALID = 0
 end
+"""
+Parameter Criterion selects condition that enforce wave length via `L` or `T`
 
+- PC_LENGTH - length condition `L - 2π = 0`
+- PC_PERIOD - period condition `T*c - 2π = 0`
+- PC_INVALID - for internal use only. Most likely value was:
+    - not selected
+    - used in invalid context
+"""
 @enum ParameterCriterion begin
     PC_LENGTH = 1
     PC_PERIOD = 2
     PC_INVALID = 0
 end
+"""
+Elevation Type selects representesion of free surface `η`
 
+- DIRECT_ELEVATION - represents `η` as `N+1` points along a wave
+- FOURIER_ELEVATION - represents `η` as `N+1` cosine frequencies of a wave
+- INVALID_ELEVATION - for internal use only. Most likely value was:
+    - not selected
+    - used in invalid context
+"""
 @enum ElevationType begin
     DIRECT_ELEVATION = 1
     FOURIER_ELEVATION = 2
     INVALID_ELEVATION = 0
 end
+"""
+Wave Type selects dominant forces shaping wave
 
+- GRAVITY_WAVE              - apply only gravitational force to a wave
+
+- CAPILLARY_WAVE            - apply only capillary force to a wave 
+
+- GRAVITY_CAPILLARY_WAVE    - apply both capilary and gravitational forces to a wave
+
+- INVALID_WAVE - for internal use only. Most likely value was:
+    - not selected
+    - used in invalid context
+"""
 @enum WaveType begin
     GRAVITY_WAVE = 1
     CAPILLARY_WAVE = 2
     GRAVITY_CAPILLARY_WAVE = 3
     INVALID_WAVE = 0
 end
-
+"""
+DepthType selects stream function representesion
+- DEEP_WATER - selects representesion stable in deep water - `e^y`
+    
+- SHALLOW_WATER - selected representesion stable in shallow water `sinh(y+d)/cosh(d)`
+- STABLE - selects representesion stable in all conditions but slow `sinh(y)+tanh(d)*cosh(y)`
+"""
 @enum DepthType begin
     DEEP_WATER = 1
     SHALLOW_WATER = 2
