@@ -3,8 +3,10 @@ module Linear
 using ..Params
 using ..Index: Index,IndexStruct
 using ..Surface
-using ..Wave: WaveStruct
+using ..Wave: Wave, WaveStruct
 using ..Physics
+using ..DimensionalFactor
+using ..Indirect
 
 using NonlinearSolve
 
@@ -37,12 +39,68 @@ function linear_angular_frequency(w,config)
 
     return value*tanh(w.D)
 end
+"""
+    linear_solution(d,H,P;pc=Params.PC_LENGTH, eta_type::Params.ElevationType=Params.FOURIER_ELEVATION,wave_type::Params.WaveType=Params.GRAVITY_WAVE, g=G, rho=RHO,sigma=SIGMA,N=10)
 
-function linear_solution(d, P, pc, idx::IndexStruct, compiler, df_compiler; g=G,eta_type::Params.ElevationType =Params.FOURIER_ELEVATION)
-    
-    config = Params.ConfigStruct(pc=pc, eta_type=eta_type)
+Approximate solution `u` of a steady wave of height `H` and length `L`
+propagating in water of depth `d` using Linear Approximation Method.
 
-    return linear_solution(d,P,config,idx,compiler,df_compiler;g=g)
+# Arguments
+- `d`: water depth (m)
+- `H`: wave height (m)
+- `P`: wave parameter - length `L` (m) or period `T` (s)
+- `pc`: parameter criterion; `pc=1`, `pc=PC_LENGTH` - length (default), `pc=2`, `pc=PC_PERIOD` - period
+- `eta_type`: elevation representation type;
+- `wave_type`: type of forces shaping the wave;
+- `N`: number of solution eigenvalues, defaults to `N=10`
+- `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
+- `rho`: density (kg/m^3), defaults to `ρ=1000`
+- `sigma`: surface tension coefficient (kg/s^2), defaults to `σ=0.073`
+# Output
+- `w`: dimensionless wave struct
+- `df`: dimensional factor
+
+"""
+function linear_solution(d,H,P; pc=Params.PC_LENGTH, 
+    eta_type::Params.ElevationType=Params.FOURIER_ELEVATION,
+    wave_type::Params.WaveType=Params.GRAVITY_WAVE,
+     g=G, rho=RHO,sigma=SIGMA,N=10)
+
+    physics = Physics.PhysicsStruct(g,rho,sigma)
+
+    Physics.validate_constants(physics)
+
+    idx::IndexStruct = Index.default_indexes(N)
+
+    config = Params.ConfigStruct(
+        eta_type = eta_type,
+        pc = pc,
+    )
+
+    df_compiler = DimensionalFactor.dimensional_factor_compiler(d,physics)
+
+    compiler = WaveStruct(idx,config)
+
+
+    compiler = Wave.set_compilator_values(
+        compiler,
+        WaveStruct(H=H,L=Params.L(P,pc),T=Params.T(P,pc)),
+        df_compiler
+    )
+
+    w, df = linear_solution(d,P,config,idx,compiler,df_compiler,g=physics.g)
+
+    w =  Wave.set_values(w,
+            WaveStruct(
+            eta = Surface.struct_with_derived_values(w.eta,idx,config.eta_type),
+            P = (kx,kz) -> Indirect.indirect_pressure(w,kx,kz),
+            F = Indirect.indirect_wave_power(w),
+            L = w.L === nothing ? Indirect.indirect_wavelength(w) : nothing,
+            T = w.T === nothing ? Indirect.indirect_wave_period(w) : nothing,
+        )
+    )
+
+    return w, df
 end
 
 function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)

@@ -30,10 +30,10 @@ include("crapper.jl")
 include("wave/dimensional_factor.jl")
 using .DimensionalFactor: dimensional, dimensionless
 
+include("wave/indirect.jl")
+
 include("linear.jl")
 using .Linear: linear_wave_number, linear_solution
-
-include("wave/indirect.jl")
 
 include("output.jl")
 using .Output

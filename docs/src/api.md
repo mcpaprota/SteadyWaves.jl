@@ -21,5 +21,6 @@ Modules = [
     SteadyWaves.Params,
     SteadyWaves.Shoaling,
     SteadyWaves.Steady,
+    SteadyWaves.Linear,
 ]
 ```
