@@ -23,6 +23,8 @@ include("wave/surface.jl")
 
 include("wave/velocity.jl")
 
+include("wave/current.jl")
+
 include("wave/wave.jl")
 
 include("crapper.jl")

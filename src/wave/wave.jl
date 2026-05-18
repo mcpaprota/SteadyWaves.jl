@@ -5,6 +5,7 @@ using ..Surface:SurfaceStruct, Surface
 using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
 using ..StructOperator: combine, map, safe
+using ..Current
 
 """
 Structure with wave properties:
@@ -29,6 +30,7 @@ struct WaveStruct
     v
     D
     C
+    c_e
     R
     H
     U
@@ -40,7 +42,7 @@ struct WaveStruct
     P
     sigma
     raw
-    WaveStruct(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw) = new(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw)
+    WaveStruct(eta,v,D,C,c_e,R,H,U,Q,N,L,T,F,P,sigma,raw) = new(eta,v,D,C,c_e,R,H,U,Q,N,L,T,F,P,sigma,raw)
 
     # create struct that replaces values given as key words in default
     WaveStruct(;
@@ -48,6 +50,7 @@ struct WaveStruct
         v = nothing,
         D = nothing,
         C = nothing,
+        c_e = nothing,
         R = nothing,
         H = nothing,
         U = nothing,
@@ -59,7 +62,7 @@ struct WaveStruct
         P = nothing,
         sigma = nothing,
         raw = nothing,
-    )= new(eta,v,D,C,R,H,U,Q,N,L,T,F,P,sigma,raw)
+    )= new(eta,v,D,C,c_e,R,H,U,Q,N,L,T,F,P,sigma,raw)
 
     # creates compiler X = (w_c, u) -> u[idx.X] from IndexStruct
     WaveStruct(idx::IndexStruct,config::Params.ConfigStruct) = new(
@@ -67,6 +70,7 @@ struct WaveStruct
         velocity_struct_factory(idx,config),
         (w_c, u) -> get(u,idx.D),
         (w_c, u) -> get(u,idx.C),
+        Current.eulerian_current_factory(nothing,config),
         (w_c, u) -> get(u,idx.R),
         (w_c, u) -> get(u,idx.H),
         (w_c, u) -> get(u,idx.U),
