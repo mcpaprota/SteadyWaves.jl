@@ -12,6 +12,7 @@ using ..Indirect
 using ..Params
 using ..Physics
 using ..Linear
+using ..Current
 using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
@@ -46,8 +47,10 @@ propagating in water of depth `d` using Fourier Approximation Method.
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
     eta_type::ElevationType = Params.FOURIER_ELEVATION,
     wave_type::Params.WaveType = Params.GRAVITY_WAVE,
-    deep_water = false
+    deep_water = false,
+    c_e::Union{Nothing,Number}=nothing,
     )
+
 
     config = Params.ConfigStruct(
         cc=cc, pc=pc,
@@ -56,13 +59,16 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
         wave_type=wave_type
     )
 
+    c_e = config.cc == Params.CC_ARBITRARY ? nothing : c_e
+    
+
     physics = Physics.PhysicsStruct(g,rho,sigma) 
 
     L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
     validate_config(d,H,L,T,config,physics,N,M)
 
-    return fourier_approx(d,H,P,config, physics; N=N,M=M)
+    return fourier_approx(d,H,P,c_e,config, physics; N=N,M=M)
 end
 
 function validate_config(d,H,L,T,config,physics,N,M)
@@ -78,7 +84,7 @@ function validate_config(d,H,L,T,config,physics,N,M)
     @assert M > 0
 end
 
-function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
+function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
     L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
     idx = Index.default_indexes(N)
@@ -98,6 +104,7 @@ function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.P
             L = L,
             T = T,
             sigma = physics.sigma,
+            c_e = c_e
         ),
         df_compiler,
     )
@@ -113,6 +120,8 @@ function fourier_approx(d, H, P, config::Params.ConfigStruct, physics::Physics.P
         ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition)
     ]
+
+    conditions  = filter(x -> x.condition !== nothing, conditions)
 
     for m in 1:M
         # update height
@@ -159,13 +168,14 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
+        ConditionStruct(current_condition_factory(config)),
         ConditionStruct(mean_depth_condition),
         ConditionStruct(height_condition)
     ]
 
-    if config.indirect_celerity == false
-        append!(conditions,[ConditionStruct(current_condition_factory(config))])
-    end
+    conditions  = filter(x -> x.condition !== nothing, conditions)
+
+    println.(conditions)
 
     w = fourier_approx_base(w.raw,compiler,conditions)
 

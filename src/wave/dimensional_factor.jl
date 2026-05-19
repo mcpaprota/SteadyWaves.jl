@@ -90,6 +90,7 @@ function dimensional_factor_compiler(d,physics)
 	    (w_c, u) -> velocity_struct_factor(w_c, u, g, d),           # v
 	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # D
 	    (w_c, u) -> speed_factor(      w_c.D(w_c,u), d, g),	        # C
+        (w_c, u) -> speed_factor(      w_c.D(w_c,u), d, g),	        # c_e
 	    (w_c, u) -> bernoulli_factor(  w_c.D(w_c,u), d, g),	        # R
 	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # H
 	    (w_c, u) -> speed_factor(      w_c.D(w_c,u), d, g),	        # U

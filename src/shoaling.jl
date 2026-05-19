@@ -35,23 +35,24 @@ for wave of length `L` and height `H`.
 - `K`: vector of shoaling coefficient values
 """
 function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, sigma=0,
-        eta_type=Params.FOURIER_ELEVATION
+        eta_type=Params.FOURIER_ELEVATION,
+        c_e=nothing,
     )
     
     config = Params.ConfigStruct(pc=PC_LENGTH, cc=cc, eta_type=eta_type)
    
     physics = Physics.PhysicsStruct(g,rho,sigma)
 
-    return topo_approx(d,H,L,config,physics,N=N)
+    return topo_approx(d,H,L,c_e,config,physics,N=N)
 end
 
-function topo_approx(d, H, L, config,physics; N=10)
+function topo_approx(d, H, L,c_e, config,physics; N=10)
     idx = Index.default_indexes(N)
     k = 2π / L # initial wave number (rad/m
 
     K = zero(float(d))
     K[1] = 1
-    w, df = fourier_approx(d[1], H, L,config,physics; N=N)
+    w, df = fourier_approx(d[1], H, L,c_e,config,physics; N=N)
 
     wd = dimensional(w,df)
 

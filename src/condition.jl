@@ -73,14 +73,6 @@ function power_condition(w::WaveStruct)
     return indirect_wave_power(w) - w.F
 end
 
-function euler_condition(w::WaveStruct)
-    return w.U - w.C
-end
-
-function stokes_condition(w::WaveStruct)
-    return euler_condition(w::WaveStruct) - w.Q / w.D
-end
-
 function length_condition(w::WaveStruct)
     return w.L - 2π 
 end
@@ -89,13 +81,15 @@ function period_condition(w::WaveStruct)
     return w.C * w.T- 2π   
 end
 
+function current_condition(w::WaveStruct)
+    return w.C - w.U - w.c_e
+end
+
 function current_condition_factory(config::Params.ConfigStruct)
-    if config.cc == CC_STOKES
-        return stokes_condition
-    elseif config.cc == CC_EULER
-        return euler_condition
+    if config.indirect_celerity
+        return nothing
     else
-        throw(error("Unknown current criterion $(config.cc)"))
+        return current_condition
     end
 end
 

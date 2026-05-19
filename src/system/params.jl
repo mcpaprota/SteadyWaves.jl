@@ -5,6 +5,7 @@ Current Criterion selects condition that relates `c` to `u`
 
 - CC_EULER - euler condition `u - c = 0`
 - CC_STOKES - stokes condition `u - c - Q/d = 0`
+- CC_ARBITRARY - current condition `u -c - c_e = 0`
 - CC_INVALID - for internal use only. Most likely value was:
     - not selected
     - used in invalid context
@@ -12,6 +13,7 @@ Current Criterion selects condition that relates `c` to `u`
 @enum CurrentCriterion begin
     CC_STOKES = 1
     CC_EULER = 2
+    CC_ARBITRARY = 3
     CC_INVALID = 0
 end
 """

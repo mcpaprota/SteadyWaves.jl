@@ -292,7 +292,7 @@ end
     H = kH/k
 
 
-    @time w, _ = Steady.fourier_approx(d,H,L,Params.ConfigStruct(
+    @time w, _ = Steady.fourier_approx(d,H,L,nothing,Params.ConfigStruct(
         eta_type=Params.FOURIER_ELEVATION,
         cc=Params.CC_EULER,
         pc=Params.PC_LENGTH,
