@@ -18,7 +18,7 @@ using ..Condition: period_condition, power_condition, current_condition_factory,
         kinematic_surface_condition, mean_depth_condition,
         dynamic_condition_factory
 """
-    topo_approx(d, H, L; cc=2, N=10, g=G)
+    topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, sigma=0,eta_type=Params.FOURIER_ELEVATION,c_e=nothing)
 
 Calculate shoaling coefficients `K` in range of depth values `d`
 for wave of length `L` and height `H`.
@@ -27,9 +27,14 @@ for wave of length `L` and height `H`.
 - `d`: vector of decreasing water depths (m)
 - `L`: initial wavelength (m) - corresponding to d[1]
 - `H`: initial wave height (m) - corresponding to d[1]
-- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
+- `cc`: current criterion; `cc=CC_STOKES` - Stokes (default), `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
+- `rho`: density (kg/m^3),default to `rho=1000`
+- `sigma` - surface tension coefficient `sigma=0.073`
+- `eta_type` - elevation type - FOURIER_ELEVATION, DIRECT_ELEVATION
+- `deep_water`: depth flag - `true` - infinite depth `false` finite depth
+- `c_e`: eulerian current - if `cc = CC_ARBITRARY` describe eulerian current
 
 # Output
 - `K`: vector of shoaling coefficient values
@@ -62,21 +67,28 @@ function topo_approx(d, H, L,c_e, config,physics; N=10)
     end
     return K
 end
-
 """
-    update_depth_fourier_approx(u, d, d_p, F, T; cc=1, N=10, g=G)
+    update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g=G,rho=RHO,eta_type = Params.FOURIER_ELEVATION)
 
-Update approximate solution `u` of a steady wave of power `F` and period `T`
-propagating in water of changing depth from `d` to `d_p` using Fourier Approximation Method.
+Approximate solution `w` of a steady wave that approaches change in depth
 
 # Arguments
-- `u`: solution matrix being mutated
-- `d`: initial water depth (m)
-- `d_p`: target water depth (m)
-- `F`: wave power (kg m/s)
+- `w`: previous wave
+- `d`: water depth (m)
+- `d_p`: previous water depth (m)
+- `F`: wave flux
 - `T`: wave period (s)
-- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
+- `idx`: solution array indexes
+- `cc`: current criterion; `cc=CC_STOKES` - Stokes (default), `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
+- `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
+- `rho`: density (kg/m^3),default to `rho=1000`
+- `sigma` - surface tension coefficient `sigma=0.073`
+- `eta_type` - elevation type - FOURIER_ELEVATION, DIRECT_ELEVATION
+
+# Output
+- `w`: Wave Structure
+- `df`: Dimensional Factor Structure
 """
 function update_depth_fourier_approx(w, d, d_p, F, T, idx; cc=CC_STOKES, N=10, g=G,rho=RHO,eta_type = Params.FOURIER_ELEVATION)
     
