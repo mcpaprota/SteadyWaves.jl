@@ -75,6 +75,7 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
     config = Params.ConfigStruct(
         eta_type = eta_type,
         pc = pc,
+        cc = CC_EULER,
     )
 
     df_compiler = DimensionalFactor.dimensional_factor_compiler(d,physics)

@@ -14,15 +14,29 @@ using Test
 
     @test SteadyWaves.Indirect.indirect_surface_tension(1,1,0) ≈ 0
 
+    t = 1
+    u = 1/t
+
     w,_ = SteadyWaves.linear_solution(1,0.1,1)
 
-    @test Output.elevation(w,1) ≈ Output.elevation(w,0,1,1)
+    @test Output.elevation(w,-1) ≈ Output.elevation(w,0,t,u)
 
-    @test Output.elevation(w,w.C) ≈ Output.elevation(w,0,1)
+    @test Output.elevation(w,-w.C) ≈ Output.elevation(w,0,t)
 
-    @test Output.surface_tension(w,1) ≈ Output.surface_tension(w,0,1,1)
 
-    @test Output.surface_tension(w,w.C) ≈ Output.surface_tension(w,0,1)
+    @test Output.surface_tension(w,-1) ≈ Output.surface_tension(w,0,t,u)
+
+    @test Output.surface_tension(w,-w.C) ≈ Output.surface_tension(w,0,t)
+
+
+    @test Output.horizontal_velocity(w,-1,1) ≈ (Output.horizontal_velocity(w,0,1,t,u) -u)
+
+    @test (Output.horizontal_velocity(w,0,1,t/w.C) -w.C) ≈ (Output.horizontal_velocity(w,0,1,t,u) -u)
+
+
+    @test Output.vertical_velocity(w,-1,1) ≈ Output.vertical_velocity(w,0,1,t,u)
+
+    @test Output.vertical_velocity(w,0,1,t/w.C) ≈ Output.vertical_velocity(w,0,1,t,u)
 
 end
 

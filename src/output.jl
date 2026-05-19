@@ -62,6 +62,12 @@ end
 Calculate vertical velocity from solution `w`
 at coordinates (`kx`, `kz`) or (`x`, `z`).
 
+If only `x` is provided returns value from wave perspective.
+
+If `t` is provided returns value from static perspective.
+
+If `t, s` is provided returns value from an arbitrary perspective.
+
 If `w` is dimensional provide dimensional (`x`, `z`).
 If not provide (`k*x`, `k*z`).
 
@@ -70,11 +76,24 @@ function vertical_velocity(w,kx,kz)
     return w.v.z(kx,kz)
 end
 
+function vertical_velocity(w,kx,kz,t)
+    return vertical_velocity(w,kx,kz,t,w.C)
+end
+function vertical_velocity(w,kx,kz,t,u)
+    return w.v.z(kx-u*t,kz)
+end
+
 """
     horizontal_velocity(w, kx, kz)
 
 Calculate horizontal velocity from solution `w`
 at coordinates (`kx`, `kz`) or (`x`, `z`).
+
+If only `x` is provided returns value from wave perspective.
+
+If `t` is provided returns value from static perspective.
+
+If `t, s` is provided returns value from an arbitrary perspective.
 
 If `w` is dimensional provide dimensional (`x`, `z`).
 If not provide (`k*x`, `k*z`).
@@ -83,6 +102,12 @@ If not provide (`k*x`, `k*z`).
 function horizontal_velocity(w,kx,kz)
     return w.v.x(kx,kz)
 end
+function horizontal_velocity(w,kx,kz,t)
+    return horizontal_velocity(w,kx,kz,t,w.C)
+end
+function horizontal_velocity(w,kx,kz,t,u)
+    return w.v.x(kx-u*t,kz) + u
+end
 
 """
     pressure(w, kx, kz)
@@ -90,12 +115,26 @@ end
 Calculate pressure from solution `w`
 at coordinates (`kx`, `kz`) or (`x`, `z`).
 
+If only `x` is provided returns value from wave perspective.
+
+If `t` is provided returns value from static perspective.
+
+If `t, s` is provided returns value from an arbitrary perspective.
+
 If `w` is dimensional provide dimensional (`x`, `z`).
 If not provide (`k*x`, `k*z`).
 
 """
 function pressure(w,kx,kz)
     return w.P(kx,kz)
+end
+
+function pressure(w,kx,kz,t)
+    return w.P(kx-w.C*t,kz,w.C)
+end
+
+function pressure(w,kx,kz,t,u)
+    return w.P(kx-u*t,kz,u)
 end
 
 """
@@ -152,11 +191,11 @@ function elevation(w::WaveStruct,kx)
 end
 
 function elevation(w::WaveStruct,kx,t)
-    return elevation(w,kx+w.C*t)
+    return elevation(w,kx-w.C*t)
 end
 
 function elevation(w::WaveStruct,kx,t,c)
-    return elevation(w,kx+c*t)
+    return elevation(w,kx-c*t)
 end
 
 """
@@ -187,11 +226,11 @@ function surface_tension(w,kx)
 end
 
 function surface_tension(w,kx,t)
-    return surface_tension(w,kx+w.C*t)
+    return surface_tension(w,kx-w.C*t)
 end
 
 function surface_tension(w,kx,t,c)
-    return surface_tension(w,kx+c*t)
+    return surface_tension(w,kx-c*t)
 end
 
 end
