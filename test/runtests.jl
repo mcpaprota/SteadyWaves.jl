@@ -13,6 +13,17 @@ using Test
 
 
     @test SteadyWaves.Indirect.indirect_surface_tension(1,1,0) ≈ 0
+
+    w,_ = SteadyWaves.linear_solution(1,0.1,1)
+
+    @test Output.elevation(w,1) ≈ Output.elevation(w,0,1,1)
+
+    @test Output.elevation(w,w.C) ≈ Output.elevation(w,0,1)
+
+    @test Output.surface_tension(w,1) ≈ Output.surface_tension(w,0,1,1)
+
+    @test Output.surface_tension(w,w.C) ≈ Output.surface_tension(w,0,1)
+
 end
 
 @testset "SteadyWaves.jl - direct elevation" begin
