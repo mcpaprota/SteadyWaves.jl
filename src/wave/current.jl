@@ -22,6 +22,10 @@ function eulerian_current_factory(c_e,config)
     elseif config.cc == Params.CC_STOKES
 
         return eulerian_current_net_zero_transport
+        
+    elseif config.cc == Params.CC_ARBITRARY
+
+        return (w_c,u) -> c_e
 
     else
         throw(error("Unknown current criterion $(config.cc)"))
