@@ -19,30 +19,32 @@ using ..Condition: parameter_condition_factory,
     kinematic_surface_condition,
     mean_depth_condition, dynamic_condition_factory
 """
-    fourier_approx(d, H, P; pc=1, cc=1, N=10, M=1, g=G)
-
-Approximate solution `u` of a steady wave of height `H` and length `L`
+    fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
+        eta_type::ElevationType = Params.FOURIER_ELEVATION,
+        wave_type::Params.WaveType = Params.GRAVITY_WAVE,
+        deep_water = false,
+        c_e::Union{Nothing,Number}=nothing,
+    )
+Approximate solution `w` of a steady wave of height `H` and length `L`
 propagating in water of depth `d` using Fourier Approximation Method.
 
 # Arguments
 - `d`: water depth (m)
 - `H`: wave height (m)
 - `P`: wave parameter - length `L` (m) or period `T` (s)
-- `pc`: parameter criterion; `pc=1`, `pc=PC_LENGTH` - length (default), `pc=2`, `pc=PC_PERIOD` - period
-- `cc`: current criterion; `cc=1`, `cc=CC_STOKES` - Stokes (default), `cc=2`, `cc=CC_EULER` - Euler
+- `pc`: parameter criterion; `pc=PC_LENGTH` - length (default), `pc=PC_PERIOD` - period
+- `cc`: current criterion; `cc=CC_STOKES` - Stokes (default), `cc=CC_EULER` - Euler
 - `N`: number of solution eigenvalues, defaults to `N=10`
 - `M`: number of height steps, defaults to `M=1`
 - `g`: gravity acceleration (m/s^2), defaults to `g=9.81`
-
+- `rho`: density (kg/m^3),default to `rho=1000`
+- `sigma` - surface tension coefficient `sigma=0.073`
+- `eta_type` - elevation type - FOURIER_ELEVATION, DIRECT_ELEVATION
+- `deep_water`: depth flag - `true` - infinite depth `false` finite depth
+- `c_e`: eulerian current - if `cc = CC_ARBITRARY` describe eulerian current
 # Output
-- `u[1:N+1]`: free surface elevation *kη*
-- `u[N+2:2N+1]`: stream function coefficients *B*
-- `u[2N+2]`: wave celerity *c√(k/g)*
-- `u[2N+3]`: mean water depth *kη̄*
-- `u[2N+4]`: volume flux due to waves *q√(k³/g)*
-- `u[2N+5]`: Bernoulli constant *rk/g*
-- `u[2N+6]`: mean flow velocity *Ū√(k/g)*
-- `u[2N+7]`: wave height *kH*
+- `w`: Wave Structure
+- `df`: Dimensional Factor Structure
 """
 function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
     eta_type::ElevationType = Params.FOURIER_ELEVATION,
