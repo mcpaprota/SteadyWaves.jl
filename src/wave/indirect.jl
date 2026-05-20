@@ -19,6 +19,10 @@ function indirect_pressure(w,kx,kz)
     return w.R - w.v.x(kx,kz)^2 / 2 - w.v.z(kx,kz)^2 / 2 - kz + w.D
 end
 
+function indirect_pressure(w,kx,kz,u)
+    return w.R - (w.v.x(kx,kz)+u)^2 / 2 - w.v.z(kx,kz)^2 / 2 - kz + w.D
+end
+
 function indirect_wave_period(w::WaveStruct)
     return w.L / w.C
 end
