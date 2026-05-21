@@ -76,6 +76,11 @@ DepthType selects stream function representesion
     STABLE = 3
 end
 
+@enum ReferenceLevel begin
+    MEAN_DEPTH
+    STILL_DEPTH
+end
+
 function parse_depth_type(deep::Bool)
     return deep ? DEEP_WATER : SHALLOW_WATER
 end
@@ -95,6 +100,7 @@ struct ConfigStruct
     wave_type::WaveType
     deep_water::DepthType
     indirect_celerity::Bool
+    reference_level::ReferenceLevel
 
     ConfigStruct(;
         cc=CC_INVALID,
@@ -103,6 +109,7 @@ struct ConfigStruct
         wave_type=GRAVITY_WAVE,
         deep_water=SHALLOW_WATER,
         indirect_celerity::Bool=false,
+        reference_level::ReferenceLevel=MEAN_DEPTH,
     ) = new(
         typeof(cc) == Int ? CurrentCriterion(cc) : cc,
         typeof(pc) == Int ? ParameterCriterion(pc) : pc,
@@ -110,6 +117,7 @@ struct ConfigStruct
         typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type,
         typeof(deep_water) == Bool ? parse_depth_type(deep_water) : deep_water,
         indirect_celerity,
+        reference_level
     )
 end
 

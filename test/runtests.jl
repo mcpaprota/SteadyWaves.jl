@@ -224,6 +224,52 @@ end
     )
 end
 
+@testset "SteadyWaves.jl - still_water" begin
+    
+    d = 1
+    L = 1
+    H = 0.1
+    N = 40
+    
+    @time ws, df = Steady.fourier_approx(d,H,L,nothing,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_STOKES,
+        pc=Params.PC_LENGTH,
+        reference_level=Params.STILL_DEPTH
+        ),
+        Physics.DEFAULT_PHYSICS,
+        N=N
+    )
+    
+    ws = SteadyWaves.dimensional(ws,df)
+    print(ws.eta.avg)
+
+    @time wm, df = Steady.fourier_approx(ws.eta.avg,H,L,nothing,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_STOKES,
+        pc=Params.PC_LENGTH,
+        reference_level=Params.MEAN_DEPTH
+        ),
+        Physics.DEFAULT_PHYSICS,
+        N=N
+    )
+
+    wm = SteadyWaves.dimensional(wm,df)
+
+    @test sum(abs.(ws.eta.a .- wm.eta.a)) < 1e-10
+
+    @test sum(abs.(ws.v.b .- wm.v.b)) < 1e-10
+
+    @test ws.C ≈ wm.C
+    
+    @test ws.Q ≈ wm.Q
+
+    @test ws.R ≈ wm.R
+
+    @test ws.U ≈ wm.U
+end
+
+
 @testset "SteadyWaves.jl - fourier capillary" begin
     
     N = 20

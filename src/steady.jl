@@ -17,7 +17,8 @@ using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition,
-    mean_depth_condition, dynamic_condition_factory
+    mean_depth_condition, dynamic_condition_factory,
+    depth_condition_factory
 """
     fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
         eta_type::ElevationType = Params.FOURIER_ELEVATION,
@@ -117,7 +118,7 @@ function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physi
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
-        ConditionStruct(mean_depth_condition),
+        ConditionStruct(depth_condition_factory(config)),
         ConditionStruct(parameter_condition_factory(config)),
         ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition)
@@ -171,7 +172,7 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
         ConditionStruct(current_condition_factory(config)),
-        ConditionStruct(mean_depth_condition),
+        ConditionStruct(depth_condition_factory(config)),
         ConditionStruct(height_condition)
     ]
 
