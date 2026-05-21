@@ -45,19 +45,27 @@ function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, sigma=0,
     )
     
     config = Params.ConfigStruct(pc=PC_LENGTH, cc=cc, eta_type=eta_type)
+
+    definition = Params.Definition(
+        d = d[1],
+        H = H,
+        L = L,
+        c_e = c_e
+    )
    
     physics = Physics.PhysicsStruct(g,rho,sigma)
 
-    return topo_approx(d,H,L,c_e,config,physics,N=N)
+    return topo_approx(definition,config,physics,d,N=N)
 end
 
-function topo_approx(d, H, L,c_e, config,physics; N=10)
+function topo_approx(definition, config,physics,d; N=10)
+    H = definition.H
     idx = Index.default_indexes(N)
-    k = 2π / L # initial wave number (rad/m
+    k = 2π / definition.L # initial wave number (rad/m)
 
     K = zero(float(d))
     K[1] = 1
-    w, df = fourier_approx(d[1], H, L,c_e,config,physics; N=N)
+    w, df = fourier_approx(definition,config,physics; N=N)
 
     wd = dimensional(w,df)
 

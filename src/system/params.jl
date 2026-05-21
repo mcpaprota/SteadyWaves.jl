@@ -113,6 +113,24 @@ struct ConfigStruct
     )
 end
 
+struct Definition
+    d
+    H
+    F
+    L
+    T
+    c_e
+
+    Definition(;
+        d=nothing,
+        H=nothing,
+        F=nothing,
+        L=nothing,
+        T=nothing,
+        c_e=nothing
+    ) =new(d, H, F, L, T, c_e)
+end
+
 export CurrentCriterion, CC_EULER, CC_STOKES
 
 export ParameterCriterion, PC_LENGTH, PC_PERIOD

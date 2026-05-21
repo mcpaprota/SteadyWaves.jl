@@ -53,7 +53,6 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     c_e::Union{Nothing,Number}=nothing,
     )
 
-
     config = Params.ConfigStruct(
         cc=cc, pc=pc,
         eta_type=eta_type,
@@ -62,6 +61,15 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     )
 
     c_e = config.cc == Params.CC_ARBITRARY ? nothing : c_e
+
+    definition = Params.Definition(
+        d = d,
+        H = H,
+        L = Params.L(P,pc),
+        T = Params.T(P,pc),
+        c_e = c_e
+    )
+
     
 
     physics = Physics.PhysicsStruct(g,rho,sigma) 
@@ -70,7 +78,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
     validate_config(d,H,L,T,config,physics,N,M)
 
-    return fourier_approx(d,H,P,c_e,config, physics; N=N,M=M)
+    return fourier_approx(definition,config, physics; N=N,M=M)
 end
 
 function validate_config(d,H,L,T,config,physics,N,M)
@@ -86,39 +94,37 @@ function validate_config(d,H,L,T,config,physics,N,M)
     @assert M > 0
 end
 
-function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
-    L , T = Params.L(P,config.pc), Params.T(P,config.pc)
-
+function fourier_approx(definition::Params.Definition, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
     idx = Index.default_indexes(N)
 
     # create default compiler
     compiler = WaveStruct(idx,config)
 
     # create dimensional factor compiler 
-    df_compiler = dimensional_factor_compiler(d, physics)
+    df_compiler = dimensional_factor_compiler(definition.d, physics)
 
     # set dimensionless height, length and period from dimensional value
     # if property is nothing given change is skipped
     compiler = Wave.set_compilator_values(
         compiler,
         WaveStruct(
-            H = H/M,
-            L = L,
-            T = T,
+            H = definition.H/M,
+            L = definition.L,
+            T = definition.T,
             sigma = physics.sigma,
-            c_e = c_e
+            c_e = definition.c_e
         ),
         df_compiler,
     )
 
     # initial conditions
-    w, _ = Linear.linear_solution(d, P, config, idx, compiler, df_compiler)
+    w, _ = Linear.linear_solution(definition, config, idx, compiler, df_compiler)
 
     conditions = [
         ConditionStruct(kinematic_surface_condition,0:N),
         ConditionStruct(dynamic_condition_factory(config),0:N),
         ConditionStruct(mean_depth_condition),
-        ConditionStruct(parameter_condition_factory(config)),
+        ConditionStruct(parameter_condition_factory(definition,config)),
         ConditionStruct(current_condition_factory(config)),
         ConditionStruct(height_condition)
     ]
@@ -127,7 +133,7 @@ function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physi
 
     for m in 1:M
         # update height
-        compiler = Wave.set_compilator_values(compiler, WaveStruct(H = H * m/M), df_compiler)
+        compiler = Wave.set_compilator_values(compiler, WaveStruct(H = definition.H * m/M), df_compiler)
 
         w = fourier_approx_base(w.raw,compiler,conditions)
     end
@@ -140,7 +146,7 @@ function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physi
 
 end
 
-function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensionless_sigma=0, N=10)
+function dimensionless_fourier_approx(definition::Params.Definition,config::Params.ConfigStruct;dimensionless_sigma=0, N=10)
     idx = Index.dynamic_indexes(N,
         eta=1:N+1,
         psi=1:N,
@@ -157,8 +163,8 @@ function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensi
     compiler = Wave.set_compilator_values(
         compiler,
         WaveStruct(
-            D = kd,
-            H = kH,
+            D = definition.d,
+            H = definition.H,
             sigma = dimensionless_sigma,
             L = 2pi,
         )
