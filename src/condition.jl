@@ -10,6 +10,18 @@ function mean_depth_condition(w::WaveStruct)
     return w.eta.avg - w.D
 end
 
+function still_water_depth_condition(w::WaveStruct)
+    return w.Q - w.U * (w.eta.avg - w.D)
+end
+
+function depth_condition_factory(config)
+    dict = Dict{Params.ReferenceLevel,Function}(
+        Params.MEAN_DEPTH => mean_depth_condition,
+        Params.STILL_DEPTH => still_water_depth_condition,
+    )
+    return dict[config.reference_level]
+end
+
 function kinematic_surface_condition(w::WaveStruct,m)
     kx = w.eta.point.x(m)
     kz = w.eta.point(m)

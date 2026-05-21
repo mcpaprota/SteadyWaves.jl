@@ -224,6 +224,24 @@ end
     )
 end
 
+@testset "SteadyWaves.jl - still_water" begin
+    
+    d = 1
+    L = 1
+    H = 0.1
+    N = 40
+    
+    @time w, _ = Steady.fourier_approx(d,H,L,nothing,Params.ConfigStruct(
+        eta_type=Params.FOURIER_ELEVATION,
+        cc=Params.CC_EULER,
+        pc=Params.PC_LENGTH,
+        reference_level=Params.STILL_DEPTH
+        ),
+        Physics.DEFAULT_PHYSICS,
+        N=N
+    )
+end
+
 @testset "SteadyWaves.jl - fourier capillary" begin
     
     N = 20
