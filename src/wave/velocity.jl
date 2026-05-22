@@ -1,6 +1,7 @@
 module Velocity
 
 using ..Params
+using ..StructOperator
 """
 Structure with velocity field properties:
 - `x`: horizontal velocity
@@ -16,12 +17,7 @@ struct VelocityStruct
 
     VelocityStruct(x,z,psi,b) = new(x,z,psi,b)
 
-    (v::VelocityStruct)(w_c,u) = return VelocityStruct(
-        v.x(w_c,u),
-        v.z(w_c,u),
-        v.psi(w_c,u),
-        v.b(w_c,u)
-    )
+    (v_c::VelocityStruct)(w_c,u) = return StructOperator.map(v_c, v->v(w_c,u))
 end
 
 function shallow_velocity_struct(idx)

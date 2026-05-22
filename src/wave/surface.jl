@@ -2,6 +2,7 @@
 module Surface
 using ..Index: IndexStruct
 using ..Params
+using ..StructOperator
 """
 Structure with properties of the free surface:
 - `point`: properties at control points
@@ -26,19 +27,7 @@ struct SurfaceStruct
 
     SurfaceStruct(point,keypoints,min,max,avg,e_p,a,z) = new(point,keypoints,min,max,avg,e_p,a,z)
 
-    SurfaceStruct(u,compiler::SurfaceStruct,wave_compiler) = new(
-        compiler.point(wave_compiler,u),
-        compiler.keypoints(wave_compiler,u),
-        compiler.min(u),
-        compiler.max(u),
-        compiler.avg(u),
-        compiler.e_p(wave_compiler,u),
-        compiler.a(u),
-        compiler.z(u)
-    )
-
-    SurfaceStruct(
-        default::SurfaceStruct;
+    SurfaceStruct(;
         point=nothing,
         keypoints=nothing,
         min=nothing,
@@ -47,16 +36,7 @@ struct SurfaceStruct
         e_p=nothing,
         a=nothing,
         z=nothing,
-    ) = new(
-            something(point,     default.point),
-            something(keypoints, default.keypoints),
-            something(min,       default.min),
-            something(max,       default.max),
-            something(avg,       default.avg),
-            something(e_p,       default.e_p),
-            something(a,         default.a),
-            something(z,         default.z),
-        )
+    ) = new(point,keypoints,min,max,avg,e_p,a,z)
     
     SurfaceStruct(idx::IndexStruct,eta_type::ElevationType) = begin
         if eta_type == Params.DIRECT_ELEVATION
@@ -66,7 +46,7 @@ struct SurfaceStruct
         end
     end
 
-    (compiler::SurfaceStruct)(w_c,u::Vector) = return SurfaceStruct(u,compiler,w_c)
+    (compiler::SurfaceStruct)(w_c,u::Vector) = return StructOperator.map(compiler,v -> v(w_c,u))
 end
 
 struct EtaSupportStruct
@@ -78,13 +58,8 @@ struct EtaSupportStruct
 
     EtaSupportStruct(z,x,dz_dx_1,dz_dx_2) = new(z,x,dz_dx_1,dz_dx_2)
 
+    (e_c::EtaSupportStruct)(w_c,u) = return StructOperator.map(e_c, v -> v(w_c,u))
 
-    (e_c::EtaSupportStruct)(w_c,u) = return EtaSupportStruct(
-        e_c.z(w_c,u),
-        e_c.x(w_c,u),
-        e_c.dz_dx_1(w_c,u),
-        e_c.dz_dx_2(w_c,u),
-    )
     (e_c::EtaSupportStruct)(m) = return e_c.z(m)
 end
 
@@ -117,12 +92,12 @@ function direct_elevation_struct(idx)
     return SurfaceStruct(
         point,
         (w_c,u) -> direct_keypoints(u,idx),
-        (u) -> direct_min(u,idx),
-        (u) -> direct_max(u,idx),
-        (u) -> direct_avg(u,idx),
+        (w_c,u) -> direct_min(u,idx),
+        (w_c,u) -> direct_max(u,idx),
+        (w_c,u) -> direct_avg(u,idx),
         (w_c,u) -> direct_potential_energy(u,idx,w_c),
-        u -> nothing,
-        u -> nothing,
+        (w_c,u) -> nothing,
+        (w_c,u) -> nothing,
     )
 end
 
@@ -137,12 +112,12 @@ function fourier_elevation_struct(idx)
     return SurfaceStruct(
         point,
         (w_c,u) -> nothing,
-        u -> fourier_min(u,idx),
-        u -> fourier_max(u,idx),
-        u -> fourier_avg(u,idx),
+        (w_c,u) -> fourier_min(u,idx),
+        (w_c,u) -> fourier_max(u,idx),
+        (w_c,u) -> fourier_avg(u,idx),
         (w_c,u) -> fourier_potential_energy(u,idx,w_c),
-        u -> fourier_amplitudes(u,idx),
-        u -> fourier_z_support_struct(u[idx.eta]),
+        (w_c,u) -> fourier_amplitudes(u,idx),
+        (w_c,u)  -> fourier_z_support_struct(u[idx.eta]),
     )
 end
 
@@ -279,15 +254,22 @@ end
 function struct_with_fourier(eta::SurfaceStruct,idx::IndexStruct)
     a = fourier_from_points(eta.point,eta.point.x,idx.N)
 
-    return SurfaceStruct(eta;
-        a = a,
-        z = fourier_z_support_struct(a),
-    )
+    return StructOperator.combine(
+        SurfaceStruct(;
+            a = a,
+            z = fourier_z_support_struct(a),
+        ),
+        eta,
+        something
+    ) 
+    
 end
 
 function struct_with_keypoints(eta::SurfaceStruct,idx::IndexStruct)
-    return SurfaceStruct(eta;
-        keypoints = eta.point.(0:idx.N)
+    return StructOperator.combine(
+        SurfaceStruct(;keypoints = eta.point.(0:idx.N)),
+        eta,
+        something
     )
 end
 
