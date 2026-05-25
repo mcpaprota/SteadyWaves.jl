@@ -17,6 +17,8 @@ using .Params
 
 include("system/struct_operator.jl")
 
+include("system/function_operator.jl")
+
 include("wave/index.jl")
 
 include("wave/surface.jl")

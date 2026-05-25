@@ -4,6 +4,7 @@ using ..Velocity: VelocityStruct
 using ..Surface: SurfaceStruct, EtaSupportStruct
 using ..Wave: WaveStruct
 using ..StructOperator: map, combine
+using ..FunctionOperator: F
 
 
 function distance_factor(kd,d) 
@@ -85,7 +86,7 @@ function dimensional_factor_compiler(d,physics)
     g = physics.g
     rho = physics.rho 
 
-    return WaveStruct(
+    w = WaveStruct(
 	    (w_c, u) -> surface_struct_factor(w_c.D(w_c,u)/d,g,rho),	# eta
 	    (w_c, u) -> velocity_struct_factor(w_c, u, g, d),           # v
 	    (w_c, u) -> distance_factor(   w_c.D(w_c,u), d),	        # D
@@ -103,6 +104,8 @@ function dimensional_factor_compiler(d,physics)
         (w_c, u) -> surface_tension_factor( w_c.D(w_c,u), d, g, rho),
 	    (w_c, u) -> 1	                                            # raw
     )
+
+    return map(w,F)
 end
 
 function dimensional(str,df,full_df=nothing)

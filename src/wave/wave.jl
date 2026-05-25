@@ -5,6 +5,7 @@ using ..Surface:SurfaceStruct, Surface
 using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
 using ..StructOperator: combine, map, safe
+using ..FunctionOperator: F
 using ..Current
 
 """
@@ -65,24 +66,28 @@ struct WaveStruct
     )= new(eta,v,D,C,c_e,R,H,U,Q,N,L,T,F,P,sigma,raw)
 
     # creates compiler X = (w_c, u) -> u[idx.X] from IndexStruct
-    WaveStruct(idx::IndexStruct,config::Params.ConfigStruct) = new(
-        SurfaceStruct(idx,config.eta_type),
-        velocity_struct_factory(idx,config),
-        (w_c, u) -> get(u,idx.D),
-        (w_c, u) -> get(u,idx.C),
-        Current.eulerian_current_factory(nothing,config),
-        (w_c, u) -> get(u,idx.R),
-        (w_c, u) -> get(u,idx.H),
-        (w_c, u) -> get(u,idx.U),
-        (w_c, u) -> get(u,idx.Q),
-        (w_c, u) -> idx.N,
-        (w_c, u) -> nothing,
-        (w_c, u) -> nothing,
-        (w_c, u) -> nothing,
-        (w_c, u) -> nothing,
-        (w_c, u) -> 0,
-        (w_c, u) -> u,
-    )
+    WaveStruct(idx::IndexStruct,config::Params.ConfigStruct) = begin
+        w = new(
+            SurfaceStruct(idx,config.eta_type),
+            velocity_struct_factory(idx,config),
+            (w_c, u) -> get(u,idx.D),
+            (w_c, u) -> get(u,idx.C),
+            Current.eulerian_current_factory(nothing,config),
+            (w_c, u) -> get(u,idx.R),
+            (w_c, u) -> get(u,idx.H),
+            (w_c, u) -> get(u,idx.U),
+            (w_c, u) -> get(u,idx.Q),
+            (w_c, u) -> idx.N,
+            (w_c, u) -> nothing,
+            (w_c, u) -> nothing,
+            (w_c, u) -> nothing,
+            (w_c, u) -> nothing,
+            (w_c, u) -> 0,
+            (w_c, u) -> u,
+        )
+        return map(w,F)
+    end
+
 
     # create structure from array u and compiler X = compiler.X(compiler,u)
     WaveStruct(u,compiler::WaveStruct,inner_compiler::WaveStruct) = begin
@@ -93,13 +98,13 @@ struct WaveStruct
 end
 
 function set_compilator_values(default::WaveStruct,dless::WaveStruct)
-    wrapped = map(dless,safe(dl -> typeof(dl) <: Real ? (w_c,u) -> dl : dl))
+    wrapped = map(dless,safe())
 
     return combine(wrapped,default,something)
 end
 
 function set_compilator_values(default::WaveStruct,dim::WaveStruct,df::WaveStruct)
-    dless = combine(dim,df,safe((dim,df)-> (w_c, u) -> dim * df(w_c,u)))
+    dless = combine(dim,df,safe(*))
 
     return combine(dless,default,something)
 end

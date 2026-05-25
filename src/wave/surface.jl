@@ -3,6 +3,7 @@ module Surface
 using ..Index: IndexStruct
 using ..Params
 using ..StructOperator
+using ..FunctionOperator
 """
 Structure with properties of the free surface:
 - `point`: properties at control points
