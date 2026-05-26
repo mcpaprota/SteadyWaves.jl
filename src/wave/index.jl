@@ -1,5 +1,7 @@
 module Index
 
+using ..StructOperator
+
 function eta_indexes(N)
 return 1:N+1
 end
@@ -15,7 +17,7 @@ const H_INDEX::Int = 7
 
 struct IndexStruct
     eta::UnitRange
-    psi::UnitRange
+    v::UnitRange
     D::Int
     C::Int
     R::Int
@@ -42,38 +44,39 @@ end
 function dynamic_indexes(N;eta=false, psi=false, D=false, C=false, R=false, H=false, U=false, Q=false)
     offset = 1
 
-    eta, offset = dynamic_range(eta, offset)
-    psi, offset = dynamic_range(psi, offset)
-    D, offset   = dynamic_position(D, offset)
-    C, offset   = dynamic_position(C, offset)
-    R, offset   = dynamic_position(R, offset)
-    H, offset   = dynamic_position(H, offset)
-    U, offset   = dynamic_position(U, offset)
-    Q, offset   = dynamic_position(Q, offset)
+    eta, offset = dynamic(eta, offset)
+    psi, offset = dynamic(psi, offset)
+    D, offset   = dynamic(D, offset)
+    C, offset   = dynamic(C, offset)
+    R, offset   = dynamic(R, offset)
+    H, offset   = dynamic(H, offset)
+    U, offset   = dynamic(U, offset)
+    Q, offset   = dynamic(Q, offset)
 
     return IndexStruct(eta, psi, D, C, R, H, U, Q,N)
 end
 
-function dynamic_range(values,offset)
-    if values != false
-        return (offset - values[begin]) .+ values, values[end] - values[begin] + offset + 1
-    else
-        return 0:0, offset
-    end
+function dynamic_indexes(w::T) where T
+    return StructOperator.map(w,dynamic,1)
+
 end
 
-function dynamic_position(value,offset)
-    if value
+function dynamic(values::UnitRange,offset)
+    return (offset - values[begin]) .+ values, values[end] - values[begin] + offset + 1
+end
+
+function dynamic(value,offset)
+    if value !== nothing && value
         return offset, offset+1
     else
         return 0, offset
     end
 end
 
-function max_index(index::IndexStruct)
+function max_index(index)
     return max(
         index.eta[end],
-        index.psi[end],
+        index.v[end],
         index.D,
         index.C,
         index.R,
@@ -102,5 +105,6 @@ function get(u,idx)
 
     return u[idx]
 end
+
 
 end

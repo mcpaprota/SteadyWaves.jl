@@ -89,7 +89,19 @@ end
 function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
     L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
-    idx = Index.default_indexes(N)
+    idx = Index.dynamic_indexes(
+        WaveStruct(
+            eta = 1:N+1,
+            v = 1:N,
+            C= config.indirect_celerity == false,
+            R=true,
+            U=true,
+            Q=true,
+            D=true,
+        )
+    )
+
+    idx = Wave.set_values(idx,WaveStruct(N=N))
 
     # create default compiler
     compiler = WaveStruct(idx,config)
@@ -141,14 +153,18 @@ function fourier_approx(d, H, P,c_e, config::Params.ConfigStruct, physics::Physi
 end
 
 function dimensionless_fourier_approx(kd, kH,config::Params.ConfigStruct;dimensionless_sigma=0, N=10)
-    idx = Index.dynamic_indexes(N,
-        eta=1:N+1,
-        psi=1:N,
-        C= config.indirect_celerity == false,
-        R=true,
-        U=true,
-        Q=true
+    idx = Index.dynamic_indexes(
+        WaveStruct(
+            eta = 1:N+1,
+            v = 1:N,
+            C= config.indirect_celerity == false,
+            R=true,
+            U=true,
+            Q=true,
+        )
     )
+
+    idx = Wave.set_values(idx,WaveStruct(N=N))
 
     # create default compiler
     compiler = WaveStruct(idx,config)

@@ -78,21 +78,22 @@ end
 
 function stream_horizontal_velocity(u, idx, w_c,stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return (kx,kz) -> -w_c.U(w_c,u) + sum([j*stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+    return (kx,kz) -> -w_c.U(w_c,u) + sum([j*stream_eigenfunction(u[idx.v[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
 function stream_vertical_velocity(u, idx, w_c,stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return (kx,kz) -> sum([j*stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+    return (kx,kz) -> sum([j*stream_eigenfunction(u[idx.v[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
 function stream(u, idx, w_c, stream_eigenfunction)
     kd = w_c.D(w_c,u)
-    return (kx,kz) -> sum([stream_eigenfunction(u[idx.psi[j]], kd, kx, kz, j) for j in 1:idx.N])
+    println(typeof(u[idx.v]))
+    return (kx,kz) -> sum([stream_eigenfunction(u[idx.v[j]], kd, kx, kz, j) for j in 1:idx.N])
 end
 
 function b(idx)
-    return (w_c,u) -> u[idx.psi]
+    return (w_c,u) -> u[idx.v]
 end
 
 end

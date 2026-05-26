@@ -83,6 +83,20 @@ struct WaveStruct
         (w_c, u) -> 0,
         (w_c, u) -> u,
     )
+    WaveStruct(idx::WaveStruct,config::Params.ConfigStruct) = begin
+        w = map(idx,safe(v-> (w_c,u) -> get(u,v)))
+
+        return set_compilator_values(
+            w,
+            WaveStruct(
+                eta=SurfaceStruct(idx,config.eta_type),
+                v = velocity_struct_factory(idx,config),
+                c_e =Current.eulerian_current_factory(nothing,config),
+                raw = (w_c,u) -> u,
+                N = idx.N,
+            )
+        )
+    end
 
     # create structure from array u and compiler X = compiler.X(compiler,u)
     WaveStruct(u,compiler::WaveStruct,inner_compiler::WaveStruct) = begin

@@ -146,7 +146,7 @@ function init_conditions!(ratio_d, u, idx,config)
         u[idx.eta[begin+1:end]] /= ratio_d
 
     end
-    u[idx.psi] /= √ratio_d # B
+    u[idx.v] /= √ratio_d # B
     u[idx.C] /= √ratio_d # c√(k/g)
     u[idx.D] /= ratio_d # kη̄
     u[idx.Q] /= √ratio_d^3 # q√(k³/g)

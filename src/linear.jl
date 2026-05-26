@@ -12,7 +12,7 @@ using NonlinearSolve
 
 function init(d,P,pc,idx, g=G)
     k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P, g) # wave number (rad/s)
-    u = zeros(idx.U)
+    u = zeros(Index.max_index(idx))
 
     set(u,idx.D,k*d)
 
@@ -70,7 +70,7 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
 
     Physics.validate_constants(physics)
 
-    idx::IndexStruct = Index.default_indexes(N)
+    idx = Index.default_indexes(N)
 
     config = Params.ConfigStruct(
         eta_type = eta_type,
@@ -104,7 +104,7 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
     return w, df
 end
 
-function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
+function linear_solution(d, P, config::Params.ConfigStruct, idx, compiler, df_compiler; g=G)
 
     k, u = init(d, P, config.pc, idx,g)
 
@@ -118,7 +118,7 @@ function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, co
 
     omega = √freq #dispersion relation
 
-    set(u, idx.psi[begin], 0.5 * w.H / omega)  # Bk/g
+    set(u, idx.v[begin], 0.5 * w.H / omega)  # Bk/g
     set(u, idx.C, omega)                       # c√(k/g)
     set(u, idx.D, w.D)                         # kη̄
     set(u, idx.Q, 0)                           # q√(k³/g)
@@ -128,7 +128,7 @@ function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, co
     return WaveStruct(u,compiler), df
 end
 
-function dimensionless_linear_solution(config::Params.ConfigStruct, idx::IndexStruct, compiler)
+function dimensionless_linear_solution(config::Params.ConfigStruct, idx, compiler)
     u = zeros(Index.max_index(idx))
 
     w = WaveStruct(u, compiler)
@@ -139,7 +139,7 @@ function dimensionless_linear_solution(config::Params.ConfigStruct, idx::IndexSt
 
     omega = √freq #dispersion relation
 
-    set(u, idx.psi[begin], 0.5 * w.H / omega)  # Bk/g
+    set(u, idx.v[begin], 0.5 * w.H / omega)  # Bk/g
     set(u, idx.C, omega)                       # c√(k/g)
     set(u, idx.Q, 0)                           # q√(k³/g)
     set(u, idx.R, freq / 2)                    # rk/g

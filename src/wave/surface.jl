@@ -38,7 +38,7 @@ struct SurfaceStruct
         z=nothing,
     ) = new(point,keypoints,min,max,avg,e_p,a,z)
     
-    SurfaceStruct(idx::IndexStruct,eta_type::ElevationType) = begin
+    SurfaceStruct(idx,eta_type::ElevationType) = begin
         if eta_type == Params.DIRECT_ELEVATION
             return direct_elevation_struct(idx)
         elseif eta_type == Params.FOURIER_ELEVATION
@@ -63,12 +63,12 @@ struct EtaSupportStruct
     (e_c::EtaSupportStruct)(m) = return e_c.z(m)
 end
 
-function direct_point_der_1(point,m,idx::IndexStruct)
+function direct_point_der_1(point,m,idx)
     dkx = pi / idx.N
     return (point(m-1) - point(m+1))/ 2dkx
 end
 
-function direct_point_der_2(point,m,idx::IndexStruct)
+function direct_point_der_2(point,m,idx)
     dkx = pi / idx.N
     return (point(m-1) - 2point(m) + point(m+1)) / dkx^2
 end
@@ -121,17 +121,17 @@ function fourier_elevation_struct(idx)
     )
 end
 
-function point_x(m,idx::IndexStruct)
+function point_x(m,idx)
     return m * pi/idx.N
 end
 
-function keypoint_point(keypoint,m,idx::IndexStruct)
+function keypoint_point(keypoint,m,idx)
     println(m)
     m = idx.N - abs(idx.N - m%2idx.N)
     return keypoint[begin+m]
 end
 
-function direct_point(u,m,idx::IndexStruct)
+function direct_point(u,m,idx)
     # triangular index function 
     P = 2idx.N
     m = (P + m%P)%P #ensure that m is in <0,P-1> range even if m < 0
@@ -139,29 +139,29 @@ function direct_point(u,m,idx::IndexStruct)
     return u[idx.eta[begin+m]]
 end
 
-function direct_keypoints(u,idx::IndexStruct)
+function direct_keypoints(u,idx)
     return u[idx.eta]
 end
 
-function direct_min(u,idx::IndexStruct)
+function direct_min(u,idx)
     return u[idx.eta[end]]
 end
 
-function direct_max(u,idx::IndexStruct)
+function direct_max(u,idx)
     return u[idx.eta[begin]]
 end
 
-function direct_avg(u,idx::IndexStruct)
+function direct_avg(u,idx)
     return (2 * sum(u[idx.eta]) - direct_min(u,idx) - direct_max(u,idx)) / 2 / idx.N 
 end
 
-function direct_potential_energy(u,idx::IndexStruct,w_c)
+function direct_potential_energy(u,idx,w_c)
     relative_eta = u[idx.eta] .- w_c.D(w_c,u)
     
     return (relative_eta[1]^2 + relative_eta[end]^2 + 2 * sum(relative_eta[2:end-1] .^ 2)) / 4idx.N
 end
 
-function fourier_amplitudes(u,idx::IndexStruct)
+function fourier_amplitudes(u,idx)
     return u[idx.eta]
 end
 
@@ -181,7 +181,7 @@ function fourier_z(u,kx,idx)
     return fourier_z(u[idx.eta],kx)
 end
 
-function fourier_point(w_c,u,m::Int,idx::IndexStruct)
+function fourier_point(w_c,u,m::Int,idx)
     return fourier_z(
         u[idx.eta],
         w_c.eta.point(w_c,u).x(m),
@@ -202,15 +202,15 @@ function fourier_point_der_2(w_c,u,m,idx)
     )
 end
 
-function fourier_max(u,idx::IndexStruct)
+function fourier_max(u,idx)
     return fourier_z(u,0,idx)
 end
 
-function fourier_min(u,idx::IndexStruct)
+function fourier_min(u,idx)
     return fourier_z(u,pi,idx)
 end
 
-function fourier_avg(u,idx::IndexStruct)
+function fourier_avg(u,idx)
     return u[idx.eta[begin]]
 end
 
@@ -233,7 +233,7 @@ function fourier_from_points(point_z,point_x,N)
     return a
 end
 
-function struct_with_derived_values(eta::SurfaceStruct,idx::IndexStruct,type::ElevationType)
+function struct_with_derived_values(eta::SurfaceStruct,idx,type::ElevationType)
     if type == Params.DIRECT_ELEVATION
         return struct_with_fourier(eta,idx)
     elseif type == Params.FOURIER_ELEVATION
@@ -251,7 +251,7 @@ function fourier_z_support_struct(a)
     
 end
 
-function struct_with_fourier(eta::SurfaceStruct,idx::IndexStruct)
+function struct_with_fourier(eta::SurfaceStruct,idx)
     a = fourier_from_points(eta.point,eta.point.x,idx.N)
 
     return StructOperator.combine(
@@ -265,7 +265,7 @@ function struct_with_fourier(eta::SurfaceStruct,idx::IndexStruct)
     
 end
 
-function struct_with_keypoints(eta::SurfaceStruct,idx::IndexStruct)
+function struct_with_keypoints(eta::SurfaceStruct,idx)
     return StructOperator.combine(
         SurfaceStruct(;keypoints = eta.point.(0:idx.N)),
         eta,
