@@ -93,10 +93,10 @@ function current_condition_factory(config::Params.ConfigStruct)
     end
 end
 
-function parameter_condition_factory(config::Params.ConfigStruct)
-    if config.pc == PC_LENGTH
+function parameter_condition_factory(definition::Params.Definition,config::Params.ConfigStruct)
+    if definition.L !== nothing
         return length_condition
-    elseif config.pc == PC_PERIOD
+    elseif definition.T !== nothing
         return period_condition
     else
         throw(error("Unknown parameter criterion $(config.pc)"))

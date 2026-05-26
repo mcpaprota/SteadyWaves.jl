@@ -317,16 +317,20 @@ end
     H = kH/k
 
 
-    @time w, _ = Steady.fourier_approx(d,H,L,nothing,Params.ConfigStruct(
-        eta_type=Params.FOURIER_ELEVATION,
-        cc=Params.CC_EULER,
-        pc=Params.PC_LENGTH,
+    @time w, _ = Steady.fourier_approx(
+        Params.Definition(d=d,H=H,L=L),
+        Params.ConfigStruct(
+            eta_type=Params.FOURIER_ELEVATION,
+            cc=Params.CC_EULER,
+            pc=Params.PC_LENGTH,
         ),
         Physics.DEFAULT_PHYSICS,
         N=N
     )
 
-    @time wd, _ = Steady.dimensionless_fourier_approx(kd,kH,Params.ConfigStruct(
+    @time wd, _ = Steady.dimensionless_fourier_approx(
+        Params.Definition(d=kd,H=kH),
+        Params.ConfigStruct(
         eta_type=Params.FOURIER_ELEVATION,
         cc=Params.CC_EULER
         ),
@@ -346,10 +350,15 @@ end
 
     @test w.U ≈ wd.U
 
-    @time wd, _ = Steady.dimensionless_fourier_approx(kd,kH,Params.ConfigStruct(
-        eta_type=Params.FOURIER_ELEVATION,
-        cc=Params.CC_EULER,
-        indirect_celerity = true,
+    @time wd, _ = Steady.dimensionless_fourier_approx(
+        Params.Definition(
+            d=kd,
+            H=kH
+        ),
+        Params.ConfigStruct(
+            eta_type=Params.FOURIER_ELEVATION,
+            cc=Params.CC_EULER,
+            indirect_celerity = true,
         ),
         dimensionless_sigma = 0,
         N = N

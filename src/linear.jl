@@ -10,8 +10,9 @@ using ..Indirect
 
 using NonlinearSolve
 
-function init(d,P,pc,idx, g=G)
-    k = Int(pc) == Int(PC_LENGTH) ? 2π / P : linear_wave_number(d, 2π / P, g) # wave number (rad/s)
+function init(definition,idx, g=G)
+    d = definition.d
+    k = definition.L !== nothing ? 2π / definition.L : linear_wave_number(d, 2π / definition.T, g) # wave number (rad/s)
     u = zeros(idx.U)
 
     set(u,idx.D,k*d)
@@ -72,6 +73,13 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
 
     idx::IndexStruct = Index.default_indexes(N)
 
+    definition = Params.Definition(
+        d = d,
+        H = H,
+        L = Params.L(P,pc),
+        T = Params.T(P,pc),
+    )
+
     config = Params.ConfigStruct(
         eta_type = eta_type,
         pc = pc,
@@ -89,7 +97,7 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
         df_compiler
     )
 
-    w, df = linear_solution(d,P,config,idx,compiler,df_compiler,g=physics.g)
+    w, df = linear_solution(definition,config,idx,compiler,df_compiler,g=physics.g)
 
     w =  Wave.set_values(w,
             WaveStruct(
@@ -104,9 +112,9 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
     return w, df
 end
 
-function linear_solution(d, P, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
+function linear_solution(definition, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
 
-    k, u = init(d, P, config.pc, idx,g)
+    k, u = init(definition, idx,g)
 
     df = WaveStruct(u, df_compiler, compiler)
 
