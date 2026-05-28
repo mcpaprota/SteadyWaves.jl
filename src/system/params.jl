@@ -121,6 +121,8 @@ struct Definition
     T
     c_e
 
+    Definition(d, H, F, L, T, c_e)  =new(d, H, F, L, T, c_e)
+
     Definition(;
         d=nothing,
         H=nothing,
