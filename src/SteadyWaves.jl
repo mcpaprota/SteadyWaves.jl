@@ -42,9 +42,9 @@ using .Output
 using .Output: wave_height, wavelength, wave_power, wave_period,
     vertical_velocity, horizontal_velocity, pressure, elevation
 
-include("condition.jl")
-
 include("system/nonlinear_system.jl")
+
+include("condition.jl")
 
 include("steady.jl")
 using .Steady: fourier_approx
@@ -73,6 +73,7 @@ export Shoaling
 export Index
 export Linear
 export Crapper
+export DimensionalFactor
 
 export G, RHO
 

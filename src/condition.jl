@@ -4,6 +4,7 @@ using ..Wave:WaveStruct
 using ..Output
 using ..Indirect: indirect_wave_power, indirect_pressure, indirect_surface_tension,indirect_dynamic_pressure
 using ..Params
+using ..NonlinearSystem: ConditionStruct
 
 
 function mean_depth_condition(w::WaveStruct)
@@ -101,6 +102,22 @@ function parameter_condition_factory(definition::Params.Definition,config::Param
     else
         throw(error("Unknown parameter criterion $(config.pc)"))
     end
+end
+
+
+function condition_factory(definition,config,N)
+    conditions = [
+        ConditionStruct(kinematic_surface_condition,0:N),
+        ConditionStruct(dynamic_condition_factory(config),0:N),
+        ConditionStruct(mean_depth_condition),
+        ConditionStruct(parameter_condition_factory(definition,config)),
+        ConditionStruct(current_condition_factory(config)),
+        ConditionStruct(height_condition),
+        ConditionStruct(definition.F === nothing ? nothing : power_condition),
+    ]
+
+    conditions  = filter(x -> x.condition !== nothing, conditions)
+
 end
 
 end

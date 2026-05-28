@@ -17,7 +17,7 @@ using ..NonlinearSystem: fourier_approx_base, ConditionStruct
 using ..Condition: parameter_condition_factory,
     current_condition_factory, height_condition,
     kinematic_surface_condition,
-    mean_depth_condition, dynamic_condition_factory
+    mean_depth_condition, dynamic_condition_factory,condition_factory
 """
     fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=RHO,sigma=SIGMA,
         eta_type::ElevationType = Params.FOURIER_ELEVATION,
@@ -97,52 +97,23 @@ end
 function fourier_approx(definition::Params.Definition, config::Params.ConfigStruct, physics::Physics.PhysicsStruct; N=10, M=1)
     idx = Index.default_indexes(N)
 
-    # create default compiler
-    compiler = WaveStruct(idx,config)
+    # Calculate initial wave using linear theory
+    def_0 = Wave.set_values(definition,Params.Definition(H=definition.H/M))
+    w, df = Linear.linear_solution(def_0, config, physics, idx)
 
-    # create dimensional factor compiler 
-    df_compiler = dimensional_factor_compiler(definition.d, physics)
-
-    # set dimensionless height, length and period from dimensional value
-    # if property is nothing given change is skipped
-    compiler = Wave.set_compilator_values(
-        compiler,
-        WaveStruct(
-            H = definition.H/M,
-            L = definition.L,
-            T = definition.T,
-            sigma = physics.sigma,
-            c_e = definition.c_e
-        ),
-        df_compiler,
-    )
-
-    # initial conditions
-    w, _ = Linear.linear_solution(definition, config, idx, compiler, df_compiler)
-
-    conditions = [
-        ConditionStruct(kinematic_surface_condition,0:N),
-        ConditionStruct(dynamic_condition_factory(config),0:N),
-        ConditionStruct(mean_depth_condition),
-        ConditionStruct(parameter_condition_factory(definition,config)),
-        ConditionStruct(current_condition_factory(config)),
-        ConditionStruct(height_condition)
-    ]
-
-    conditions  = filter(x -> x.condition !== nothing, conditions)
-
+    # Approximate nonlinear solution then increase wave height up to selected
     for m in 1:M
         # update height
-        compiler = Wave.set_compilator_values(compiler, WaveStruct(H = definition.H * m/M), df_compiler)
+        def_m = Wave.set_values(definition,Params.Definition(H=definition.H*m/M))
 
-        w = fourier_approx_base(w.raw,compiler,conditions)
+        w, df = conformal_furrier_approx(def_m,config,physics,idx,w)
     end
 
 
     w = output_wave(w,idx,config)
 
     push!(w.raw,w.H)
-    return w, WaveStruct(w.raw, df_compiler, compiler)
+    return w, df
 
 end
 
@@ -207,6 +178,30 @@ function output_wave(w,idx,config)
             T = w.T === nothing ? Indirect.indirect_wave_period(w) : nothing,
         )
     )
+end
+# update wave to fit definition
+function conformal_furrier_approx(definition,config,physics,idx,w)
+
+    compiler = WaveStruct(idx,config)
+
+    # create dimensional factor compiler 
+    df_compiler = dimensional_factor_compiler(definition.d, physics)
+
+    # set dimensionless height, length and period from dimensional value
+    compiler = Wave.set_compilator_values(
+        compiler,
+        WaveStruct(definition,physics),
+        df_compiler,
+    )
+
+    conditions = condition_factory(definition,config,idx.N)
+
+    w = fourier_approx_base(w.raw,compiler,conditions)
+
+    w = output_wave(w,idx,config)
+
+    return w, WaveStruct(w.raw, df_compiler, compiler)
+
 end
 
 end
