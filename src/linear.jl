@@ -112,7 +112,24 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
     return w, df
 end
 
-function linear_solution(definition, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
+function linear_solution(definition::Params.Definition,config::Params.ConfigStruct,physics,idx)
+
+    df_compiler = DimensionalFactor.dimensional_factor_compiler(definition.d,physics)
+
+    compiler = WaveStruct(idx,config)
+
+
+    compiler = Wave.set_compilator_values(
+        compiler,
+        WaveStruct(definition,physics),
+        df_compiler
+    )
+
+    return linear_solution(definition, config, idx,compiler,df_compiler,g=physics.g)
+    
+end
+
+function linear_solution(definition::Params.Definition, config::Params.ConfigStruct, idx::IndexStruct, compiler, df_compiler; g=G)
 
     k, u = init(definition, idx,g)
 

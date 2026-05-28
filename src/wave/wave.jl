@@ -6,6 +6,7 @@ using ..Velocity:VelocityStruct, velocity_struct_factory
 using ..Params
 using ..StructOperator: combine, map, safe
 using ..Current
+using ..Physics
 
 """
 Structure with wave properties:
@@ -83,7 +84,14 @@ struct WaveStruct
         (w_c, u) -> 0,
         (w_c, u) -> u,
     )
-
+    WaveStruct(definition,physics) = WaveStruct(
+        H = definition.H,
+        L = definition.L,
+        T = definition.T,
+        F = definition.F,
+        sigma = physics.sigma,
+        c_e = definition.c_e
+    )
     # create structure from array u and compiler X = compiler.X(compiler,u)
     WaveStruct(u,compiler::WaveStruct,inner_compiler::WaveStruct) = begin
         return map(compiler,v->v(inner_compiler,u))
