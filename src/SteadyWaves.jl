@@ -73,6 +73,7 @@ export Shoaling
 export Index
 export Linear
 export Crapper
+export DimensionalFactor
 
 export G, RHO
 

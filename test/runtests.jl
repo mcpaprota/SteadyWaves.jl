@@ -384,15 +384,15 @@ end
 
     d, L, g, rho = 1, 1, G, RHO
 
-    kd = 2pi/L * d
+    k = 2pi/L
 
-    @test DF.dimensional_factor(kd,d,g,rho;L=1) ≈ DF.distance_factor(kd,d)
+    @test DF.dimensional_factor(k,g,rho;L=1) ≈ DF.distance_factor(k)
 
-    @test DF.dimensional_factor(kd,d,g,rho;T=1) ≈ DF.period_factor(kd,d,g)
+    @test DF.dimensional_factor(k,g,rho;T=1) ≈ DF.period_factor(k,g)
 
-    @test DF.dimensional_factor(kd,d,g,rho;L=1,T=-1) ≈ DF.speed_factor(kd,d,g)
+    @test DF.dimensional_factor(k,g,rho;L=1,T=-1) ≈ DF.speed_factor(k,g)
 
-    @test DF.dimensional_factor(kd,d,g,rho;L=1,T=-3,M=1) ≈ DF.power_factor(kd,d,g,rho)
+    @test DF.dimensional_factor(k,g,rho;L=1,T=-3,M=1) ≈ DF.power_factor(k,g,rho)
 
-    @test DF.dimensional_factor(kd,d,g,rho;L=-1,T=-2,M=1) ≈ DF.pressure_factor(kd,d,g,rho)
+    @test DF.dimensional_factor(k,g,rho;L=-1,T=-2,M=1) ≈ DF.pressure_factor(k,g,rho)
 end
