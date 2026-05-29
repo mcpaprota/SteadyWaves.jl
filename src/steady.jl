@@ -54,7 +54,7 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
     )
 
     config = Params.ConfigStruct(
-        cc=cc, pc=pc,
+        cc=cc,
         eta_type=eta_type,
         deep_water=deep_water,
         wave_type=wave_type
@@ -62,11 +62,13 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
     c_e = config.cc == Params.CC_ARBITRARY ? nothing : c_e
 
+    L , T = Params.L(P,pc), Params.T(P,pc)
+
     definition = Params.Definition(
         d = d,
         H = H,
-        L = Params.L(P,pc),
-        T = Params.T(P,pc),
+        L = L,
+        T = T,
         c_e = c_e
     )
 
@@ -74,7 +76,6 @@ function fourier_approx(d, H, P; pc=PC_LENGTH, cc=CC_STOKES, N=10, M=1, g=G,rho=
 
     physics = Physics.PhysicsStruct(g,rho,sigma) 
 
-    L , T = Params.L(P,config.pc), Params.T(P,config.pc)
 
     validate_config(d,H,L,T,config,physics,N,M)
 
@@ -86,8 +87,7 @@ function validate_config(d,H,L,T,config,physics,N,M)
 
     Physics.validate_parameters(H,L,T,d)
 
-    @assert (L === nothing) || (config.pc === PC_LENGTH)
-    @assert (T === nothing) || (config.pc === PC_PERIOD)
+    @assert (L === nothing) || (T === nothing)
 
     @assert N > 1
 

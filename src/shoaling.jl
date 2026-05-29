@@ -44,7 +44,7 @@ function topo_approx(d, H, L; cc=CC_STOKES, N=10, g=G, rho = RHO, sigma=0,
         c_e=nothing,
     )
     
-    config = Params.ConfigStruct(pc=PC_LENGTH, cc=cc, eta_type=eta_type)
+    config = Params.ConfigStruct(cc=cc, eta_type=eta_type)
 
     definition = Params.Definition(
         d = d[1],

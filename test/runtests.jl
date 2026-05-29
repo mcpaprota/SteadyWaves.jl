@@ -322,7 +322,6 @@ end
         Params.ConfigStruct(
             eta_type=Params.FOURIER_ELEVATION,
             cc=Params.CC_EULER,
-            pc=Params.PC_LENGTH,
         ),
         Physics.DEFAULT_PHYSICS,
         N=N

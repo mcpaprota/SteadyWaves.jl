@@ -100,7 +100,7 @@ function parameter_condition_factory(definition::Params.Definition,config::Param
     elseif definition.T !== nothing
         return period_condition
     else
-        throw(error("Unknown parameter criterion $(config.pc)"))
+        throw(error("Both L  and T are nothing"))
     end
 end
 
