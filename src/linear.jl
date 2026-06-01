@@ -82,22 +82,11 @@ function linear_solution(d,H,P; pc=Params.PC_LENGTH,
 
     config = Params.ConfigStruct(
         eta_type = eta_type,
-        pc = pc,
         cc = Params.CC_ARBITRARY,
     )
 
-    df_compiler = DimensionalFactor.dimensional_factor_compiler(d,physics)
 
-    compiler = WaveStruct(idx,config)
-
-
-    compiler = Wave.set_compilator_values(
-        compiler,
-        WaveStruct(H=H,L=Params.L(P,pc),T=Params.T(P,pc)),
-        df_compiler
-    )
-
-    w, df = linear_solution(definition,config,idx,compiler,df_compiler,g=physics.g)
+    w, df = linear_solution(definition,config,physics,idx)
 
     w =  Wave.set_values(w,
             WaveStruct(

@@ -95,7 +95,6 @@ end
 
 struct ConfigStruct
     cc::CurrentCriterion
-    pc::ParameterCriterion
     eta_type::ElevationType
     wave_type::WaveType
     deep_water::DepthType
@@ -104,7 +103,6 @@ struct ConfigStruct
 
     ConfigStruct(;
         cc=CC_INVALID,
-        pc=PC_INVALID,
         eta_type=INVALID_ELEVATION,
         wave_type=GRAVITY_WAVE,
         deep_water=SHALLOW_WATER,
@@ -112,7 +110,6 @@ struct ConfigStruct
         k_source=K_DEPTH,
     ) = new(
         typeof(cc) == Int ? CurrentCriterion(cc) : cc,
-        typeof(pc) == Int ? ParameterCriterion(pc) : pc,
         typeof(eta_type) == Int ? ElevationType(eta_type) : eta_type,
         typeof(wave_type) == Int ? ElevationType(wave_type) : wave_type,
         typeof(deep_water) == Bool ? parse_depth_type(deep_water) : deep_water,
