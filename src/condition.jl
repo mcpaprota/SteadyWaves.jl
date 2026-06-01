@@ -116,7 +116,7 @@ function condition_factory(definition,config,N)
         ConditionStruct(definition.F === nothing ? nothing : power_condition),
     ]
 
-    conditions  = filter(x -> x.condition !== nothing, conditions)
+    return filter(x -> x.condition !== nothing, conditions)
 
 end
 
